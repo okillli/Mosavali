@@ -1,0 +1,14 @@
+-- Seed Crops
+INSERT INTO crops (name_ka) VALUES ('ხორბალი'), ('ქერი') ON CONFLICT DO NOTHING;
+
+-- Seed Work Types
+INSERT INTO work_types (name) VALUES 
+('ხვნა'), 
+('დათესვა'), 
+('კულტივაცია'), 
+('სასუქის შეტანა'), 
+('ჰერბიციდი'), 
+('ფუნგიციდი'), 
+('მორწყვა'), 
+('აღება (კომბაინი)') 
+ON CONFLICT DO NOTHING;

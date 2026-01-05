@@ -1,0 +1,62 @@
+-- Enable RLS on all tables
+ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE seasons ENABLE ROW LEVEL SECURITY;
+ALTER TABLE fields ENABLE ROW LEVEL SECURITY;
+ALTER TABLE warehouses ENABLE ROW LEVEL SECURITY;
+ALTER TABLE bins ENABLE ROW LEVEL SECURITY;
+ALTER TABLE lots ENABLE ROW LEVEL SECURITY;
+ALTER TABLE buyers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE inventory_movements ENABLE ROW LEVEL SECURITY;
+ALTER TABLE sales ENABLE ROW LEVEL SECURITY;
+ALTER TABLE works ENABLE ROW LEVEL SECURITY;
+ALTER TABLE expenses ENABLE ROW LEVEL SECURITY;
+ALTER TABLE varieties ENABLE ROW LEVEL SECURITY;
+
+-- 1. Profiles policy (User can only read/edit their own profile)
+DROP POLICY IF EXISTS "Users can manage their own profile" ON profiles;
+CREATE POLICY "Users can manage their own profile" 
+ON profiles FOR ALL USING (auth.uid() = id);
+
+-- 2. Helper function
+CREATE OR REPLACE FUNCTION get_user_farm_id()
+RETURNS UUID AS $$
+    SELECT farm_id FROM profiles WHERE id = auth.uid();
+$$ LANGUAGE sql STABLE SECURITY DEFINER;
+
+-- 3. Farm Isolation (Generic Loop for tables with farm_id)
+DO $$ 
+DECLARE 
+    t TEXT;
+BEGIN
+    FOR t IN 
+        SELECT table_name 
+        FROM information_schema.tables 
+        WHERE table_schema = 'public' 
+          AND table_type = 'BASE TABLE'
+          -- Exclude tables that don't have farm_id or need special handling
+          AND table_name NOT IN ('profiles', 'crops', 'varieties', 'work_types', 'bins') 
+    LOOP
+        EXECUTE format('DROP POLICY IF EXISTS "Farm isolation" ON %I', t);
+        EXECUTE format('CREATE POLICY "Farm isolation" ON %I FOR ALL USING (farm_id = get_user_farm_id())', t);
+    END LOOP;
+END $$;
+
+-- 4. Special Policy for Bins (Check via Warehouse)
+DROP POLICY IF EXISTS "Farm isolation" ON bins;
+CREATE POLICY "Farm isolation" ON bins FOR ALL USING (
+    warehouse_id IN (SELECT id FROM warehouses WHERE farm_id = get_user_farm_id())
+);
+
+-- 5. Public/Shared Data Policies
+DROP POLICY IF EXISTS "Anyone can read crops" ON crops;
+CREATE POLICY "Anyone can read crops" ON crops FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Anyone can read work_types" ON work_types;
+CREATE POLICY "Anyone can read work_types" ON work_types FOR SELECT USING (true);
+
+-- Varieties (Shared list, readable by all, insertable by authenticated users)
+DROP POLICY IF EXISTS "Anyone can read varieties" ON varieties;
+CREATE POLICY "Anyone can read varieties" ON varieties FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Authenticated users can add varieties" ON varieties;
+CREATE POLICY "Authenticated users can add varieties" ON varieties FOR INSERT WITH CHECK (auth.role() = 'authenticated');

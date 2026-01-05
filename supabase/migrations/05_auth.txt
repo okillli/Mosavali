@@ -1,0 +1,36 @@
+-- Function to handle new user registration
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+DECLARE
+  new_farm_id UUID;
+  new_warehouse_id UUID;
+BEGIN
+  -- 1. Generate a new Farm ID
+  new_farm_id := gen_random_uuid();
+  
+  -- 2. Create Profile linked to this Farm
+  INSERT INTO public.profiles (id, farm_id, display_name)
+  VALUES (NEW.id, new_farm_id, NEW.email);
+  
+  -- 3. Create Default Season (Current Year)
+  INSERT INTO public.seasons (farm_id, year, is_current)
+  VALUES (new_farm_id, EXTRACT(YEAR FROM NOW())::INTEGER, true);
+  
+  -- 4. Create Default Warehouse
+  INSERT INTO public.warehouses (farm_id, name, location_text)
+  VALUES (new_farm_id, 'მთავარი საწყობი', 'ავტომატურად შექმნილი')
+  RETURNING id INTO new_warehouse_id;
+
+  -- 5. Create Default Bin for the Warehouse
+  INSERT INTO public.bins (warehouse_id, name, is_default)
+  VALUES (new_warehouse_id, 'სექცია 1', true);
+  
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Trigger execution
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();

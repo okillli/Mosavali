@@ -1,0 +1,153 @@
+-- 1. VIEWS
+CREATE OR REPLACE VIEW v_bin_lot_stock AS
+SELECT 
+    farm_id,
+    bin_id,
+    lot_id,
+    SUM(weight_change) as stock_kg
+FROM (
+    SELECT 
+        farm_id,
+        to_bin_id as bin_id,
+        lot_id,
+        weight_kg as weight_change
+    FROM inventory_movements
+    WHERE to_bin_id IS NOT NULL
+    UNION ALL
+    SELECT 
+        farm_id,
+        from_bin_id as bin_id,
+        lot_id,
+        -weight_kg as weight_change
+    FROM inventory_movements
+    WHERE from_bin_id IS NOT NULL
+) as combined
+GROUP BY farm_id, bin_id, lot_id
+HAVING SUM(weight_change) > 0;
+
+-- 2. NO-MIXING TRIGGER
+CREATE OR REPLACE FUNCTION enforce_no_mixing()
+RETURNS TRIGGER AS $$
+DECLARE
+    current_active_lot UUID;
+BEGIN
+    -- Only check if moving INTO a bin
+    IF NEW.to_bin_id IS NOT NULL THEN
+        SELECT active_lot_id INTO current_active_lot FROM bins WHERE id = NEW.to_bin_id;
+        
+        IF current_active_lot IS NOT NULL AND current_active_lot != NEW.lot_id THEN
+            RAISE EXCEPTION 'ეს სექცია უკვე შეიცავს სხვა ლოტს. შერევა აკრძალულია.';
+        END IF;
+        
+        -- Set active lot if it was empty
+        IF current_active_lot IS NULL THEN
+            UPDATE bins SET active_lot_id = NEW.lot_id WHERE id = NEW.to_bin_id;
+        END IF;
+    END IF;
+    
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER tr_enforce_no_mixing
+BEFORE INSERT ON inventory_movements
+FOR EACH ROW EXECUTE FUNCTION enforce_no_mixing();
+
+-- 3. CLEAR ACTIVE LOT IF STOCK REACHES ZERO
+CREATE OR REPLACE FUNCTION clear_empty_bin_active_lot()
+RETURNS TRIGGER AS $$
+DECLARE
+    remaining_stock DECIMAL;
+BEGIN
+    -- Check stock in the bin NEW movement just touched
+    -- This handles both from_bin and to_bin
+    
+    IF OLD.from_bin_id IS NOT NULL THEN
+        SELECT COALESCE(SUM(stock_kg), 0) INTO remaining_stock 
+        FROM v_bin_lot_stock 
+        WHERE bin_id = OLD.from_bin_id;
+        
+        IF remaining_stock = 0 THEN
+            UPDATE bins SET active_lot_id = NULL WHERE id = OLD.from_bin_id;
+        END IF;
+    END IF;
+
+    -- Also check the bin we just moved FROM in NEW (if applicable)
+    IF NEW.from_bin_id IS NOT NULL THEN
+        SELECT COALESCE(SUM(stock_kg), 0) INTO remaining_stock 
+        FROM v_bin_lot_stock 
+        WHERE bin_id = NEW.from_bin_id;
+        
+        IF remaining_stock = 0 THEN
+            UPDATE bins SET active_lot_id = NULL WHERE id = NEW.from_bin_id;
+        END IF;
+    END IF;
+    
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER tr_clear_empty_bin
+AFTER INSERT OR UPDATE ON inventory_movements
+FOR EACH ROW EXECUTE FUNCTION clear_empty_bin_active_lot();
+
+-- 4. PREVENT NEGATIVE STOCK
+CREATE OR REPLACE FUNCTION prevent_negative_stock()
+RETURNS TRIGGER AS $$
+DECLARE
+    available_kg DECIMAL;
+BEGIN
+    IF NEW.from_bin_id IS NOT NULL THEN
+        SELECT COALESCE(stock_kg, 0) INTO available_kg 
+        FROM v_bin_lot_stock 
+        WHERE bin_id = NEW.from_bin_id AND lot_id = NEW.lot_id;
+        
+        IF available_kg < NEW.weight_kg THEN
+            RAISE EXCEPTION 'მარაგი არასაკმარისია.';
+        END IF;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER tr_prevent_negative_stock
+BEFORE INSERT ON inventory_movements
+FOR EACH ROW EXECUTE FUNCTION prevent_negative_stock();
+
+-- 5. ATOMIC SALE CREATION
+CREATE OR REPLACE FUNCTION create_sale_atomic(
+    p_farm_id UUID,
+    p_season_id UUID,
+    p_lot_id UUID,
+    p_bin_id UUID,
+    p_buyer_id UUID,
+    p_sale_date DATE,
+    p_weight_kg DECIMAL,
+    p_price_per_kg DECIMAL,
+    p_notes TEXT
+) RETURNS UUID AS $$
+DECLARE
+    v_sale_id UUID;
+    v_total_gel DECIMAL;
+BEGIN
+    v_total_gel := p_weight_kg * p_price_per_kg;
+
+    -- 1. Insert into sales
+    INSERT INTO sales (
+        farm_id, season_id, lot_id, bin_id, buyer_id, 
+        sale_date, weight_kg, price_per_kg, total_gel, notes
+    ) VALUES (
+        p_farm_id, p_season_id, p_lot_id, p_bin_id, p_buyer_id, 
+        p_sale_date, p_weight_kg, p_price_per_kg, v_total_gel, p_notes
+    ) RETURNING id INTO v_sale_id;
+
+    -- 2. Insert movement (SALE_OUT)
+    INSERT INTO inventory_movements (
+        farm_id, type, lot_id, from_bin_id, weight_kg, movement_date, sale_id, reason
+    ) VALUES (
+        p_farm_id, 'SALE_OUT', p_lot_id, p_bin_id, p_weight_kg, p_sale_date, v_sale_id, 'გაყიდვა'
+    );
+
+    RETURN v_sale_id;
+END;
+$$ LANGUAGE plpgsql;

@@ -1,0 +1,962 @@
+PRODUCT REQUIREMENTS DOCUMENT (PRD)
+Version: 1.0
+Date: 2026-01-05
+Product (working name): მოსავალი (Harvest)
+Platforms: Mobile/tablet-first web app (PWA-ready) + desktop web
+Language: სრულად ქართულად (ka-GE) — ყველა ეკრანი, ღილაკი, ველი, შეტყობინება, ვალიდაცია
+
+============================================================
+1) PURPOSE / SUMMARY
+============================================================
+The app centralises and simplifies end-to-end management of barley and wheat production, warhousing,sales and tracking everything end-to-end:
+- Lands/fields (მიწები)
+- Works/operations on lands (სამუშაოები)
+- Harvest and creation of lots/batches (ლოტები/პარტიები)
+- Warehousing with warehouses and bins/sections (საწყობები / სექციები)
+- Inventory movements (მიღება, გადატანა, გაყიდვა, კორექცია)
+- Sales transactions (გაყიდვები)
+- Payment tracking per sale (გადახდები)
+- Expenses tracking and allocation (ხარჯები)
+- Reports (რეპორტები) for stock, yield, costs, profit/loss, outstanding payments
+
+Design principle: “Simple, fast, no clutter”.
+Core traceability chain: Field → Lot → Bin → Sale → Payment.
+Inventory is event-based (movements), not manually edited stock totals.
+
+============================================================
+2) TARGET USERS / ROLES
+============================================================
+Initial MVP user:
+- Single farm owner (1 account)
+- Single farm (one business)
+
+Future-proofing (not enabled in MVP but structure must allow later):
+- Multiple users
+- Multiple farms (multi-tenant)
+- Role-based permissions
+
+============================================================
+3) SCOPE
+============================================================
+3.1 IN SCOPE (MVP)
+A) Authentication
+- Email + Password authentication using Supabase Auth
+- No Google OAuth in MVP
+- Basic password reset flow (email link)
+
+B) Master Data (Configurable Lists)
+- Crops (pre-seeded): ხორბალი, ქერი
+- Varieties (ჯიშები)
+- Warehouses (საწყობები)
+- Bins/Sections per warehouse (სექციები)
+- Fields/Lands (მიწები)
+- Buyers (მყიდველები)
+- Expense Types (ხარჯის ტიპები)
+- Work Types (სამუშაოს ტიპები)
+- Seasons (სეზონები) — usually year
+
+C) Operational Records
+- Field Works (planned + completed)
+- Lots (harvest batches)
+- Inventory Movements:
+  - RECEIVE (მიღება)
+  - TRANSFER (გადატანა)
+  - SALE_OUT (გაყიდვა)
+  - ADJUSTMENT (კორექცია/დაკლება/ზარალი)
+- Sales (one sale per lot)
+- Sale Payments (multiple payments per sale)
+- Expenses (with allocation to Field / Work / Lot / Warehouse/Bin / Season / General)
+
+D) Reports
+- Current stock (warehouse/bin/lot + variety totals)
+- Profit/Loss per season
+- Cost per land
+- Outstanding payments
+- Yield per land (kg/ha)
+
+3.2 OUT OF SCOPE (MVP)
+- Multi-user roles & permissions beyond single user
+- Attachments (photos of receipts)
+- Invoices/printing
+- Buyer grading/deductions automation
+- Map/GPS pins, cadastral integration
+- Sensor integrations (temperature, moisture sensors)
+- Offline data entry queue (PWA offline sync) — optional Phase 2
+- Complex agronomy planning module
+
+============================================================
+4) KEY DEFINITIONS / DATA CONCEPTS
+============================================================
+4.1 Crop (კულტურა)
+A grain type: wheat (ხორბალი) or barley (ქერი).
+
+4.2 Variety (ჯიში)
+Variety belongs to a Crop.
+
+4.3 Field / Land (მიწა)
+A unit of land where crops are grown.
+Fields have area (hectares), location (text), and ownership status.
+
+4.4 Season (სეზონი)
+A reporting period, typically a year (e.g., 2026).
+Used for grouping works, lots, expenses, and reports.
+
+4.5 Lot / Batch (ლოტი / პარტია)
+A harvested batch from a field, for a crop+variety on a specific harvest date.
+Lots are the fundamental traceability and inventory unit.
+
+4.6 Warehouse (საწყობი)
+A storage location for grain.
+
+4.7 Bin / Section (სექცია)
+A subdivision inside a warehouse. Each warehouse must have at least one bin:
+- Default bin automatically created: “სექცია 1”
+
+4.8 Inventory Movement (ინვენტარის მოძრაობა)
+Event-based record that changes stock.
+Stock is computed as sum of movements.
+
+4.9 Sale (გაყიდვა)
+A sale transaction of grain. In MVP:
+- One sale record corresponds to one lot (no multi-lot sales in a single sale record)
+- If a real sale includes multiple lots, user records multiple sales.
+
+4.10 Sale Payment (გადახდა)
+Payment records linked to a sale.
+Supports unpaid/part-paid/paid.
+
+4.11 Expense (ხარჯი)
+A cost record that can be allocated to a target (field/work/lot/warehouse/season/general).
+
+4.12 Work / Operation (სამუშაო)
+A record of activity on a field (planned or completed), optionally tied to crop/variety and expenses.
+
+============================================================
+5) BUSINESS RULES (NON-NEGOTIABLE)
+============================================================
+5.1 NO MIXING RULE (Bin content rule)
+A bin/section can contain only ONE active lot at a time.
+- If bin is empty (active_lot is null OR stock = 0): receiving/transferring any lot is allowed.
+- If bin contains a lot and stock > 0: receiving/transferring is allowed only for the SAME lot.
+- Receiving/transferring a different lot into a non-empty bin must be BLOCKED.
+
+User-facing message (Georgian):
+- “ეს სექცია უკვე შეიცავს სხვა ლოტს. შერევა აკრძალულია.”
+
+This rule must be enforced:
+- In UI validation (for immediate feedback)
+- At database level (trigger/function) to prevent data corruption.
+
+5.2 STOCK CANNOT GO NEGATIVE
+Sales and movements must not reduce stock below zero for a (bin, lot).
+- Any action attempting to reduce more than available must be blocked.
+
+User-facing message:
+- “მარაგი არასაკმარისია. ხელმისაწვდომია: {available_kg} კგ.”
+
+5.3 WEIGHT UNITS
+- All stored weight values in DB are in kilograms (kg).
+- UI shows kg everywhere for input.
+- UI additionally shows tons for summaries and report totals:
+  - tons = kg / 1000
+  - display with 2 decimals where relevant (e.g., 12.35 ტ)
+
+5.4 SALES TOTALS AND PAYMENTS
+Sale total = weight_kg * price_per_kg.
+Outstanding = total - sum(payments).
+Payment status auto-calculated:
+- Unpaid (გადაუხდელი): paid_total = 0
+- Part-paid (ნაწილობრივ გადახდილი): 0 < paid_total < total
+- Paid (გადახდილი): paid_total >= total (allow slight rounding tolerance if needed)
+
+5.5 SIMPLE LOCATION
+Field and warehouse location is text only in MVP.
+
+============================================================
+6) INFORMATION ARCHITECTURE / NAVIGATION (GEORGIAN)
+============================================================
+Main navigation (mobile bottom nav or side menu on desktop):
+1) მთავარი
+2) მიწები
+3) სამუშაოები
+4) მოსავალი / ლოტები
+5) საწყობები
+6) გაყიდვები
+7) ხარჯები
+8) რეპორტები
+9) პარამეტრები
+
+============================================================
+7) DETAILED FEATURES & REQUIREMENTS BY MODULE
+============================================================
+
+------------------------------------------------------------
+7.1 AUTHENTICATION (Supabase Auth)
+------------------------------------------------------------
+7.1.1 Sign up / First user creation
+- MVP can allow open sign-up OR be restricted (config flag).
+- Requirement: provide email + password.
+- Password rules: minimum 8 chars (configurable), show validation in Georgian.
+
+7.1.2 Login
+Fields:
+- ელფოსტა
+- პაროლი
+Buttons:
+- შესვლა
+- პაროლის აღდგენა
+
+7.1.3 Password reset
+- User enters email
+- Receives reset link
+- Sets new password
+
+7.1.4 Session
+- Persist session
+- Protected routes require authentication
+
+------------------------------------------------------------
+7.2 SETTINGS / MASTER DATA (პარამეტრები)
+------------------------------------------------------------
+All settings pages must be simple CRUD lists with “Add” floating button on mobile.
+
+7.2.1 Seasons (სეზონები)
+- Fields: Year (e.g., 2026)
+- Must have exactly one “current season” (optional toggle)
+- When creating records, default season = current season if set; else latest year.
+
+7.2.2 Crops (კულტურები)
+- Preseed:
+  - ხორბალი
+  - ქერი
+- Crop list normally not edited in MVP, but allow view.
+
+7.2.3 Varieties (ჯიშები)
+Fields:
+- Name (ჯიშის სახელი)
+- Crop (კულტურა)
+Actions:
+- Add, Edit, Delete (if not used; if used, block deletion and show message)
+
+7.2.4 Warehouses (საწყობები)
+Fields:
+- Name (საწყობის სახელი)
+- Location text (მდებარეობა)
+Actions:
+- Add/Edit/Delete (deletion blocked if has movements or bins)
+
+On warehouse creation:
+- Auto-create default bin “სექცია 1” (is_default = true).
+
+7.2.5 Bins/Sections (სექციები)
+- Managed inside Warehouse detail page.
+Fields:
+- Name (e.g., სექცია 2)
+- Optional note
+Rules:
+- Cannot delete default bin if it is the only bin.
+- Cannot delete bin if stock > 0 or has historical movements (prefer soft-delete).
+
+7.2.6 Fields/Lands (მიწები)
+(Also accessible in main “მიწები” module.)
+Fields:
+- Name (სახელი)
+- Area (ჰა) numeric
+- Location (მდებარეობა) text
+- Ownership: Owned (საკუთარი) / Rented (ნაქირავები)
+- Notes
+
+7.2.7 Buyers (მყიდველები)
+Fields:
+- Buyer name (სახელი)
+- Phone (ტელეფონი)
+- Notes (optional)
+Quick-add from Sale form.
+
+7.2.8 Expense Types (ხარჯის ტიპები)
+Fields:
+- Name (e.g., სასუქი, საწვავი, ხელფასი, სხვა)
+Actions:
+- Add/Edit/Delete (deletion blocked if used)
+
+7.2.9 Work Types (სამუშაოს ტიპები)
+Fields:
+- Name (examples):
+  - მოხვნა
+  - დათესვა
+  - სასუქის შეტანა
+  - წამლობა
+  - კულტივაცია
+  - მორწყვა
+  - მოსავლის აღება
+  - სხვა
+Actions:
+- Add/Edit/Delete (deletion blocked if used)
+
+------------------------------------------------------------
+7.3 FIELDS/LANDS MODULE (მიწები)
+------------------------------------------------------------
+7.3.1 Field list
+Show per field:
+- Name
+- Area (ha)
+- Ownership
+- Optional: quick metrics for selected season:
+  - Total expenses (₾)
+  - Total harvest (kg)
+  - Yield (kg/ha)
+
+Actions:
+- Add field
+- Tap field → Field detail
+
+7.3.2 Field detail
+Tabs/sections:
+A) მიმოხილვა
+- Area, location, ownership
+- Harvest summary by season/crop/variety
+- Expense summary
+B) სამუშაოები
+- List of works for this field (filter by season, status)
+C) ლოტები
+- Lots harvested from this field
+D) ხარჯები
+- Expenses allocated to this field + expenses linked via works on this field
+
+------------------------------------------------------------
+7.4 WORKS MODULE (სამუშაოები)
+------------------------------------------------------------
+7.4.1 Work list
+Filters:
+- Season (default current)
+- Field
+- Status: Planned/Completed
+- Work type
+
+Work card shows:
+- Field name
+- Work type
+- Status
+- Planned/Completed date
+- Optional crop/variety
+- Linked expense total (if any)
+
+7.4.2 Create/Edit Work
+Fields:
+- Field (required)
+- Season (required)
+- Crop (optional)
+- Variety (optional; filtered by crop if crop selected)
+- Work type (required)
+- Status (required): Planned / Completed
+- Planned date (optional; recommended for planned)
+- Completed date (optional; required if status = Completed)
+- Quantity (optional numeric)
+- Unit (optional text; examples: ლიტრი, კგ, საათი)
+- Notes
+
+Rules:
+- If status=Completed and completed_date empty → block save.
+
+Optional link:
+- “დაკავშირებული ხარჯები” section showing expenses linked to this work (read-only list) and button “+ ხარჯის დამატება ამ სამუშაოზე”.
+
+------------------------------------------------------------
+7.5 HARVEST & LOTS MODULE (მოსავალი / ლოტები)
+------------------------------------------------------------
+7.5.1 Lot list
+Filters:
+- Season (default current)
+- Crop
+- Variety
+- Field
+Show:
+- Lot code (auto)
+- Crop/Variety
+- Field
+- Harvest date
+- Harvested kg
+- Current bin + remaining kg (computed)
+- Status: In stock / Sold out (computed)
+
+7.5.2 Create Lot (Harvest)
+Fields (required unless specified):
+- Season (required)
+- Crop (required)
+- Variety (required)
+- Field (required)
+- Harvest date (required; default today)
+- Harvested weight (kg) required
+- Optional quality:
+  - Moisture % (optional)
+  - Impurities/Foreign material % (optional)
+- Notes (optional)
+
+On save:
+- Create lot record
+- Immediately show modal step “მიღება საწყობში” (Receive into warehouse)
+  - Warehouse (required; default last used)
+  - Bin/Section (required; default “სექცია 1”)
+  - Receive date (default today)
+  - Receive weight kg (default = harvested weight)
+Rules:
+- Enforce no mixing on chosen bin.
+- Create Inventory Movement type RECEIVE.
+
+7.5.3 Lot detail
+Sections:
+- Lot info (season, crop, variety, field, harvest date, harvested kg)
+- Remaining stock (kg + tons)
+- Current location (warehouse/bin) if in stock
+- Movement history (chronological)
+- Linked sales list (if any)
+- Linked expenses (if allocated to this lot)
+- Button actions:
+  - “გადატანა” (Transfer)
+  - “კორექცია” (Adjustment)
+  - “გაყიდვა” (Create sale)
+
+------------------------------------------------------------
+7.6 WAREHOUSES & STOCK MODULE (საწყობები)
+------------------------------------------------------------
+7.6.1 Warehouse list
+Show:
+- Warehouse name
+- Location text
+- Total stock kg + tons (computed)
+
+7.6.2 Warehouse detail
+Sections:
+A) Bins list (სექციები)
+For each bin:
+- Bin name
+- Active lot code (or “ცარიელია”)
+- Remaining kg + tons
+Tap bin → Bin detail
+
+B) Actions
+- + სექციის დამატება
+- გადატანა (opens transfer flow)
+
+7.6.3 Bin detail
+Show:
+- Warehouse + bin name
+- Active lot (if any)
+- Stock remaining kg + tons
+- Movement history filtered for this bin
+Actions:
+- Transfer out
+- Adjustment
+- Sale (if stock > 0)
+
+7.6.4 Transfer flow (გადატანა)
+Fields:
+- From warehouse/bin (required)
+- Lot (auto from active lot; not selectable if no mixing)
+- To warehouse/bin (required)
+- Transfer date (default today)
+- Weight kg (required)
+Rules:
+- From bin must have enough available.
+- To bin must be empty OR same lot (no mixing).
+On save:
+- Create Inventory Movement type TRANSFER.
+
+7.6.5 Adjustment flow (კორექცია)
+Purpose: correct measurement, record loss/spoilage/shrink, etc.
+Fields:
+- Warehouse/bin (required)
+- Lot (auto; must match active lot)
+- Date (default today)
+- Adjustment kg (required) — can be negative or positive
+  - UI: user enters a number and selects direction:
+    - “დაკლება (-)” or “დამატება (+)”
+  - Store signed kg in DB OR store separate sign + absolute value (implementation choice).
+- Reason (required) (text or selectable list optional)
+Rules:
+- If adjustment decreases stock, cannot exceed available (no negative stock).
+On save:
+- Create Inventory Movement type ADJUSTMENT.
+
+------------------------------------------------------------
+7.7 SALES MODULE (გაყიდვები)
+------------------------------------------------------------
+7.7.1 Sales list
+Filters:
+- Season (default current)
+- Buyer
+- Payment status
+Show per sale:
+- Date
+- Buyer name + phone
+- Lot code + variety
+- Weight kg + tons
+- Price/kg
+- Total ₾
+- Paid ₾ and Outstanding ₾
+- Status badge: გადაუხდელი / ნაწილობრივ / გადახდილი
+
+Actions:
+- + გაყიდვის დამატება
+- Tap sale → Sale detail
+
+7.7.2 Create Sale
+Fields:
+- Lot (required)
+  - selecting lot auto suggests its current warehouse/bin
+- Warehouse/bin (required; default from lot location)
+- Weight kg (required; default = available stock or last sold)
+- Price per kg (₾) (required)
+- Buyer (required: select existing or quick-add)
+  - Buyer quick-add fields: Name, Phone
+- Sale date (required; default today)
+- Notes (optional; can contain quality comments)
+
+Rules:
+- Must not exceed available stock in that bin for that lot.
+- On save:
+  - Create sale record
+  - Create inventory movement SALE_OUT reducing stock
+  - Update bin active lot if stock becomes zero.
+
+7.7.3 Sale detail
+Display:
+- Lot info (crop/variety)
+- Warehouse/bin
+- Weight, price/kg, total
+- Buyer + phone
+- Notes
+- Payment summary:
+  - total, paid, outstanding, status
+Payments list:
+- Each payment: date, amount, method (optional)
+Actions:
+- “+ გადახდის დამატება”
+- Edit sale (restricted; if payments exist, editing weight/price requires recalculation and confirmation; MVP can allow only notes edit after payments)
+
+------------------------------------------------------------
+7.8 EXPENSES MODULE (ხარჯები)
+------------------------------------------------------------
+7.8.1 Expense list
+Filters:
+- Season
+- Type
+- Allocation type
+Show:
+- Date
+- Type
+- Amount ₾
+- Allocation summary (e.g., “მიწა: ნაკვეთი 1”)
+- Notes preview
+
+Actions:
+- + ხარჯის დამატება
+- Tap expense → Expense detail/edit
+
+7.8.2 Create/Edit Expense
+Fields:
+- Date (default today)
+- Expense type (required)
+- Amount GEL (required)
+- Notes (optional)
+- Allocation (required):
+  - Allocation type:
+    - მიწა (FIELD)
+    - სამუშაო (WORK)
+    - ლოტი (LOT)
+    - საწყობი/სექცია (WAREHOUSE/BIN)
+    - სეზონი (SEASON)
+    - ზოგადი (GENERAL)
+  - Allocation target selection:
+    - If FIELD: pick field
+    - If WORK: pick work (filtered by season/field optional)
+    - If LOT: pick lot
+    - If WAREHOUSE/BIN: pick warehouse then bin
+    - If SEASON: pick season
+    - If GENERAL: no target
+Rules:
+- Amount must be > 0.
+- If allocation type != GENERAL, allocation target must be selected.
+
+------------------------------------------------------------
+7.9 REPORTS MODULE (რეპორტები)
+------------------------------------------------------------
+All reports must support:
+- Season filter (default current)
+- Export option (Phase 1 optional): CSV download
+- Display kg + tons where meaningful
+- Fast load (use DB views and indexes)
+
+Report 1: Current Stock (მიმდინარე მარაგი)
+A) By warehouse/bin/lot
+- Warehouse → bins
+- For each bin show:
+  - Active lot code
+  - Crop/variety
+  - Remaining kg + tons
+B) Totals by crop/variety
+- For each crop/variety show total kg + tons across all warehouses
+
+Report 2: Profit/Loss per Season (მოგება/ზარალი სეზონით)
+For chosen season:
+- Sales revenue total (sum of sales.total_gel)
+- Expenses total:
+  - include expenses allocated directly to season
+  - include expenses allocated to fields/works/lots/warehouses that belong to the season
+- Toggle: “ზოგადი ხარჯების ჩართვა” (include GENERAL)
+Output:
+- Revenue
+- Expenses
+- Net (Profit/Loss)
+Optional breakdown:
+- Expenses by type
+
+Report 3: Cost per Land (ხარჯები მიწის მიხედვით)
+For each field in season:
+- Total expenses allocated to the field
+- PLUS expenses allocated to works on that field (work.season matches)
+Output:
+- Field name
+- Area ha
+- Total cost ₾
+- Cost per ha ₾/ha
+
+Report 4: Outstanding Payments (დაუფარავი გადახდები)
+List of sales where outstanding > 0:
+- Sale date
+- Buyer name + phone
+- Total ₾
+- Paid ₾
+- Outstanding ₾
+Sort default: oldest sale date first
+Action: open sale detail
+
+Report 5: Yield per Land (მოსავლიანობა მიწის მიხედვით)
+For each field:
+- Total harvested kg for season (sum lots.harvested_kg)
+- Area ha
+- Yield = kg / ha
+Breakdowns:
+- filter by crop, variety
+- show kg/ha
+
+============================================================
+8) UI/UX REQUIREMENTS (MOBILE-FIRST)
+============================================================
+8.1 Form simplicity
+- Min required fields only.
+- Defaults:
+  - Date defaults to today
+  - Season defaults to current season
+  - Warehouse defaults to last used
+  - Bin defaults to “სექცია 1”
+  - Buyer defaults to last used (optional)
+- Large inputs, numeric keyboard for numeric fields.
+
+8.2 Quick actions
+Dashboard must have quick buttons:
+- + გაყიდვა
+- + ხარჯი
+- + სამუშაო
+- + ლოტი / მოსავალი
+- + გადატანა (optional)
+
+8.3 Search and filters
+- Buyers list searchable by name/phone
+- Lots searchable by code/field/variety
+- Fields searchable by name
+
+8.4 Confirmations
+Require confirmation dialog for:
+- Deleting master data
+- Adjustments with negative stock effect
+- Editing sales with existing payments (or restrict edits)
+
+8.5 Error messages in Georgian
+All validation and error messages must be in Georgian.
+
+============================================================
+9) DATA MODEL (DETAILED TABLE SPECIFICATION)
+============================================================
+NOTE: Use UUID primary keys for all tables. Use created_at, updated_at everywhere.
+Include farm_id in all core data tables for future multi-farm support (even if only one farm exists in MVP).
+
+9.1 farms
+- id (uuid, pk)
+- name (text)
+- created_at
+
+9.2 profiles
+- id (uuid, pk) = auth.user.id
+- farm_id (uuid, fk -> farms.id)
+- display_name (text)
+- created_at
+
+9.3 seasons
+- id (uuid, pk)
+- farm_id (uuid fk)
+- year (int, unique per farm)
+- is_current (boolean)
+
+9.4 crops
+- id (uuid pk)
+- name_ka (text)  [“ხორბალი”, “ქერი”]
+- created_at
+
+9.5 varieties
+- id (uuid pk)
+- farm_id (uuid fk)
+- crop_id (uuid fk)
+- name (text)
+Constraints:
+- unique(farm_id, crop_id, name)
+
+9.6 fields
+- id (uuid pk)
+- farm_id (uuid fk)
+- name (text)
+- area_ha (numeric(10,2))
+- location_text (text)
+- ownership (enum: OWNED, RENTED)
+- notes (text nullable)
+
+9.7 warehouses
+- id (uuid pk)
+- farm_id (uuid fk)
+- name (text)
+- location_text (text nullable)
+- notes (text nullable)
+
+9.8 bins
+- id (uuid pk)
+- farm_id (uuid fk)
+- warehouse_id (uuid fk)
+- name (text)           [e.g., “სექცია 1”]
+- is_default (boolean)
+- active_lot_id (uuid nullable)  [enforce no mixing]
+- is_archived (boolean default false)
+
+9.9 lots
+- id (uuid pk)
+- farm_id (uuid fk)
+- season_id (uuid fk)
+- crop_id (uuid fk)
+- variety_id (uuid fk)
+- field_id (uuid fk)
+- lot_code (text unique per farm)  [auto-generated e.g., LOT-2026-0001]
+- harvest_date (date)
+- harvested_kg (numeric(12,2))
+- moisture_pct (numeric(5,2) nullable)
+- impurities_pct (numeric(5,2) nullable)
+- notes (text nullable)
+
+9.10 inventory_movements
+- id (uuid pk)
+- farm_id (uuid fk)
+- lot_id (uuid fk)
+- type (enum: RECEIVE, TRANSFER, SALE_OUT, ADJUSTMENT)
+- from_bin_id (uuid nullable fk -> bins.id)
+- to_bin_id (uuid nullable fk -> bins.id)
+- movement_date (date)
+- weight_kg (numeric(12,2))  [signed if ADJUSTMENT; else positive]
+- reason (text nullable; required when type=ADJUSTMENT)
+- sale_id (uuid nullable fk -> sales.id)
+- created_at
+
+Rules:
+- RECEIVE: to_bin_id required, from_bin_id null
+- TRANSFER: both from_bin_id and to_bin_id required
+- SALE_OUT: from_bin_id required, to_bin_id null, sale_id required
+- ADJUSTMENT: from_bin_id required (the affected bin), reason required
+
+9.11 buyers
+- id (uuid pk)
+- farm_id (uuid fk)
+- name (text)
+- phone (text)
+- notes (text nullable)
+
+9.12 sales
+- id (uuid pk)
+- farm_id (uuid fk)
+- season_id (uuid fk)
+- lot_id (uuid fk)
+- bin_id (uuid fk -> bins.id)
+- buyer_id (uuid fk)
+- sale_date (date)
+- weight_kg (numeric(12,2))
+- price_per_kg (numeric(12,4))
+- total_gel (numeric(14,2))  [can be computed in app; store for reporting]
+- notes (text nullable)
+- payment_status (enum: UNPAID, PART_PAID, PAID)
+- created_at
+
+9.13 sale_payments
+- id (uuid pk)
+- farm_id (uuid fk)
+- sale_id (uuid fk)
+- payment_date (date)
+- amount_gel (numeric(14,2))
+- method (text nullable)  [cash/bank/other optional]
+- notes (text nullable)
+
+9.14 expense_types
+- id (uuid pk)
+- farm_id (uuid fk)
+- name (text unique per farm)
+
+9.15 expenses
+- id (uuid pk)
+- farm_id (uuid fk)
+- season_id (uuid fk nullable)  [optional; helpful for reporting]
+- expense_date (date)
+- expense_type_id (uuid fk)
+- amount_gel (numeric(14,2))
+- notes (text nullable)
+- allocation_type (enum: FIELD, WORK, LOT, BIN, SEASON, GENERAL)
+- allocation_id (uuid nullable)  [points to the chosen entity]
+Rules:
+- If allocation_type=GENERAL => allocation_id must be null
+- Else allocation_id required
+
+9.16 work_types
+- id (uuid pk)
+- farm_id (uuid fk)
+- name (text unique per farm)
+
+9.17 field_works
+- id (uuid pk)
+- farm_id (uuid fk)
+- season_id (uuid fk)
+- field_id (uuid fk)
+- crop_id (uuid nullable fk)
+- variety_id (uuid nullable fk)
+- work_type_id (uuid fk)
+- status (enum: PLANNED, COMPLETED)
+- planned_date (date nullable)
+- completed_date (date nullable)
+- qty (numeric(12,2) nullable)
+- unit (text nullable)
+- notes (text nullable)
+
+============================================================
+10) DATABASE LOGIC REQUIREMENTS (TRIGGERS / VIEWS)
+============================================================
+10.1 Stock calculation view
+Create a view v_bin_lot_stock:
+- Group by (bin_id, lot_id)
+- Calculate stock_kg = sum of movements affecting that bin+lot:
+  - RECEIVE into bin: +weight
+  - TRANSFER into bin: +weight
+  - TRANSFER out of bin: -weight
+  - SALE_OUT from bin: -weight
+  - ADJUSTMENT on bin: +signed_weight (or separate sign logic)
+- Expose also:
+  - warehouse_id
+  - crop_id, variety_id
+  - last_movement_date
+  - stock_tons = stock_kg/1000
+
+10.2 Enforce NO MIXING at DB level
+Implement a function + trigger on inventory_movements insert/update:
+- If to_bin_id is not null:
+  - Fetch bins.active_lot_id
+  - If active_lot_id is null => set active_lot_id = NEW.lot_id
+  - Else require active_lot_id = NEW.lot_id, otherwise raise error
+- After movement insert, recalculate stock for that bin & active lot:
+  - If stock becomes 0 => clear active_lot_id (set null)
+
+10.3 Prevent negative stock at DB level
+Before inserting movements that decrease stock (TRANSFER out, SALE_OUT, negative ADJUSTMENT):
+- Compute available stock for (from_bin_id, lot_id)
+- If resulting would be < 0 => raise error
+
+10.4 Sale atomicity
+Sale creation must be transactional:
+- Insert sale
+- Insert SALE_OUT movement
+- Optionally insert payment(s)
+If any fails, rollback all.
+
+10.5 Payment status auto update
+After insert/update/delete in sale_payments:
+- Recalculate sale paid_total and payment_status.
+Store paid_total in a computed view or materialized value (optional).
+
+============================================================
+11) SECURITY / ACCESS CONTROL
+============================================================
+MVP single user:
+- All tables use RLS (Row Level Security)
+- Policy: user can access rows where farm_id = user’s profile farm_id
+- Ensure no public access to data
+- Server actions/API routes must validate session
+
+============================================================
+12) PERFORMANCE REQUIREMENTS
+============================================================
+- Lists should load fast for typical farm datasets:
+  - fields < 100
+  - lots < 1000
+  - movements < 10,000
+- Use indexes:
+  - inventory_movements (farm_id, bin_id, lot_id, date)
+  - sales (farm_id, season_id, buyer_id, sale_date)
+  - expenses (farm_id, season_id, expense_type_id, date)
+
+============================================================
+13) DEPLOYMENT REQUIREMENTS
+============================================================
+- Hosting: Vercel
+- Database/Auth: Supabase project
+- Environment variables required:
+  - NEXT_PUBLIC_SUPABASE_URL
+  - NEXT_PUBLIC_SUPABASE_ANON_KEY
+  - SUPABASE_SERVICE_ROLE_KEY (only if needed server-side)
+- Provide README with:
+  - local run steps
+  - Supabase migration apply steps
+  - Vercel deploy steps
+
+============================================================
+14) ACCEPTANCE CRITERIA (MVP)
+============================================================
+A) Language
+- 100% of UI strings are in Georgian (no English leftovers).
+
+B) No mixing and stock correctness
+- If user tries to receive/transfer a different lot into a non-empty bin, app blocks it.
+- Stock never goes negative.
+- Stock totals match movements.
+
+C) Core flows work end-to-end
+1) Create field → create work → create lot → receive to warehouse/bin → transfer → sale → payment
+2) Expenses allocated to:
+   - field, work, lot, bin, season, general
+3) Reports show correct totals and conversions kg/tons.
+
+D) Payments
+- Partial payments update outstanding correctly and status changes accordingly.
+
+============================================================
+15) FUTURE ENHANCEMENTS (POST-MVP)
+============================================================
+- Google Maps pins for fields/warehouses
+- Cadastral/plot IDs
+- Attachments for expenses
+- Offline mode with sync queue
+- Multi-user roles
+- Buyer grading fields and deductions
+- Document export (invoice/receipt)
+- Quality parameters as structured fields and reporting
+
+============================================================
+16) ASSUMPTIONS (EXPLICIT)
+============================================================
+- One bin holds one lot at a time; no mixing is a strict rule.
+- One sale record per lot; multi-lot sales recorded as multiple sales.
+- Locations are text-only.
+- Buyer quality requirements are optional notes only.
+- Default unit is kg; tons are display-only conversions.
+
+END OF PRD

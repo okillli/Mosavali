@@ -1,0 +1,146 @@
+-- 1. ENUMS
+CREATE TYPE ownership AS ENUM ('OWNED', 'RENTED');
+CREATE TYPE movement_type AS ENUM ('RECEIVE', 'TRANSFER', 'SALE_OUT', 'ADJUSTMENT');
+CREATE TYPE payment_status AS ENUM ('UNPAID', 'PART_PAID', 'PAID');
+CREATE TYPE work_status AS ENUM ('PLANNED', 'COMPLETED');
+CREATE TYPE allocation_type AS ENUM ('FIELD', 'WORK', 'LOT', 'BIN', 'SEASON', 'GENERAL');
+
+-- 2. TABLES
+CREATE TABLE profiles (
+    id UUID PRIMARY KEY REFERENCES auth.users(id),
+    farm_id UUID NOT NULL,
+    display_name TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE seasons (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    farm_id UUID NOT NULL,
+    year INTEGER NOT NULL,
+    is_current BOOLEAN DEFAULT false,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE crops (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name_ka TEXT NOT NULL UNIQUE
+);
+
+CREATE TABLE varieties (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    crop_id UUID REFERENCES crops(id),
+    name TEXT NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE fields (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    farm_id UUID NOT NULL,
+    name TEXT NOT NULL,
+    area_ha DECIMAL(10,2) NOT NULL,
+    location_text TEXT,
+    ownership ownership DEFAULT 'OWNED',
+    notes TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE warehouses (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    farm_id UUID NOT NULL,
+    name TEXT NOT NULL,
+    location_text TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE bins (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    warehouse_id UUID REFERENCES warehouses(id) ON DELETE CASCADE,
+    name TEXT NOT NULL,
+    is_default BOOLEAN DEFAULT false,
+    active_lot_id UUID, -- Will be managed by triggers for no-mixing
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE lots (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    farm_id UUID NOT NULL,
+    lot_code TEXT NOT NULL,
+    season_id UUID REFERENCES seasons(id),
+    crop_id UUID REFERENCES crops(id),
+    variety_id UUID REFERENCES varieties(id),
+    field_id UUID REFERENCES fields(id),
+    harvest_date DATE NOT NULL,
+    harvested_kg DECIMAL(15,2) NOT NULL,
+    notes TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE buyers (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    farm_id UUID NOT NULL,
+    name TEXT NOT NULL,
+    phone TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE inventory_movements (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    farm_id UUID NOT NULL,
+    type movement_type NOT NULL,
+    lot_id UUID REFERENCES lots(id) ON DELETE CASCADE,
+    from_bin_id UUID REFERENCES bins(id),
+    to_bin_id UUID REFERENCES bins(id),
+    weight_kg DECIMAL(15,2) NOT NULL,
+    movement_date DATE DEFAULT CURRENT_DATE,
+    reason TEXT,
+    sale_id UUID, -- Optional link to sales
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE sales (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    farm_id UUID NOT NULL,
+    season_id UUID REFERENCES seasons(id),
+    lot_id UUID REFERENCES lots(id),
+    bin_id UUID REFERENCES bins(id), -- Where it was taken from
+    buyer_id UUID REFERENCES buyers(id),
+    sale_date DATE NOT NULL,
+    weight_kg DECIMAL(15,2) NOT NULL,
+    price_per_kg DECIMAL(10,2) NOT NULL,
+    total_gel DECIMAL(15,2) NOT NULL,
+    payment_status payment_status DEFAULT 'UNPAID',
+    notes TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE work_types (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name TEXT NOT NULL UNIQUE
+);
+
+CREATE TABLE works (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    farm_id UUID NOT NULL,
+    field_id UUID REFERENCES fields(id),
+    season_id UUID REFERENCES seasons(id),
+    work_type_id UUID REFERENCES work_types(id),
+    planned_date DATE,
+    completed_date DATE,
+    status work_status DEFAULT 'PLANNED',
+    notes TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE expenses (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    farm_id UUID NOT NULL,
+    season_id UUID REFERENCES seasons(id),
+    allocation_type allocation_type NOT NULL,
+    target_id UUID, -- UUID of field, work, lot, etc.
+    amount_gel DECIMAL(15,2) NOT NULL,
+    expense_date DATE DEFAULT CURRENT_DATE,
+    description TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
