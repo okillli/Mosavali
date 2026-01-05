@@ -25,6 +25,13 @@ export default defineConfig(({ mode }) => {
         'process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY': JSON.stringify(
           getEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY') || getEnv('VITE_SUPABASE_ANON_KEY')
         ),
+        // Also expose via import.meta.env for Vite's native mechanism
+        'import.meta.env.VITE_SUPABASE_URL': JSON.stringify(
+          getEnv('VITE_SUPABASE_URL') || getEnv('NEXT_PUBLIC_SUPABASE_URL')
+        ),
+        'import.meta.env.VITE_SUPABASE_ANON_KEY': JSON.stringify(
+          getEnv('VITE_SUPABASE_ANON_KEY') || getEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY')
+        ),
       },
       resolve: {
         alias: {

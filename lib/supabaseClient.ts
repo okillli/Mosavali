@@ -1,21 +1,27 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Safely access environment variables
-const getEnv = (key: string) => {
-  // Check process.env (Node/Next.js)
+// Safely access environment variables from multiple sources
+const getEnv = (key: string): string => {
+  // Check process.env (works with vite.config.ts define)
   if (typeof process !== 'undefined' && process.env && process.env[key]) {
-    return process.env[key];
+    return process.env[key] as string;
   }
-  // Check import.meta.env (Vite/Modern browsers)
-  // Casting to any to avoid TypeScript error: Property 'env' does not exist on type 'ImportMeta'.
-  if (typeof import.meta !== 'undefined' && (import.meta as any).env && (import.meta as any).env[key]) {
-    return (import.meta as any).env[key];
+  // Check import.meta.env (Vite's native env handling)
+  if (typeof import.meta !== 'undefined' && (import.meta as any).env) {
+    const env = (import.meta as any).env;
+    if (env[key]) return env[key];
   }
   return '';
 };
 
-const supabaseUrl = getEnv('NEXT_PUBLIC_SUPABASE_URL');
-const supabaseKey = getEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY');
+// Check multiple possible env var names for Supabase config
+const supabaseUrl =
+  getEnv('NEXT_PUBLIC_SUPABASE_URL') ||
+  getEnv('VITE_SUPABASE_URL');
+
+const supabaseKey =
+  getEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY') ||
+  getEnv('VITE_SUPABASE_ANON_KEY');
 
 if (!supabaseUrl || !supabaseKey) {
   console.warn(
