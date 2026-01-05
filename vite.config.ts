@@ -18,8 +18,13 @@ export default defineConfig(({ mode }) => {
       define: {
         'process.env.API_KEY': JSON.stringify(getEnv('GEMINI_API_KEY')),
         'process.env.GEMINI_API_KEY': JSON.stringify(getEnv('GEMINI_API_KEY')),
-        'process.env.NEXT_PUBLIC_SUPABASE_URL': JSON.stringify(getEnv('NEXT_PUBLIC_SUPABASE_URL')),
-        'process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY': JSON.stringify(getEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY')),
+        // Support both NEXT_PUBLIC_ and VITE_ prefixes for flexibility
+        'process.env.NEXT_PUBLIC_SUPABASE_URL': JSON.stringify(
+          getEnv('NEXT_PUBLIC_SUPABASE_URL') || getEnv('VITE_SUPABASE_URL')
+        ),
+        'process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY': JSON.stringify(
+          getEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY') || getEnv('VITE_SUPABASE_ANON_KEY')
+        ),
       },
       resolve: {
         alias: {
