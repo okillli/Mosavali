@@ -19,14 +19,26 @@ export default function NewWarehousePage() {
     setLoading(true);
     setError(null);
 
+    // Get farm_id first
+    const { data: profile, error: profileError } = await supabase.from('profiles').select('farm_id').single();
+
+    if (profileError || !profile) {
+      console.error('Profile error:', profileError);
+      setError('პროფილის მონაცემები ვერ მოიძებნა.');
+      setLoading(false);
+      return;
+    }
+
     // 1. Create Warehouse
     const { data: wh, error: whError } = await supabase.from('warehouses').insert({
+      farm_id: profile.farm_id,
       name: formData.name,
       location_text: formData.location_text
     }).select().single();
 
     if (whError) {
-      setError(STRINGS.INVALID_VALUE);
+      console.error('Warehouse insert error:', whError);
+      setError(STRINGS.INVALID_VALUE + ': ' + whError.message);
       setLoading(false);
       return;
     }
@@ -39,7 +51,7 @@ export default function NewWarehousePage() {
     });
 
     if (binError) {
-      console.error(binError);
+      console.error('Bin insert error:', binError);
     }
 
     router.push('/app/warehouses');

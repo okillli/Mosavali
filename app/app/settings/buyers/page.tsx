@@ -21,13 +21,27 @@ export default function BuyersSettings() {
   const handleAdd = async () => {
     if(!newName) return;
     setLoading(true);
-    const { data: profile } = await supabase.from('profiles').select('farm_id').single();
-    
-    await supabase.from('buyers').insert({
+
+    const { data: profile, error: profileError } = await supabase.from('profiles').select('farm_id').single();
+
+    if (profileError || !profile) {
+      console.error('Profile error:', profileError);
+      alert('პროფილის მონაცემები ვერ მოიძებნა.');
+      setLoading(false);
+      return;
+    }
+
+    const { error } = await supabase.from('buyers').insert({
         farm_id: profile.farm_id,
         name: newName,
         phone: newPhone
     });
+
+    if (error) {
+      console.error('Insert error:', error);
+      alert('მყიდველის დამატება ვერ მოხერხდა: ' + error.message);
+    }
+
     setNewName('');
     setNewPhone('');
     setLoading(false);

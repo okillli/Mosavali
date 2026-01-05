@@ -19,8 +19,14 @@ export default function NewFieldPage() {
 
   const handleSubmit = async () => {
     setLoading(true);
-    const { data: profile } = await supabase.from('profiles').select('farm_id').single();
-    if (!profile) return;
+    const { data: profile, error: profileError } = await supabase.from('profiles').select('farm_id').single();
+
+    if (profileError || !profile) {
+      console.error('Profile error:', profileError);
+      alert('პროფილის მონაცემები ვერ მოიძებნა.');
+      setLoading(false);
+      return;
+    }
 
     const { error } = await supabase.from('fields').insert({
       farm_id: profile.farm_id,
@@ -32,7 +38,8 @@ export default function NewFieldPage() {
     });
 
     if (error) {
-      alert(STRINGS.INVALID_VALUE);
+      console.error('Insert error:', error);
+      alert(STRINGS.INVALID_VALUE + ': ' + error.message);
       setLoading(false);
     } else {
       router.push('/app/fields');

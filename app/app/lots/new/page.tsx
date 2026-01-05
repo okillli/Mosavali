@@ -70,10 +70,17 @@ export default function NewLotPage() {
     let createdLotId = null;
 
     try {
+      // Get farm_id first
+      const { data: profile, error: profileError } = await supabase.from('profiles').select('farm_id').single();
+      if (profileError || !profile) {
+        throw new Error('პროფილის მონაცემები ვერ მოიძებნა.');
+      }
+
       const lotCode = `LOT-${new Date().getFullYear()}-${Math.floor(Math.random() * 10000)}`;
-      
+
       // 1. Create Lot
       const { data: lot, error: lotError } = await supabase.from('lots').insert({
+        farm_id: profile.farm_id,
         season_id: formData.season_id,
         crop_id: formData.crop_id,
         variety_id: formData.variety_id,
@@ -89,6 +96,7 @@ export default function NewLotPage() {
 
       // 2. Create Movement (Receive)
       const { error: moveError } = await supabase.from('inventory_movements').insert({
+        farm_id: profile.farm_id,
         lot_id: lot.id,
         type: 'RECEIVE',
         to_bin_id: formData.bin_id,

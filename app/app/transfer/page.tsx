@@ -39,9 +39,15 @@ export default function TransferPage() {
   const handleSubmit = async () => {
     setLoading(true);
     setError(null);
-    
-    const { data: profile } = await supabase.from('profiles').select('farm_id').single();
-    if (!profile) return;
+
+    const { data: profile, error: profileError } = await supabase.from('profiles').select('farm_id').single();
+
+    if (profileError || !profile) {
+      console.error('Profile error:', profileError);
+      setError('პროფილის მონაცემები ვერ მოიძებნა.');
+      setLoading(false);
+      return;
+    }
 
     const { error: moveError } = await supabase.from('inventory_movements').insert({
       farm_id: profile.farm_id,
@@ -55,7 +61,14 @@ export default function TransferPage() {
     });
 
     if (moveError) {
-      setError(moveError.message.includes('შერევა') ? STRINGS.NO_MIXING_ERROR : STRINGS.NEGATIVE_STOCK_ERROR);
+      console.error('Transfer error:', moveError);
+      if (moveError.message.includes('შერევა')) {
+        setError(STRINGS.NO_MIXING_ERROR);
+      } else if (moveError.message.includes('მარაგი')) {
+        setError(STRINGS.NEGATIVE_STOCK_ERROR);
+      } else {
+        setError(moveError.message);
+      }
       setLoading(false);
     } else {
       router.push('/app/reports');

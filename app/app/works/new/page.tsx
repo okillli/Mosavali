@@ -44,8 +44,14 @@ export default function NewWorkPage() {
     setLoading(true);
     setError(null);
 
-    const { data: profile } = await supabase.from('profiles').select('farm_id').single();
-    if (!profile) return;
+    const { data: profile, error: profileError } = await supabase.from('profiles').select('farm_id').single();
+
+    if (profileError || !profile) {
+      console.error('Profile error:', profileError);
+      setError('პროფილის მონაცემები ვერ მოიძებნა.');
+      setLoading(false);
+      return;
+    }
 
     const { error: insertError } = await supabase.from('works').insert({
       farm_id: profile.farm_id,
@@ -53,7 +59,8 @@ export default function NewWorkPage() {
     });
 
     if (insertError) {
-      setError(STRINGS.INVALID_VALUE);
+      console.error('Insert error:', insertError);
+      setError(STRINGS.INVALID_VALUE + ': ' + insertError.message);
       setLoading(false);
     } else {
       router.push('/app/works');

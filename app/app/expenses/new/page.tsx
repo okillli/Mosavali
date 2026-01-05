@@ -51,8 +51,14 @@ export default function NewExpensePage() {
     setLoading(true);
     setError(null);
 
-    const { data: profile } = await supabase.from('profiles').select('farm_id').single();
-    if (!profile) return;
+    const { data: profile, error: profileError } = await supabase.from('profiles').select('farm_id').single();
+
+    if (profileError || !profile) {
+      console.error('Profile error:', profileError);
+      setError('პროფილის მონაცემები ვერ მოიძებნა.');
+      setLoading(false);
+      return;
+    }
 
     const targetId = formData.allocation_type === 'GENERAL' || formData.allocation_type === 'SEASON' ? null : formData.target_id;
 
@@ -67,7 +73,8 @@ export default function NewExpensePage() {
     });
 
     if (insertError) {
-      setError(STRINGS.INVALID_VALUE);
+      console.error('Insert error:', insertError);
+      setError(STRINGS.INVALID_VALUE + ': ' + insertError.message);
       setLoading(false);
     } else {
       router.push('/app/expenses');

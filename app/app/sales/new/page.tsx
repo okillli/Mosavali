@@ -66,8 +66,14 @@ export default function NewSalePage() {
     setLoading(true);
     setError(null);
 
-    const { data: profile } = await supabase.from('profiles').select('farm_id').single();
-    if (!profile) return;
+    const { data: profile, error: profileError } = await supabase.from('profiles').select('farm_id').single();
+
+    if (profileError || !profile) {
+      console.error('Profile error:', profileError);
+      setError('პროფილის მონაცემები ვერ მოიძებნა.');
+      setLoading(false);
+      return;
+    }
 
     // Call RPC
     const { data, error: rpcError } = await supabase.rpc('create_sale_atomic', {

@@ -33,11 +33,17 @@ export default function VarietiesSettings() {
   const handleAdd = async () => {
     if(!newName || !selectedCrop) return;
     setLoading(true);
-    
-    await supabase.from('varieties').insert({
+
+    const { error } = await supabase.from('varieties').insert({
         crop_id: selectedCrop,
         name: newName
     });
+
+    if (error) {
+      console.error('Insert error:', error);
+      alert('ჯიშის დამატება ვერ მოხერხდა: ' + error.message);
+    }
+
     setNewName('');
     setLoading(false);
     fetchVarieties();
