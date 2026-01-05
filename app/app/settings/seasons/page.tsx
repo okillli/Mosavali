@@ -21,13 +21,27 @@ export default function SeasonsSettings() {
   const handleAdd = async () => {
     if(!newYear) return;
     setLoading(true);
-    const { data: profile } = await supabase.from('profiles').select('farm_id').single();
-    
-    await supabase.from('seasons').insert({
+
+    const { data: profile, error: profileError } = await supabase.from('profiles').select('farm_id').single();
+
+    if (profileError || !profile) {
+      console.error('Profile error:', profileError);
+      alert('პროფილის მონაცემები ვერ მოიძებნა. გთხოვთ შეამოწმოთ მონაცემთა ბაზა.');
+      setLoading(false);
+      return;
+    }
+
+    const { error: insertError } = await supabase.from('seasons').insert({
         farm_id: profile.farm_id,
         year: parseInt(newYear),
         is_current: false
     });
+
+    if (insertError) {
+      console.error('Insert error:', insertError);
+      alert('სეზონის დამატება ვერ მოხერხდა: ' + insertError.message);
+    }
+
     setNewYear('');
     setLoading(false);
     fetchSeasons();
