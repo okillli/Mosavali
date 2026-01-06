@@ -148,10 +148,17 @@ Features: search with debounce, async loading, create inline, keyboard nav
 
 This app is used by farmers in the field on phones. **Mobile is the primary experience.**
 
+### Feature Parity (CRITICAL)
+- **100% of features must work on mobile** - never hide functionality
+- If sidebar has 9 nav items, mobile must access all 9 (via bottom nav + Settings/menu)
+- All CRUD operations (Add/Edit/Delete) must be accessible on mobile
+- All reports must be viewable on mobile
+- If it works on desktop, it MUST work on mobile
+
 ### Layout Rules
 - **Single column on mobile** → `md:grid-cols-2` (never desktop-only layouts)
-- **Sidebar hidden on mobile** → `hidden md:flex`
-- **Bottom nav on mobile** → 4 main items, fixed at bottom
+- **Sidebar hidden, but features accessible** → use bottom nav + Settings page
+- **Bottom nav on mobile** → 4 main items, others via Settings
 - **Content padding** → `pb-16` to clear bottom nav
 
 ### Touch Targets
@@ -187,10 +194,14 @@ This app is used by farmers in the field on phones. **Mobile is the primary expe
 - **Headers**: `text-xl` or `text-2xl` (readable on small screens)
 - **Labels**: `text-sm font-medium`
 
-### Navigation
-- Desktop: Sidebar (9 items)
+### Navigation (Feature Parity)
+- Desktop: Sidebar (9 items: Dashboard, Fields, Works, Lots, Warehouses, Sales, Expenses, Reports, Settings)
 - Mobile: Bottom nav (4 main: Dashboard, Fields, Lots, Sales)
-- Secondary pages accessible via Settings or parent pages
+- **All other features accessible via:**
+  - Settings page (Seasons, Varieties, Buyers)
+  - Parent pages (Works from Field detail, Expenses from Work detail)
+  - Dashboard quick links
+- **Never make a feature desktop-only**
 
 ---
 
@@ -225,4 +236,38 @@ Common: `Plus`, `Pencil`, `Trash2`, `Check`, `X`, `ChevronDown`, `Loader2`
   <span className="text-gray-500">{label}</span>
   <span className="font-medium">{value}</span>
 </div>
+```
+
+---
+
+## Performance
+
+> **Full details:** See [performance.md](performance.md)
+
+### Memoized Components
+
+UI primitives are wrapped with `React.memo` to prevent unnecessary re-renders:
+- `Button`, `Input`, `Select`, `TextArea`, `MobileNav`
+
+### Expensive Calculations
+
+Wrap array operations with `useMemo`:
+
+```tsx
+const total = useMemo(
+  () => items.reduce((sum, i) => sum + i.amount, 0),
+  [items]
+);
+```
+
+### List Keys
+
+Always use unique IDs, not array indices:
+
+```tsx
+// Good
+{items.map(item => <Card key={item.id} />)}
+
+// Bad - causes re-render issues
+{items.map((item, idx) => <Card key={idx} />)}
 ```

@@ -11,14 +11,16 @@ npm run build   # Production build
 
 ## Architecture
 
-**Stack:** Next.js + React 19 + TypeScript + Supabase (Postgres)
+**Stack:** Vite + React 19 + TypeScript + Supabase (Postgres)
 
 | Directory | Purpose |
 |-----------|---------|
-| `app/` | File-based routing |
-| `app/app/` | Authenticated routes |
-| `lib/` | Supabase client, strings |
-| `components/` | UI components |
+| `app/` | Hash-based routing |
+| `app/app/` | Authenticated routes (lazy loaded) |
+| `lib/` | Supabase client, strings, hooks, contexts |
+| `lib/hooks/` | Custom hooks (useMasterData) |
+| `lib/contexts/` | React contexts (UserContext) |
+| `components/` | UI components (memoized) |
 | `types.ts` | TypeScript types |
 
 ---
@@ -63,7 +65,8 @@ These rules apply to ALL code changes. Violations are bugs.
 
 ### 6. Mobile-First Design
 - **Mobile is the primary experience** (farmers use phones in the field)
-- All layouts must work on mobile first, enhance for desktop
+- **100% feature parity** - ALL functionality must be accessible on mobile
+- Never hide features on mobile - reorganize navigation instead
 - Minimum 44px touch targets (`py-3` or `p-4` on buttons)
 - Single column on mobile → `md:grid-cols-2` for desktop
 - Full-width buttons on mobile forms
