@@ -61,6 +61,14 @@ These rules apply to ALL code changes. Violations are bugs.
 - Sales MUST use `create_sale_atomic()` RPC
 - Never create sales with separate insert statements
 
+### 6. Mobile-First Design
+- **Mobile is the primary experience** (farmers use phones in the field)
+- All layouts must work on mobile first, enhance for desktop
+- Minimum 44px touch targets (`py-3` or `p-4` on buttons)
+- Single column on mobile → `md:grid-cols-2` for desktop
+- Full-width buttons on mobile forms
+- See [ui-patterns.md](.claude/ui-patterns.md#mobile-first-primary-target) for details
+
 ---
 
 ## Entities

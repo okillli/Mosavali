@@ -144,12 +144,53 @@ Features: search with debounce, async loading, create inline, keyboard nav
 
 ---
 
-## Mobile-First
+## Mobile-First (Primary Target)
 
-- `md:grid-cols-2` - 1 col mobile, 2 desktop
-- `hidden md:flex` - sidebar hidden on mobile
-- Bottom nav: 4 main items, fixed at bottom
-- Parent content: `pb-16` to clear bottom nav
+This app is used by farmers in the field on phones. **Mobile is the primary experience.**
+
+### Layout Rules
+- **Single column on mobile** → `md:grid-cols-2` (never desktop-only layouts)
+- **Sidebar hidden on mobile** → `hidden md:flex`
+- **Bottom nav on mobile** → 4 main items, fixed at bottom
+- **Content padding** → `pb-16` to clear bottom nav
+
+### Touch Targets
+- **Minimum 44px tap targets** → use `py-3` or `p-4` on buttons/links
+- **Adequate spacing** → `gap-4` between clickable items
+- **Full-width buttons on mobile** → `w-full` or `flex-1`
+
+### Form Optimization
+- **Large input fields** → default `p-2` is good
+- **Stack form buttons** → on mobile, use `flex-col` if needed
+- **Avoid tiny icons as sole tap targets** → pair with text or use larger touch area
+
+### Responsive Patterns
+```tsx
+// Grid: 1 col mobile, 2 desktop
+<div className="grid gap-4 md:grid-cols-2">
+
+// Hide on mobile
+<div className="hidden md:block">
+
+// Show only on mobile
+<div className="md:hidden">
+
+// Smaller text on mobile
+<span className="text-sm md:text-base">
+
+// Stack on mobile, row on desktop
+<div className="flex flex-col md:flex-row gap-2">
+```
+
+### Typography
+- **Body text**: `text-sm` mobile, `text-base` desktop if needed
+- **Headers**: `text-xl` or `text-2xl` (readable on small screens)
+- **Labels**: `text-sm font-medium`
+
+### Navigation
+- Desktop: Sidebar (9 items)
+- Mobile: Bottom nav (4 main: Dashboard, Fields, Lots, Sales)
+- Secondary pages accessible via Settings or parent pages
 
 ---
 
