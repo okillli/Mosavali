@@ -4,9 +4,18 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
+import * as dotenv from 'dotenv';
+dotenv.config({ path: '.env.local' });
 
-const SUPABASE_URL = 'https://xvrrkdswteirpildrvdh.supabase.co';
-const SUPABASE_SERVICE_KEY = 'sb_secret_NHcd2gPBP7o8sQY9YduWYw_gpPEHRxB';
+const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
+  console.error('Missing required environment variables:');
+  console.error('- VITE_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_URL');
+  console.error('- SUPABASE_SERVICE_ROLE_KEY');
+  process.exit(1);
+}
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
@@ -165,8 +174,12 @@ async function verifyAccess() {
   console.log('\n🔍 Verifying RLS access...');
 
   // Create a client with anon key (like the app uses)
-  const ANON_KEY = 'sb_publishable_d5SDXnSsx3McOrOP1bROfQ_0Uuas6Cl';
-  const anonClient = createClient(SUPABASE_URL, ANON_KEY);
+  const ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!ANON_KEY) {
+    console.log('   Skipping anon key verification - VITE_SUPABASE_ANON_KEY not set');
+    return;
+  }
+  const anonClient = createClient(SUPABASE_URL!, ANON_KEY);
 
   // Try to read crops with anon client
   const { data: anonCrops, error: anonError } = await anonClient.from('crops').select('*');
@@ -208,13 +221,17 @@ async function checkStock() {
 
   // Check as authenticated user
   console.log('\n🔐 Checking as authenticated user...');
-  const ANON_KEY = 'sb_publishable_d5SDXnSsx3McOrOP1bROfQ_0Uuas6Cl';
-  const anonClient = createClient(SUPABASE_URL, ANON_KEY);
+  const ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!ANON_KEY) {
+    console.log('   Skipping authenticated user check - VITE_SUPABASE_ANON_KEY not set');
+    return;
+  }
+  const anonClient = createClient(SUPABASE_URL!, ANON_KEY);
 
   // Sign in as test user
   const { data: authData, error: authErr } = await anonClient.auth.signInWithPassword({
-    email: 'elizbar.55@gmail.com',
-    password: '10091955'
+    email: process.env.E2E_TEST_EMAIL || '',
+    password: process.env.E2E_TEST_PASSWORD || ''
   });
 
   if (authErr) {

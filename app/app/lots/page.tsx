@@ -4,19 +4,21 @@ import { supabase } from '../../../lib/supabaseClient';
 import { STRINGS } from '../../../lib/strings';
 import Link from 'next/link';
 import { Plus } from 'lucide-react';
-import { Lot, Crop, Field } from '../../../types';
+import { Lot, Crop, Field, Season } from '../../../types';
 import { SearchFilterBar, FilterConfig } from '../../../components/ui';
 
 export default function LotsList() {
   const [lots, setLots] = useState<Lot[]>([]);
   const [crops, setCrops] = useState<Crop[]>([]);
   const [fields, setFields] = useState<Field[]>([]);
+  const [seasons, setSeasons] = useState<Season[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   // Filter state
   const [searchValue, setSearchValue] = useState('');
   const [filterValues, setFilterValues] = useState<Record<string, string>>({
+    season_id: '',
     crop_id: '',
     field_id: '',
   });
@@ -27,7 +29,7 @@ export default function LotsList() {
 
   const fetchData = async () => {
     try {
-      const [lotsRes, cropsRes, fieldsRes] = await Promise.all([
+      const [lotsRes, cropsRes, fieldsRes, seasonsRes] = await Promise.all([
         supabase.from('lots')
           .select('*, crops(name_ka), varieties(name), fields(name)')
           .limit(50)
@@ -38,6 +40,9 @@ export default function LotsList() {
         supabase.from('fields')
           .select('id, name')
           .order('name'),
+        supabase.from('seasons')
+          .select('id, name, is_current')
+          .order('created_at', { ascending: false }),
       ]);
 
       if (lotsRes.error) {
@@ -55,10 +60,23 @@ export default function LotsList() {
         setError(STRINGS.LOAD_ERROR);
         return;
       }
+      if (seasonsRes.error) {
+        console.error('Failed to fetch seasons:', seasonsRes.error);
+        setError(STRINGS.LOAD_ERROR);
+        return;
+      }
 
       if (lotsRes.data) setLots(lotsRes.data);
       if (cropsRes.data) setCrops(cropsRes.data);
       if (fieldsRes.data) setFields(fieldsRes.data);
+      if (seasonsRes.data) {
+        setSeasons(seasonsRes.data);
+        // Auto-select current season as default filter
+        const currentSeason = seasonsRes.data.find((s: Season) => s.is_current);
+        if (currentSeason) {
+          setFilterValues(prev => ({ ...prev, season_id: currentSeason.id }));
+        }
+      }
     } catch (err) {
       console.error('Fetch error:', err);
       setError(STRINGS.LOAD_ERROR);
@@ -70,6 +88,11 @@ export default function LotsList() {
   // Filter configuration
   const filters: FilterConfig[] = useMemo(() => [
     {
+      key: 'season_id',
+      label: STRINGS.SEASON,
+      options: seasons.map(s => ({ value: s.id, label: s.name })),
+    },
+    {
       key: 'crop_id',
       label: STRINGS.CROP,
       options: crops.map(c => ({ value: c.id, label: c.name_ka })),
@@ -79,7 +102,7 @@ export default function LotsList() {
       label: STRINGS.NAV_FIELDS,
       options: fields.map(f => ({ value: f.id, label: f.name })),
     },
-  ], [crops, fields]);
+  ], [seasons, crops, fields]);
 
   // Filter logic
   const filteredLots = useMemo(() => {
@@ -93,6 +116,11 @@ export default function LotsList() {
         if (!lotCode.includes(search) && !cropName.includes(search) && !varietyName.includes(search)) {
           return false;
         }
+      }
+
+      // Season filter
+      if (filterValues.season_id && lot.season_id !== filterValues.season_id) {
+        return false;
       }
 
       // Crop filter
@@ -114,7 +142,7 @@ export default function LotsList() {
   }, []);
 
   const handleClearFilters = useCallback(() => {
-    setFilterValues({ crop_id: '', field_id: '' });
+    setFilterValues({ season_id: '', crop_id: '', field_id: '' });
   }, []);
 
   return (

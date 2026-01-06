@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { createClient } from '@supabase/supabase-js';
+import { TEST_USER, login } from './utils/auth';
 
 /**
  * DATABASE SEEDING
@@ -25,19 +26,12 @@ test.describe('Database Seeding', () => {
     console.log(`Key: ${SUPABASE_KEY ? 'Set' : 'NOT SET'}`);
 
     if (!SUPABASE_URL || !SUPABASE_KEY) {
-      console.log('⚠️ Supabase credentials not found in environment');
+      console.log('Supabase credentials not found in environment');
       console.log('Will attempt to seed via UI...');
     }
 
-    // Navigate to settings to check what exists
-    await page.goto('/#/login');
-
-    const emailInput = page.locator('input[type="email"]');
-    await emailInput.waitFor({ state: 'visible', timeout: 30000 });
-    await emailInput.fill('elizbar.55@gmail.com');
-    await page.fill('input[type="password"]', '10091955');
-    await page.click('button[type="submit"]');
-    await page.waitForURL('**/#/app', { timeout: 30000 });
+    // Use centralized login from auth.ts
+    await login(page);
 
     // Check varieties page to see if crops exist
     await page.goto('/#/app/settings/varieties');

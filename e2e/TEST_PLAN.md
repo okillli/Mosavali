@@ -2,10 +2,11 @@
 
 ## Test Credentials
 
-```
-Email: elizbar.55@gmail.com
-Password: 10091955
-```
+Set these environment variables in `.env.local`:
+- `E2E_TEST_EMAIL` - Test user email
+- `E2E_TEST_PASSWORD` - Test user password
+
+See `.env.example` for the template.
 
 ---
 
@@ -268,8 +269,8 @@ TEST: auth-login-valid
 Description: Valid user can log in
 Steps:
   1. Navigate to /login
-  2. Enter email: elizbar.55@gmail.com
-  3. Enter password: 10091955
+  2. Enter email: <E2E_TEST_EMAIL from environment>
+  3. Enter password: <E2E_TEST_PASSWORD from environment>
   4. Click შესვლა button
 Expected: Redirect to /app, session created
 ```
@@ -279,7 +280,7 @@ TEST: auth-login-invalid-password
 Description: Invalid password shows error
 Steps:
   1. Navigate to /login
-  2. Enter email: elizbar.55@gmail.com
+  2. Enter email: <E2E_TEST_EMAIL from environment>
   3. Enter password: wrongpassword
   4. Click შესვლა button
 Expected: Error message "ელფოსტა ან პაროლი არასწორია."

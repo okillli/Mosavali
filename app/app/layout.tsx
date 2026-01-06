@@ -13,8 +13,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const checkUser = async () => {
-      // Cast auth to any to support both v1 and v2 types
-      const { data: { session } } = await (supabase.auth as any).getSession();
+      const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         router.push('/login');
       } else {
@@ -44,8 +43,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <Link href="/app/settings" className="block py-2 px-4 rounded hover:bg-green-800">{STRINGS.NAV_SETTINGS}</Link>
           </nav>
           <button
-            // Cast auth to any to support both v1 and v2 types
-            onClick={() => (supabase.auth as any).signOut().then(() => router.push('/login'))}
+            onClick={() => supabase.auth.signOut().then(() => router.push('/login'))}
             className="mt-auto py-2 px-4 bg-green-800 rounded hover:bg-green-700"
           >
             {STRINGS.LOGOUT}

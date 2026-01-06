@@ -11,8 +11,7 @@ export default function Landing() {
 
   useEffect(() => {
     const checkSession = async () => {
-      // Cast auth to any to support both v1 and v2 types
-      const { data: { session } } = await (supabase.auth as any).getSession();
+      const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         router.push('/app');
       } else {

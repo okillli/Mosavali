@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { supabase } from '../../../../lib/supabaseClient';
 import { STRINGS } from '../../../../lib/strings';
 import { useParams, useRouter } from 'next/navigation';
@@ -28,6 +28,7 @@ export default function WarehouseDetailPage() {
   const [deletingWarehouse, setDeletingWarehouse] = useState(false);
   const [binToDelete, setBinToDelete] = useState<Bin | null>(null);
   const [deletingBin, setDeletingBin] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (id) loadData();
@@ -35,7 +36,16 @@ export default function WarehouseDetailPage() {
 
   const loadData = async () => {
     setLoading(true);
-    const { data: wh } = await supabase.from('warehouses').select('*').eq('id', id).single();
+    setError(null);
+    const { data: wh, error: whError } = await supabase.from('warehouses').select('*').eq('id', id).single();
+
+    if (whError || !wh) {
+      console.error('Failed to fetch warehouse:', whError);
+      setError(STRINGS.WAREHOUSE_NOT_FOUND);
+      setLoading(false);
+      return;
+    }
+
     setWarehouse(wh);
 
     const { data: b } = await supabase.from('bins').select('*').eq('warehouse_id', id).order('created_at');
@@ -57,13 +67,15 @@ export default function WarehouseDetailPage() {
   const handleAddBin = async () => {
     if (!newBinName) return;
     setAddingBin(true);
-    const { error } = await supabase.from('bins').insert({
+    setError(null);
+    const { error: addError } = await supabase.from('bins').insert({
       warehouse_id: id,
       name: newBinName
     });
 
-    if (error) {
-      alert(STRINGS.BIN_ADD_ERROR + ': ' + error.message);
+    if (addError) {
+      console.error('Failed to add bin:', addError);
+      setError(STRINGS.BIN_ADD_ERROR);
     } else {
       setNewBinName('');
       loadData();
@@ -73,9 +85,11 @@ export default function WarehouseDetailPage() {
 
   const handleEditBin = async (binId: string) => {
     if (!editBinName.trim()) return;
-    const { error } = await supabase.from('bins').update({ name: editBinName }).eq('id', binId);
-    if (error) {
-      alert(STRINGS.SAVE_ERROR + ': ' + error.message);
+    setError(null);
+    const { error: editError } = await supabase.from('bins').update({ name: editBinName }).eq('id', binId);
+    if (editError) {
+      console.error('Failed to edit bin:', editError);
+      setError(STRINGS.SAVE_ERROR);
     } else {
       setEditingBinId(null);
       setEditBinName('');
@@ -86,9 +100,11 @@ export default function WarehouseDetailPage() {
   const handleDeleteBin = async () => {
     if (!binToDelete) return;
     setDeletingBin(true);
-    const { error } = await supabase.from('bins').delete().eq('id', binToDelete.id);
-    if (error) {
-      alert(STRINGS.DELETE_ERROR + ': ' + error.message);
+    setError(null);
+    const { error: deleteError } = await supabase.from('bins').delete().eq('id', binToDelete.id);
+    if (deleteError) {
+      console.error('Failed to delete bin:', deleteError);
+      setError(STRINGS.DELETE_ERROR);
     } else {
       loadData();
     }
@@ -98,9 +114,11 @@ export default function WarehouseDetailPage() {
 
   const handleDeleteWarehouse = async () => {
     setDeletingWarehouse(true);
-    const { error } = await supabase.from('warehouses').delete().eq('id', id);
-    if (error) {
-      alert(STRINGS.DELETE_ERROR + ': ' + error.message);
+    setError(null);
+    const { error: deleteError } = await supabase.from('warehouses').delete().eq('id', id);
+    if (deleteError) {
+      console.error('Failed to delete warehouse:', deleteError);
+      setError(STRINGS.DELETE_ERROR);
       setDeletingWarehouse(false);
       setShowDeleteWarehouseDialog(false);
     } else {
@@ -118,13 +136,23 @@ export default function WarehouseDetailPage() {
     setEditBinName('');
   };
 
+  const totalStock = useMemo(
+    () => stock.reduce((sum, s) => sum + s.stock_kg, 0),
+    [stock]
+  );
+
+  if (error && !warehouse) return (
+    <div className="p-4">
+      <Button variant="secondary" onClick={() => router.push('/app/warehouses')} className="mb-4">&larr; {STRINGS.BACK}</Button>
+      <div className="bg-red-100 text-red-700 p-4 rounded">{error}</div>
+    </div>
+  );
+
   if (!warehouse) return <div className="p-4">{STRINGS.LOADING}</div>;
 
   const getBinStock = (binId: string) => {
     return stock.find(s => s.bin_id === binId) || null;
   };
-
-  const totalStock = stock.reduce((sum, s) => sum + s.stock_kg, 0);
 
   const getWarehouseDeleteWarning = (): string => {
     if (totalStock > 0) {
@@ -143,6 +171,7 @@ export default function WarehouseDetailPage() {
 
   return (
     <div>
+      {error && <div className="bg-red-100 text-red-700 p-2 rounded mb-4">{error}</div>}
       <div className="mb-6">
         <Button variant="secondary" onClick={() => router.push('/app/warehouses')} className="mb-4">&larr; {STRINGS.BACK}</Button>
         <div className="flex justify-between items-start">
@@ -206,13 +235,13 @@ export default function WarehouseDetailPage() {
                         />
                         <button
                           onClick={() => handleEditBin(bin.id)}
-                          className="p-2 text-green-600 hover:bg-green-50 rounded"
+                          className="p-3 text-green-600 hover:bg-green-50 rounded"
                         >
                           <Check size={18} />
                         </button>
                         <button
                           onClick={cancelEditBin}
-                          className="p-2 text-gray-500 hover:bg-gray-50 rounded"
+                          className="p-3 text-gray-500 hover:bg-gray-50 rounded"
                         >
                           <X size={18} />
                         </button>
@@ -248,14 +277,14 @@ export default function WarehouseDetailPage() {
                       <div className="flex gap-1">
                         <button
                           onClick={() => startEditBin(bin)}
-                          className="p-2 text-gray-500 hover:bg-gray-100 rounded"
+                          className="p-3 text-gray-500 hover:bg-gray-100 rounded"
                           title={STRINGS.EDIT}
                         >
                           <Pencil size={16} />
                         </button>
                         <button
                           onClick={() => setBinToDelete(bin)}
-                          className="p-2 text-red-500 hover:bg-red-50 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="p-3 text-red-500 hover:bg-red-50 rounded disabled:opacity-50 disabled:cursor-not-allowed"
                           title={binStock && binStock.stock_kg > 0 ? STRINGS.BIN_HAS_STOCK : STRINGS.DELETE}
                           disabled={binStock && binStock.stock_kg > 0}
                         >

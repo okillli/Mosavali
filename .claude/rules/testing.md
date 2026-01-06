@@ -18,22 +18,21 @@ npx playwright test e2e/auth.spec.ts  # Single file
 
 ### Test Credentials
 
-```
-Email: elizbar.55@gmail.com
-Password: 10091955
-```
+Set these environment variables in `.env.local`:
+- `E2E_TEST_EMAIL` - Test user email
+- `E2E_TEST_PASSWORD` - Test user password
+
+See `.env.example` for template.
 
 ### Writing Tests
 
 ```typescript
 import { test, expect } from '@playwright/test';
+import { login } from './utils/auth';
 
 test('should create field', async ({ page }) => {
-  // Login
-  await page.goto('/');
-  await page.fill('input[type="email"]', 'elizbar.55@gmail.com');
-  await page.fill('input[type="password"]', '10091955');
-  await page.click('button[type="submit"]');
+  // Login using centralized auth helper
+  await login(page);
 
   // Test
   await page.click('text=მიწები');

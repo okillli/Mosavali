@@ -101,6 +101,7 @@ export const FieldForm: React.FC<FieldFormProps> = ({ mode, initialData }) => {
       <Input
         label={STRINGS.FIELD_AREA}
         type="number"
+        min="0.01"
         step="0.01"
         value={formData.area_ha}
         onChange={e => setFormData({ ...formData, area_ha: e.target.value })}

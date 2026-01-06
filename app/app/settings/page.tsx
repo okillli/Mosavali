@@ -6,6 +6,7 @@ import { ChevronRight } from 'lucide-react';
 
 export default function SettingsPage() {
   const settingsLinks = [
+      { name: STRINGS.PAGE_INITIAL_SETUP, href: '/app/settings/initial-setup' },
       { name: 'სეზონები', href: '/app/settings/seasons' },
       { name: 'ჯიშები', href: '/app/settings/varieties' },
       { name: 'სამუშაოს ტიპები', href: '/app/settings/work-types' },

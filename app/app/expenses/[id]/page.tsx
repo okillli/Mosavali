@@ -14,23 +14,29 @@ export default function ExpenseDetailPage() {
   const [targetName, setTargetName] = useState<string | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (id) fetchExpense();
   }, [id]);
 
   const fetchExpense = async () => {
-    const { data } = await supabase.from('expenses')
+    setError(null);
+    const { data, error: fetchError } = await supabase.from('expenses')
       .select('*, seasons(year)')
       .eq('id', id)
       .single();
 
-    if (data) {
-      setExpense(data);
-      // Fetch target name if allocated to specific entity
-      if (data.target_id) {
-        await fetchTargetName(data.allocation_type, data.target_id);
-      }
+    if (fetchError || !data) {
+      console.error('Failed to fetch expense:', fetchError);
+      setError(STRINGS.EXPENSE_NOT_FOUND);
+      return;
+    }
+
+    setExpense(data);
+    // Fetch target name if allocated to specific entity
+    if (data.target_id) {
+      await fetchTargetName(data.allocation_type, data.target_id);
     }
   };
 
@@ -44,7 +50,7 @@ export default function ExpenseDetailPage() {
       WORK: {
         table: 'works',
         select: 'work_types(name), fields(name)',
-        transform: (data) => data ? `${(data.work_types as { name: string })?.name} @ ${(data.fields as { name: string })?.name}` : null
+        transform: (data) => data ? `${(data.work_types as { name?: string })?.name || '-'} @ ${(data.fields as { name?: string })?.name || '-'}` : null
       },
       LOT: {
         table: 'lots',
@@ -77,10 +83,12 @@ export default function ExpenseDetailPage() {
 
   const handleDelete = async () => {
     setIsDeleting(true);
-    const { error } = await supabase.from('expenses').delete().eq('id', id);
+    setError(null);
+    const { error: deleteError } = await supabase.from('expenses').delete().eq('id', id);
 
-    if (error) {
-      alert(STRINGS.DELETE_ERROR + ': ' + error.message);
+    if (deleteError) {
+      console.error('Failed to delete expense:', deleteError);
+      setError(STRINGS.DELETE_ERROR);
       setIsDeleting(false);
       setShowDeleteDialog(false);
     } else {
@@ -88,10 +96,18 @@ export default function ExpenseDetailPage() {
     }
   };
 
+  if (error && !expense) return (
+    <div className="p-4">
+      <Button variant="secondary" onClick={() => router.push('/app/expenses')} className="mb-4">&larr; {STRINGS.BACK}</Button>
+      <div className="bg-red-100 text-red-700 p-4 rounded">{error}</div>
+    </div>
+  );
+
   if (!expense) return <div className="p-4">{STRINGS.LOADING}</div>;
 
   return (
     <div className="max-w-2xl mx-auto">
+      {error && <div className="bg-red-100 text-red-700 p-2 rounded mb-4">{error}</div>}
       <Button variant="secondary" onClick={() => router.back()} className="mb-4">&larr; {STRINGS.BACK}</Button>
 
       <div className="bg-white rounded shadow overflow-hidden">
@@ -145,7 +161,7 @@ export default function ExpenseDetailPage() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="text-xs font-bold text-gray-500 uppercase">{STRINGS.SEASON}</label>
-              <div className="text-lg">{expense.seasons?.name}</div>
+              <div className="text-lg">{expense.seasons?.name || '-'}</div>
             </div>
           </div>
 

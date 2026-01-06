@@ -15,8 +15,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     const checkSession = async () => {
-      // Cast auth to any to support both v1 and v2 types
-      const { data: { session } } = await (supabase.auth as any).getSession();
+      const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         router.replace('/app'); // Redirect if already logged in
       } else {
@@ -32,8 +31,7 @@ export default function LoginPage() {
     setMessage(null);
 
     if (isSignUp) {
-      // Cast auth to any to support both v1 and v2 types
-      const { error } = await (supabase.auth as any).signUp({ email, password });
+      const { error } = await supabase.auth.signUp({ email, password });
       if (error) {
         setError(error.message);
       } else {
@@ -41,8 +39,7 @@ export default function LoginPage() {
         setIsSignUp(false);
       }
     } else {
-      // Cast auth to any to support both v1 and v2 types
-      const { error } = await (supabase.auth as any).signInWithPassword({ email, password });
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
         setError(STRINGS.AUTH_ERROR);
       } else {

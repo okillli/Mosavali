@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { supabase } from '../../../../lib/supabaseClient';
 import { STRINGS } from '../../../../lib/strings';
 import { useParams, useRouter } from 'next/navigation';
@@ -17,6 +17,7 @@ export default function LotDetailPage() {
   const [loading, setLoading] = useState(true);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (id) loadData();
@@ -24,10 +25,19 @@ export default function LotDetailPage() {
 
   const loadData = async () => {
     setLoading(true);
-    const { data: l } = await supabase.from('lots')
+    setError(null);
+    const { data: l, error: lotError } = await supabase.from('lots')
       .select('*, crops(name_ka), varieties(name), fields(name)')
       .eq('id', id)
       .single();
+
+    if (lotError || !l) {
+      console.error('Failed to fetch lot:', lotError);
+      setError(STRINGS.LOT_NOT_FOUND);
+      setLoading(false);
+      return;
+    }
+
     setLot(l);
 
     const { data: s } = await supabase.from('v_bin_lot_stock')
@@ -52,15 +62,17 @@ export default function LotDetailPage() {
 
   const handleDelete = async () => {
     setIsDeleting(true);
+    setError(null);
 
     // First delete related inventory movements
     await supabase.from('inventory_movements').delete().eq('lot_id', id);
 
     // Then delete the lot
-    const { error } = await supabase.from('lots').delete().eq('id', id);
+    const { error: deleteError } = await supabase.from('lots').delete().eq('id', id);
 
-    if (error) {
-      alert(STRINGS.DELETE_ERROR + ': ' + error.message);
+    if (deleteError) {
+      console.error('Failed to delete lot:', deleteError);
+      setError(STRINGS.DELETE_ERROR);
       setIsDeleting(false);
       setShowDeleteDialog(false);
     } else {
@@ -68,9 +80,13 @@ export default function LotDetailPage() {
     }
   };
 
+  const currentTotalStock = useMemo(
+    () => stock.reduce((acc, curr) => acc + curr.stock_kg, 0),
+    [stock]
+  );
+
   const getDeleteWarning = (): string => {
     const warnings: string[] = [];
-    const currentTotalStock = stock.reduce((acc, curr) => acc + curr.stock_kg, 0);
 
     if (currentTotalStock > 0) {
       warnings.push(`${STRINGS.LOT_HAS_STOCK} (${currentTotalStock} ${STRINGS.UNIT_KG})`);
@@ -84,12 +100,18 @@ export default function LotDetailPage() {
     return STRINGS.DELETE_CANNOT_UNDO;
   };
 
-  if (!lot) return <div className="p-4">{STRINGS.LOADING}</div>;
+  if (error && !lot) return (
+    <div className="p-4">
+      <Button variant="secondary" onClick={() => router.push('/app/lots')} className="mb-4">&larr; {STRINGS.BACK}</Button>
+      <div className="bg-red-100 text-red-700 p-4 rounded">{error}</div>
+    </div>
+  );
 
-  const currentTotalStock = stock.reduce((acc, curr) => acc + curr.stock_kg, 0);
+  if (!lot) return <div className="p-4">{STRINGS.LOADING}</div>;
 
   return (
     <div>
+      {error && <div className="bg-red-100 text-red-700 p-2 rounded mb-4">{error}</div>}
       <div className="mb-6">
         <Button variant="secondary" onClick={() => router.back()} className="mb-4">&larr; {STRINGS.BACK}</Button>
         <div className="flex justify-between items-start">
@@ -134,7 +156,7 @@ export default function LotDetailPage() {
         <div className="bg-white p-6 rounded shadow space-y-3">
           <div className="flex justify-between border-b pb-2">
             <span className="text-gray-500">{STRINGS.NAV_FIELDS}</span>
-            <span className="font-medium">{lot.fields?.name}</span>
+            <span className="font-medium">{lot.fields?.name || '-'}</span>
           </div>
           <div className="flex justify-between border-b pb-2">
             <span className="text-gray-500">{STRINGS.INITIAL_WEIGHT}</span>
@@ -164,11 +186,11 @@ export default function LotDetailPage() {
             <p className="text-gray-500 text-sm">{STRINGS.STOCK_ZERO}</p>
           ) : (
             <div className="space-y-3">
-              {stock.map((item, idx) => (
-                <div key={idx} className="flex justify-between items-center bg-blue-50 p-3 rounded border border-blue-100">
+              {stock.map((item) => (
+                <div key={item.bin_id} className="flex justify-between items-center bg-blue-50 p-3 rounded border border-blue-100">
                   <div>
-                    <div className="font-bold text-blue-900">{item.bins.warehouses.name}</div>
-                    <div className="text-sm text-blue-700">{item.bins.name}</div>
+                    <div className="font-bold text-blue-900">{item.bins?.warehouses?.name || '-'}</div>
+                    <div className="text-sm text-blue-700">{item.bins?.name || '-'}</div>
                   </div>
                   <div className="font-mono font-bold text-lg">
                     {item.stock_kg} <span className="text-xs font-normal">კგ</span>
@@ -209,9 +231,9 @@ export default function LotDetailPage() {
                   </span>
                 </td>
                 <td className="px-6 py-3 text-gray-600 flex items-center">
-                  {move.from_bin ? `${move.from_bin.warehouses.name} (${move.from_bin.name})` : '-'}
+                  {move.from_bin ? `${move.from_bin.warehouses?.name || '-'} (${move.from_bin.name})` : '-'}
                   <ArrowRight size={14} className="mx-2 text-gray-400" />
-                  {move.to_bin ? `${move.to_bin.warehouses.name} (${move.to_bin.name})` : '-'}
+                  {move.to_bin ? `${move.to_bin.warehouses?.name || '-'} (${move.to_bin.name})` : '-'}
                 </td>
                 <td className="px-6 py-3 text-right font-medium">
                   {move.weight_kg} კგ

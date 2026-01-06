@@ -37,14 +37,30 @@ export default function VarietiesSettings() {
   };
 
   const fetchVarieties = async () => {
-    const { data } = await supabase.from('varieties').select('*, crops(name_ka)').order('created_at', { ascending: false });
-    if (data) {
-      setVarieties(data);
-      // Fetch lots count for each variety
+    const [varietiesRes, lotsRes] = await Promise.all([
+      supabase.from('varieties')
+        .select('*, crops(name_ka)')
+        .order('created_at', { ascending: false })
+        .limit(100),
+      supabase.from('lots')
+        .select('variety_id')
+    ]);
+
+    if (varietiesRes.data) {
+      setVarieties(varietiesRes.data);
+
+      // Calculate counts client-side
       const counts: Record<string, number> = {};
-      for (const variety of data) {
-        const { count } = await supabase.from('lots').select('*', { count: 'exact', head: true }).eq('variety_id', variety.id);
-        counts[variety.id] = count || 0;
+      varietiesRes.data.forEach(variety => {
+        counts[variety.id] = 0;
+      });
+
+      if (lotsRes.data) {
+        lotsRes.data.forEach(lot => {
+          if (counts[lot.variety_id] !== undefined) {
+            counts[lot.variety_id]++;
+          }
+        });
       }
       setLotsCount(counts);
     }
@@ -166,13 +182,13 @@ export default function VarietiesSettings() {
                      <div className="flex gap-2">
                        <button
                          onClick={() => handleEdit(v.id)}
-                         className="p-2 text-green-600 hover:bg-green-50 rounded"
+                         className="p-3 text-green-600 hover:bg-green-50 rounded"
                        >
                          <Check size={18} />
                        </button>
                        <button
                          onClick={cancelEdit}
-                         className="p-2 text-gray-500 hover:bg-gray-50 rounded"
+                         className="p-3 text-gray-500 hover:bg-gray-50 rounded"
                        >
                          <X size={18} />
                        </button>
@@ -187,14 +203,14 @@ export default function VarietiesSettings() {
                      <div className="flex gap-1">
                        <button
                          onClick={() => startEdit(v)}
-                         className="p-2 text-gray-500 hover:bg-gray-100 rounded"
+                         className="p-3 text-gray-500 hover:bg-gray-100 rounded"
                          title={STRINGS.EDIT}
                        >
                          <Pencil size={16} />
                        </button>
                        <button
                          onClick={() => setVarietyToDelete(v)}
-                         className="p-2 text-red-500 hover:bg-red-50 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                         className="p-3 text-red-500 hover:bg-red-50 rounded disabled:opacity-50 disabled:cursor-not-allowed"
                          title={STRINGS.DELETE}
                          disabled={lotsCount[v.id] > 0}
                        >

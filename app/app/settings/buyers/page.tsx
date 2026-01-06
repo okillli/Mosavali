@@ -4,7 +4,7 @@ import { supabase } from '../../../../lib/supabaseClient';
 import { STRINGS } from '../../../../lib/strings';
 import { Button, Input, ConfirmDialog } from '../../../../components/ui';
 import { Pencil, Trash2, Check, X } from 'lucide-react';
-import { Buyer, Sale } from '../../../../types';
+import { Buyer } from '../../../../types';
 
 export default function BuyersSettings() {
   const [buyers, setBuyers] = useState<Buyer[]>([]);
@@ -25,14 +25,30 @@ export default function BuyersSettings() {
   useEffect(() => { fetchBuyers(); }, []);
 
   const fetchBuyers = async () => {
-    const { data } = await supabase.from('buyers').select('*').order('created_at', { ascending: false });
-    if (data) {
-      setBuyers(data);
-      // Fetch sales count for each buyer
+    const [buyersRes, salesRes] = await Promise.all([
+      supabase.from('buyers')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(100),
+      supabase.from('sales')
+        .select('buyer_id')
+    ]);
+
+    if (buyersRes.data) {
+      setBuyers(buyersRes.data);
+
+      // Calculate counts client-side
       const counts: Record<string, number> = {};
-      for (const buyer of data) {
-        const { count } = await supabase.from('sales').select('*', { count: 'exact', head: true }).eq('buyer_id', buyer.id);
-        counts[buyer.id] = count || 0;
+      buyersRes.data.forEach(buyer => {
+        counts[buyer.id] = 0;
+      });
+
+      if (salesRes.data) {
+        salesRes.data.forEach(sale => {
+          if (counts[sale.buyer_id] !== undefined) {
+            counts[sale.buyer_id]++;
+          }
+        });
       }
       setSalesCount(counts);
     }
@@ -158,13 +174,13 @@ export default function BuyersSettings() {
                   <div className="flex gap-2">
                     <button
                       onClick={() => handleEdit(b.id)}
-                      className="p-2 text-green-600 hover:bg-green-50 rounded"
+                      className="p-3 text-green-600 hover:bg-green-50 rounded"
                     >
                       <Check size={18} />
                     </button>
                     <button
                       onClick={cancelEdit}
-                      className="p-2 text-gray-500 hover:bg-gray-50 rounded"
+                      className="p-3 text-gray-500 hover:bg-gray-50 rounded"
                     >
                       <X size={18} />
                     </button>
@@ -179,14 +195,14 @@ export default function BuyersSettings() {
                   <div className="flex gap-1">
                     <button
                       onClick={() => startEdit(b)}
-                      className="p-2 text-gray-500 hover:bg-gray-100 rounded"
+                      className="p-3 text-gray-500 hover:bg-gray-100 rounded"
                       title={STRINGS.EDIT}
                     >
                       <Pencil size={16} />
                     </button>
                     <button
                       onClick={() => setBuyerToDelete(b)}
-                      className="p-2 text-red-500 hover:bg-red-50 rounded"
+                      className="p-3 text-red-500 hover:bg-red-50 rounded"
                       title={STRINGS.DELETE}
                       disabled={salesCount[b.id] > 0}
                     >

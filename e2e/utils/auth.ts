@@ -1,9 +1,14 @@
 import { Page } from '@playwright/test';
 
 export const TEST_USER = {
-  email: 'elizbar.55@gmail.com',
-  password: '10091955',
+  email: process.env.E2E_TEST_EMAIL || '',
+  password: process.env.E2E_TEST_PASSWORD || '',
 };
+
+// Validate at import time
+if (!TEST_USER.email || !TEST_USER.password) {
+  console.warn('E2E_TEST_EMAIL and E2E_TEST_PASSWORD must be set in environment');
+}
 
 export async function login(page: Page) {
   // App uses hash-based routing: /#/login, /#/app

@@ -23,20 +23,35 @@ export default function SeasonsSettings() {
   useEffect(() => { fetchSeasons(); }, []);
 
   const fetchSeasons = async () => {
-    const { data } = await supabase.from('seasons').select('*').order('created_at', { ascending: false });
-    if (data) {
-      setSeasons(data);
-      // Fetch related counts for each season (lots, works, expenses, sales)
+    const [seasonsRes, lotsRes, worksRes, expensesRes, salesRes] = await Promise.all([
+      supabase.from('seasons')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(50),
+      supabase.from('lots').select('season_id'),
+      supabase.from('works').select('season_id'),
+      supabase.from('expenses').select('season_id'),
+      supabase.from('sales').select('season_id')
+    ]);
+
+    if (seasonsRes.data) {
+      setSeasons(seasonsRes.data);
+
+      // Calculate counts client-side
       const counts: Record<string, number> = {};
-      for (const season of data) {
-        const [lotsRes, worksRes, expensesRes, salesRes] = await Promise.all([
-          supabase.from('lots').select('*', { count: 'exact', head: true }).eq('season_id', season.id),
-          supabase.from('works').select('*', { count: 'exact', head: true }).eq('season_id', season.id),
-          supabase.from('expenses').select('*', { count: 'exact', head: true }).eq('season_id', season.id),
-          supabase.from('sales').select('*', { count: 'exact', head: true }).eq('season_id', season.id)
-        ]);
-        counts[season.id] = (lotsRes.count || 0) + (worksRes.count || 0) + (expensesRes.count || 0) + (salesRes.count || 0);
-      }
+      seasonsRes.data.forEach(season => {
+        counts[season.id] = 0;
+      });
+
+      // Count from each table
+      [lotsRes.data, worksRes.data, expensesRes.data, salesRes.data].forEach(tableData => {
+        tableData?.forEach(row => {
+          if (counts[row.season_id] !== undefined) {
+            counts[row.season_id]++;
+          }
+        });
+      });
+
       setRelatedCounts(counts);
     }
   };
@@ -181,13 +196,13 @@ export default function SeasonsSettings() {
                      />
                      <button
                        onClick={() => handleEdit(s.id)}
-                       className="p-2 text-green-600 hover:bg-green-50 rounded"
+                       className="p-3 text-green-600 hover:bg-green-50 rounded"
                      >
                        <Check size={18} />
                      </button>
                      <button
                        onClick={cancelEdit}
-                       className="p-2 text-gray-500 hover:bg-gray-50 rounded"
+                       className="p-3 text-gray-500 hover:bg-gray-50 rounded"
                      >
                        <X size={18} />
                      </button>
@@ -207,14 +222,14 @@ export default function SeasonsSettings() {
                        {s.is_current && <Check className="text-green-600" size={20} />}
                        <button
                          onClick={() => startEdit(s)}
-                         className="p-2 text-gray-500 hover:bg-gray-100 rounded"
+                         className="p-3 text-gray-500 hover:bg-gray-100 rounded"
                          title={STRINGS.EDIT}
                        >
                          <Pencil size={16} />
                        </button>
                        <button
                          onClick={() => setSeasonToDelete(s)}
-                         className="p-2 text-red-500 hover:bg-red-50 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                         className="p-3 text-red-500 hover:bg-red-50 rounded disabled:opacity-50 disabled:cursor-not-allowed"
                          title={s.is_current ? STRINGS.CURRENT_SEASON_DELETE_DISABLED : STRINGS.DELETE}
                          disabled={!canDelete(s)}
                        >

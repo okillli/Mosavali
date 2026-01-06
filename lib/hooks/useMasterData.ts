@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../supabaseClient';
+import { STRINGS } from '../strings';
 import type { Season, Crop, Field, Warehouse, WorkType } from '../../types';
 
 interface MasterData {
@@ -9,6 +10,7 @@ interface MasterData {
   warehouses: Warehouse[];
   workTypes: WorkType[];
   loading: boolean;
+  error: string | null;
   refresh: () => void;
 }
 
@@ -57,9 +59,11 @@ export function useMasterData(): MasterData {
   const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
   const [workTypes, setWorkTypes] = useState<WorkType[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
+    setError(null);
 
     // Check cache first
     const cached = getCachedData();
@@ -73,43 +77,65 @@ export function useMasterData(): MasterData {
       return;
     }
 
-    // Fetch all master data in parallel
-    const [
-      seasonsResult,
-      cropsResult,
-      fieldsResult,
-      warehousesResult,
-      workTypesResult,
-    ] = await Promise.all([
-      supabase.from('seasons').select('*').order('created_at', { ascending: false }),
-      supabase.from('crops').select('*').order('name_ka'),
-      supabase.from('fields').select('*').order('name'),
-      supabase.from('warehouses').select('*').order('name'),
-      supabase.from('work_types').select('*').order('name'),
-    ]);
+    try {
+      // Fetch all master data in parallel
+      const [
+        seasonsResult,
+        cropsResult,
+        fieldsResult,
+        warehousesResult,
+        workTypesResult,
+      ] = await Promise.all([
+        supabase.from('seasons').select('*').order('created_at', { ascending: false }),
+        supabase.from('crops').select('*').order('name_ka'),
+        supabase.from('fields').select('*').order('name'),
+        supabase.from('warehouses').select('*').order('name'),
+        supabase.from('work_types').select('*').order('name'),
+      ]);
 
-    const newSeasons = seasonsResult.data || [];
-    const newCrops = cropsResult.data || [];
-    const newFields = fieldsResult.data || [];
-    const newWarehouses = warehousesResult.data || [];
-    const newWorkTypes = workTypesResult.data || [];
+      // Check for any errors
+      if (seasonsResult.error || cropsResult.error || fieldsResult.error ||
+          warehousesResult.error || workTypesResult.error) {
+        console.error('Master data fetch errors:', {
+          seasons: seasonsResult.error,
+          crops: cropsResult.error,
+          fields: fieldsResult.error,
+          warehouses: warehousesResult.error,
+          workTypes: workTypesResult.error
+        });
+        setError(STRINGS.LOAD_ERROR);
+        // Still set whatever data succeeded
+      }
 
-    setSeasons(newSeasons);
-    setCrops(newCrops);
-    setFields(newFields);
-    setWarehouses(newWarehouses);
-    setWorkTypes(newWorkTypes);
+      const newSeasons = seasonsResult.data || [];
+      const newCrops = cropsResult.data || [];
+      const newFields = fieldsResult.data || [];
+      const newWarehouses = warehousesResult.data || [];
+      const newWorkTypes = workTypesResult.data || [];
 
-    // Cache the data
-    setCachedData({
-      seasons: newSeasons,
-      crops: newCrops,
-      fields: newFields,
-      warehouses: newWarehouses,
-      workTypes: newWorkTypes,
-    });
+      setSeasons(newSeasons);
+      setCrops(newCrops);
+      setFields(newFields);
+      setWarehouses(newWarehouses);
+      setWorkTypes(newWorkTypes);
 
-    setLoading(false);
+      // Only cache if no errors occurred
+      if (!seasonsResult.error && !cropsResult.error && !fieldsResult.error &&
+          !warehousesResult.error && !workTypesResult.error) {
+        setCachedData({
+          seasons: newSeasons,
+          crops: newCrops,
+          fields: newFields,
+          warehouses: newWarehouses,
+          workTypes: newWorkTypes,
+        });
+      }
+    } catch (err) {
+      console.error('Master data fetch error:', err);
+      setError(STRINGS.LOAD_ERROR);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   const refresh = useCallback(() => {
@@ -128,6 +154,7 @@ export function useMasterData(): MasterData {
     warehouses,
     workTypes,
     loading,
+    error,
     refresh,
   };
 }

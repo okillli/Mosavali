@@ -5,6 +5,7 @@ import { STRINGS } from '../../../lib/strings';
 import { StockViewWithRelations } from '../../../types';
 
 interface YieldDataItem {
+  id: string;
   name: string;
   area: number;
   total_kg: number;
@@ -12,6 +13,7 @@ interface YieldDataItem {
 
 export default function ReportsPage() {
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [stock, setStock] = useState<StockViewWithRelations[]>([]);
   const [financials, setFinancials] = useState({ income: 0, expense: 0, profit: 0 });
   const [yieldData, setYieldData] = useState<YieldDataItem[]>([]);
@@ -22,42 +24,73 @@ export default function ReportsPage() {
   }, []);
 
   const loadAllData = async () => {
-    setLoading(true);
-    // 1. Stock
-    const { data: s } = await supabase.from('v_bin_lot_stock')
-      .select('*, lots(lot_code, crop_id, crops(name_ka), variety_id, varieties(name)), bins(name, warehouse_id, warehouses(name))');
-    if (s) setStock(s);
+    try {
+      setLoading(true);
+      setError(null);
 
-    // 2. Financials (Income from Sales, Expense from Expenses)
-    const { data: sales } = await supabase.from('sales').select('total_gel');
-    const { data: expenses } = await supabase.from('expenses').select('amount_gel');
-    
-    const income = sales?.reduce((sum, item) => sum + item.total_gel, 0) || 0;
-    const expense = expenses?.reduce((sum, item) => sum + item.amount_gel, 0) || 0;
-    setFinancials({ income, expense, profit: income - expense });
+      // 1. Stock
+      const { data: s, error: stockError } = await supabase.from('v_bin_lot_stock')
+        .select('*, lots(lot_code, crop_id, crops(name_ka), variety_id, varieties(name)), bins(name, warehouse_id, warehouses(name))');
 
-    // 3. Yield (Lots grouped by field)
-    // We fetch lots and join fields
-    const { data: l } = await supabase.from('lots')
-        .select('harvested_kg, field_id, fields(name, area_ha)');
-    
-    if (l) {
-        const grouped: Record<string, YieldDataItem> = {};
-        l.forEach((lot) => {
-            const fid = lot.field_id;
-            if(!grouped[fid]) {
-                grouped[fid] = {
-                    name: lot.fields?.name || '-',
-                    area: lot.fields?.area_ha || 1,
-                    total_kg: 0
-                };
-            }
-            grouped[fid].total_kg += lot.harvested_kg;
-        });
-        setYieldData(Object.values(grouped));
+      if (stockError) {
+        console.error('Failed to fetch stock:', stockError);
+        setError(STRINGS.LOAD_ERROR);
+        return;
+      }
+      if (s) setStock(s);
+
+      // 2. Financials (Income from Sales, Expense from Expenses)
+      const { data: sales, error: salesError } = await supabase.from('sales').select('total_gel');
+      const { data: expenses, error: expensesError } = await supabase.from('expenses').select('amount_gel');
+
+      if (salesError) {
+        console.error('Failed to fetch sales:', salesError);
+        setError(STRINGS.LOAD_ERROR);
+        return;
+      }
+      if (expensesError) {
+        console.error('Failed to fetch expenses:', expensesError);
+        setError(STRINGS.LOAD_ERROR);
+        return;
+      }
+
+      const income = sales?.reduce((sum, item) => sum + item.total_gel, 0) || 0;
+      const expense = expenses?.reduce((sum, item) => sum + item.amount_gel, 0) || 0;
+      setFinancials({ income, expense, profit: income - expense });
+
+      // 3. Yield (Lots grouped by field)
+      // We fetch lots and join fields
+      const { data: l, error: lotsError } = await supabase.from('lots')
+          .select('harvested_kg, field_id, fields(name, area_ha)');
+
+      if (lotsError) {
+        console.error('Failed to fetch lots:', lotsError);
+        setError(STRINGS.LOAD_ERROR);
+        return;
+      }
+
+      if (l) {
+          const grouped: Record<string, YieldDataItem> = {};
+          l.forEach((lot) => {
+              const fid = lot.field_id;
+              if(!grouped[fid]) {
+                  grouped[fid] = {
+                      id: fid,
+                      name: lot.fields?.name || '-',
+                      area: lot.fields?.area_ha || 1,
+                      total_kg: 0
+                  };
+              }
+              grouped[fid].total_kg += lot.harvested_kg;
+          });
+          setYieldData(Object.values(grouped));
+      }
+    } catch (err) {
+      console.error('Fetch error:', err);
+      setError(STRINGS.LOAD_ERROR);
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   const totalKg = useMemo(() => stock.reduce((sum, item) => sum + item.stock_kg, 0), [stock]);
@@ -88,6 +121,10 @@ export default function ReportsPage() {
           </button>
       </div>
 
+      {error && (
+        <div className="bg-red-100 text-red-700 p-3 rounded mb-4">{error}</div>
+      )}
+
       {loading && <div>{STRINGS.LOADING}</div>}
 
       {!loading && tab === 'STOCK' && (
@@ -113,8 +150,8 @@ export default function ReportsPage() {
                             </tr>
                         </thead>
                         <tbody className="divide-y">
-                            {stock.map((item, idx) => (
-                                <tr key={idx} className="hover:bg-gray-50">
+                            {stock.map((item) => (
+                                <tr key={`${item.bin_id}-${item.lot_id}`} className="hover:bg-gray-50">
                                     <td className="px-6 py-3 font-medium">{item.bins?.warehouses?.name || '-'} - {item.bins?.name || '-'}</td>
                                     <td className="px-6 py-3">{item.lots?.lot_code || '-'}</td>
                                     <td className="px-6 py-3">{item.lots?.crops?.name_ka || '-'} / {item.lots?.varieties?.name || '-'}</td>
@@ -155,10 +192,10 @@ export default function ReportsPage() {
 
       {!loading && tab === 'YIELD' && (
           <div className="space-y-4">
-              {yieldData.map((field, idx) => {
+              {yieldData.map((field) => {
                   const yieldPerHa = field.total_kg / field.area;
                   return (
-                      <div key={idx} className="bg-white p-4 rounded shadow border flex justify-between items-center">
+                      <div key={field.id} className="bg-white p-4 rounded shadow border flex justify-between items-center">
                           <div>
                               <div className="font-bold text-lg">{field.name}</div>
                               <div className="text-sm text-gray-500">{field.area} ჰა</div>

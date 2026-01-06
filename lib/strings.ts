@@ -42,6 +42,7 @@ export const STRINGS = {
   ALL: 'ყველა',
   NO_RESULTS: 'შედეგი არ მოიძებნა',
   SEARCH_PLACEHOLDER: 'ძებნა...',
+  LOAD_MORE: 'მეტის ჩატვირთვა',
 
   // Fields
   FIELD_NAME: 'სახელი',
@@ -309,4 +310,19 @@ export const STRINGS = {
 
   // Misc
   VERSION: 'ვერსია',
+
+  // Initial Setup
+  PAGE_INITIAL_SETUP: 'საწყისი მარაგი',
+  INITIAL_SETUP_DESCRIPTION: 'შეიყვანეთ არსებული მარაგი საწყობებში. სისტემა შექმნის საწყის ნაშთებს.',
+  INITIAL_BALANCE: 'საწყისი ნაშთი',
+  SELECT_WAREHOUSE: 'აირჩიეთ საწყობი',
+  SELECT_BIN: 'აირჩიეთ სექცია',
+  SELECT_LOT: 'აირჩიეთ მოსავალი',
+  ENTER_CURRENT_STOCK: 'მიმდინარე მარაგი (კგ)',
+  ADD_INITIAL_STOCK: 'ნაშთის დამატება',
+  INITIAL_STOCK_ADDED: 'საწყისი ნაშთი დაემატა',
+  NO_WAREHOUSES_HINT: 'ჯერ დაამატეთ საწყობები და სექციები საწყობების გვერდიდან.',
+  NO_LOTS_HINT: 'ჯერ დაამატეთ მოსავალი მოსავლის გვერდიდან.',
+  CURRENT_INITIAL_BALANCES: 'დამატებული საწყისი ნაშთები',
+  NO_INITIAL_BALANCES: 'საწყისი ნაშთები ჯერ არ არის დამატებული',
 };

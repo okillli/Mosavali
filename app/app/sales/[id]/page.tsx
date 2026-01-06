@@ -15,6 +15,7 @@ export default function SaleDetailPage() {
   const [updating, setUpdating] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (id) loadData();
@@ -22,18 +23,31 @@ export default function SaleDetailPage() {
 
   const loadData = async () => {
     setLoading(true);
-    const { data } = await supabase.from('sales')
+    setError(null);
+    const { data, error: fetchError } = await supabase.from('sales')
         .select('*, buyers(name, phone), lots(lot_code, crops(name_ka), varieties(name))')
         .eq('id', id)
         .single();
+
+    if (fetchError || !data) {
+      console.error('Failed to fetch sale:', fetchError);
+      setError(STRINGS.SALE_NOT_FOUND);
+      setLoading(false);
+      return;
+    }
+
     setSale(data);
     setLoading(false);
   };
 
   const updateStatus = async (status: string) => {
       setUpdating(true);
-      const { error } = await supabase.from('sales').update({ payment_status: status }).eq('id', id);
-      if (!error) {
+      setError(null);
+      const { error: updateError } = await supabase.from('sales').update({ payment_status: status }).eq('id', id);
+      if (updateError) {
+          console.error('Failed to update status:', updateError);
+          setError(STRINGS.SAVE_ERROR);
+      } else {
           setSale({ ...sale, payment_status: status } as SaleWithRelations);
       }
       setUpdating(false);
@@ -41,11 +55,12 @@ export default function SaleDetailPage() {
 
   const handleDelete = async () => {
     if (!sale || !sale.lot_id) {
-      alert(STRINGS.DELETE_ERROR);
+      setError(STRINGS.DELETE_ERROR);
       return;
     }
 
     setIsDeleting(true);
+    setError(null);
 
     // First delete the associated inventory movement (SALE_OUT)
     const { error: movementError } = await supabase.from('inventory_movements')
@@ -55,23 +70,32 @@ export default function SaleDetailPage() {
       .eq('sale_id', id);
 
     if (movementError) {
-      alert(STRINGS.DELETE_ERROR + ': ' + movementError.message);
+      console.error('Failed to delete inventory movement:', movementError);
+      setError(STRINGS.DELETE_ERROR);
       setIsDeleting(false);
       setShowDeleteDialog(false);
       return;
     }
 
     // Then delete the sale
-    const { error } = await supabase.from('sales').delete().eq('id', id);
+    const { error: deleteError } = await supabase.from('sales').delete().eq('id', id);
 
-    if (error) {
-      alert(STRINGS.DELETE_ERROR + ': ' + error.message);
+    if (deleteError) {
+      console.error('Failed to delete sale:', deleteError);
+      setError(STRINGS.DELETE_ERROR);
       setIsDeleting(false);
       setShowDeleteDialog(false);
     } else {
       router.push('/app/sales');
     }
   };
+
+  if (error && !sale) return (
+    <div className="p-4">
+      <Button variant="secondary" onClick={() => router.push('/app/sales')} className="mb-4">&larr; {STRINGS.BACK}</Button>
+      <div className="bg-red-100 text-red-700 p-4 rounded">{error}</div>
+    </div>
+  );
 
   if (!sale) return <div className="p-4">{STRINGS.LOADING}</div>;
 
@@ -89,6 +113,7 @@ export default function SaleDetailPage() {
 
   return (
     <div className="max-w-3xl mx-auto">
+      {error && <div className="bg-red-100 text-red-700 p-2 rounded mb-4">{error}</div>}
       <div className="mb-6 flex justify-between items-center">
          <Button variant="secondary" onClick={() => router.push('/app/sales')}>&larr; {STRINGS.BACK}</Button>
          <div className="flex items-center gap-3">

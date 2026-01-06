@@ -16,13 +16,22 @@ export default function FieldDetailPage() {
   const [activeTab, setActiveTab] = useState('OVERVIEW');
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (id) fetchData();
   }, [id]);
 
   const fetchData = async () => {
-    const { data: f } = await supabase.from('fields').select('*').eq('id', id).single();
+    setError(null);
+    const { data: f, error: fieldError } = await supabase.from('fields').select('*').eq('id', id).single();
+
+    if (fieldError || !f) {
+      console.error('Failed to fetch field:', fieldError);
+      setError(STRINGS.FIELD_NOT_FOUND);
+      return;
+    }
+
     setField(f);
 
     const { data: w } = await supabase.from('works')
@@ -40,10 +49,12 @@ export default function FieldDetailPage() {
 
   const handleDelete = async () => {
     setIsDeleting(true);
-    const { error } = await supabase.from('fields').delete().eq('id', id);
+    setError(null);
+    const { error: deleteError } = await supabase.from('fields').delete().eq('id', id);
 
-    if (error) {
-      alert(STRINGS.DELETE_ERROR + ': ' + error.message);
+    if (deleteError) {
+      console.error('Failed to delete field:', deleteError);
+      setError(STRINGS.DELETE_ERROR);
       setIsDeleting(false);
       setShowDeleteDialog(false);
     } else {
@@ -67,10 +78,18 @@ export default function FieldDetailPage() {
 
   const totalHarvestedKg = useMemo(() => lots.reduce((sum, l) => sum + l.harvested_kg, 0), [lots]);
 
+  if (error) return (
+    <div className="p-4">
+      <Button variant="secondary" onClick={() => router.push('/app/fields')} className="mb-4">&larr; {STRINGS.BACK}</Button>
+      <div className="bg-red-100 text-red-700 p-4 rounded">{error}</div>
+    </div>
+  );
+
   if (!field) return <div className="p-4">{STRINGS.LOADING}</div>;
 
   return (
     <div>
+      {error && <div className="bg-red-100 text-red-700 p-2 rounded mb-4">{error}</div>}
       <div className="mb-6">
         <Button variant="secondary" onClick={() => router.push('/app/fields')} className="mb-4">&larr; {STRINGS.BACK}</Button>
         <div className="flex justify-between items-start">

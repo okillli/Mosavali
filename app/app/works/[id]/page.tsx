@@ -24,6 +24,8 @@ export default function WorkDetailPage() {
   // Delete state
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [completing, setCompleting] = useState(false);
 
   const [expenseForm, setExpenseForm] = useState({
     amount_gel: '',
@@ -36,14 +38,20 @@ export default function WorkDetailPage() {
   }, [id]);
 
   const fetchWork = async () => {
-    const { data } = await supabase.from('works')
+    setError(null);
+    const { data, error: fetchError } = await supabase.from('works')
         .select('*, fields(name), work_types(name), seasons(year)')
         .eq('id', id)
         .single();
-    if (data) {
-        setWork(data);
-        if(data.notes) setCompletionNotes(data.notes);
+
+    if (fetchError || !data) {
+        console.error('Failed to fetch work:', fetchError);
+        setError(STRINGS.WORK_NOT_FOUND);
+        return;
     }
+
+    setWork(data);
+    if(data.notes) setCompletionNotes(data.notes);
 
     // Fetch linked expenses
     const { data: expenses } = await supabase.from('expenses')
@@ -55,14 +63,27 @@ export default function WorkDetailPage() {
   };
 
   const markCompleted = async () => {
-      const { error } = await supabase.from('works').update({
-          status: 'COMPLETED',
-          completed_date: completedDate,
-          notes: completionNotes
-      }).eq('id', id);
+      setCompleting(true);
+      setError(null);
 
-      if(!error) {
-          fetchWork();
+      try {
+        const { error: updateError } = await supabase.from('works').update({
+            status: 'COMPLETED',
+            completed_date: completedDate,
+            notes: completionNotes
+        }).eq('id', id);
+
+        if (updateError) {
+          console.error('Failed to mark completed:', updateError);
+          setError(STRINGS.SAVE_ERROR);
+          return;
+        }
+        fetchWork();
+      } catch (err) {
+        console.error('Unexpected error:', err);
+        setError(STRINGS.SAVE_ERROR);
+      } finally {
+        setCompleting(false);
       }
   };
 
@@ -70,17 +91,20 @@ export default function WorkDetailPage() {
     if (!work || !expenseForm.amount_gel) return;
 
     setExpenseSaving(true);
+    setError(null);
     const { data: profile } = await supabase
         .from('profiles')
         .select('farm_id')
         .single();
 
     if (!profile) {
+      console.error('Failed to fetch profile');
+      setError(STRINGS.SAVE_ERROR);
       setExpenseSaving(false);
       return;
     }
 
-    const { error } = await supabase.from('expenses').insert({
+    const { error: insertError } = await supabase.from('expenses').insert({
       farm_id: profile.farm_id,
       season_id: work.season_id,
       allocation_type: 'WORK',
@@ -90,8 +114,9 @@ export default function WorkDetailPage() {
       description: expenseForm.description || null
     });
 
-    if (error) {
-      alert(STRINGS.SAVE_ERROR + ': ' + error.message);
+    if (insertError) {
+      console.error('Failed to create expense:', insertError);
+      setError(STRINGS.SAVE_ERROR);
     } else {
       setShowExpenseForm(false);
       setExpenseForm({
@@ -106,15 +131,17 @@ export default function WorkDetailPage() {
 
   const handleDelete = async () => {
     setIsDeleting(true);
+    setError(null);
 
     // First delete linked expenses
     await supabase.from('expenses').delete().eq('allocation_type', 'WORK').eq('target_id', id);
 
     // Then delete the work
-    const { error } = await supabase.from('works').delete().eq('id', id);
+    const { error: deleteError } = await supabase.from('works').delete().eq('id', id);
 
-    if (error) {
-      alert(STRINGS.DELETE_ERROR + ': ' + error.message);
+    if (deleteError) {
+      console.error('Failed to delete work:', deleteError);
+      setError(STRINGS.DELETE_ERROR);
       setIsDeleting(false);
       setShowDeleteDialog(false);
     } else {
@@ -131,20 +158,28 @@ export default function WorkDetailPage() {
 
   const totalExpenses = useMemo(() => linkedExpenses.reduce((sum, e) => sum + Number(e.amount_gel), 0), [linkedExpenses]);
 
+  if (error && !work) return (
+    <div className="p-4">
+      <Button variant="secondary" onClick={() => router.push('/app/works')} className="mb-4">&larr; {STRINGS.BACK}</Button>
+      <div className="bg-red-100 text-red-700 p-4 rounded">{error}</div>
+    </div>
+  );
+
   if(!work) return <div className="p-4">{STRINGS.LOADING}</div>;
 
   return (
     <div className="max-w-2xl mx-auto">
-        <Button variant="secondary" onClick={() => router.back()} className="mb-4">&larr; უკან</Button>
+        {error && <div className="bg-red-100 text-red-700 p-2 rounded mb-4">{error}</div>}
+        <Button variant="secondary" onClick={() => router.back()} className="mb-4">&larr; {STRINGS.BACK}</Button>
 
         <div className="bg-white rounded shadow overflow-hidden">
             <div className="p-6 border-b bg-gray-50 flex justify-between items-start">
                 <div>
                     <h1 className="text-xl font-bold flex items-center gap-2">
                         <Tractor className="text-green-700" />
-                        {work.work_types.name}
+                        {work.work_types?.name || '-'}
                     </h1>
-                    <p className="text-gray-600 mt-1">{STRINGS.NAV_FIELDS}: {work.fields.name}</p>
+                    <p className="text-gray-600 mt-1">{STRINGS.NAV_FIELDS}: {work.fields?.name || '-'}</p>
                 </div>
                 <div className="flex items-center gap-3">
                     {work.status === 'COMPLETED' ? (
@@ -185,7 +220,7 @@ export default function WorkDetailPage() {
                     </div>
                     <div>
                         <label className="text-xs font-bold text-gray-500 uppercase">{STRINGS.SEASON}</label>
-                        <div className="text-lg">{work.seasons.name}</div>
+                        <div className="text-lg">{work.seasons?.name || '-'}</div>
                     </div>
                 </div>
 
@@ -203,8 +238,8 @@ export default function WorkDetailPage() {
                             value={completionNotes}
                             onChange={e => setCompletionNotes(e.target.value)}
                         />
-                        <Button onClick={markCompleted} className="w-full mt-2">
-                            დასრულებულად მონიშვნა
+                        <Button onClick={markCompleted} disabled={completing} className="w-full mt-2">
+                            {completing ? '...' : STRINGS.MARK_AS_COMPLETED}
                         </Button>
                     </div>
                 )}
@@ -280,6 +315,7 @@ export default function WorkDetailPage() {
                             <Input
                                 label={`${STRINGS.EXPENSE_AMOUNT} (${STRINGS.CURRENCY})`}
                                 type="number"
+                                min="0.01"
                                 step="0.01"
                                 value={expenseForm.amount_gel}
                                 onChange={e => setExpenseForm({...expenseForm, amount_gel: e.target.value})}
@@ -323,7 +359,7 @@ export default function WorkDetailPage() {
         <ConfirmDialog
             isOpen={showDeleteDialog}
             title={STRINGS.DELETE_CONFIRM_TITLE}
-            message={`${STRINGS.DELETE_WORK_CONFIRM} "${work.work_types.name}"? ${getDeleteWarning()}`}
+            message={`${STRINGS.DELETE_WORK_CONFIRM} "${work.work_types?.name || ''}"? ${getDeleteWarning()}`}
             confirmLabel={STRINGS.DELETE}
             cancelLabel={STRINGS.CANCEL}
             variant="danger"

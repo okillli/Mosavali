@@ -7,8 +7,8 @@ const getEnv = (key: string): string => {
     return process.env[key] as string;
   }
   // Check import.meta.env (Vite's native env handling)
-  if (typeof import.meta !== 'undefined' && (import.meta as any).env) {
-    const env = (import.meta as any).env;
+  if (typeof import.meta !== 'undefined' && import.meta.env) {
+    const env = import.meta.env;
     if (env[key]) return env[key];
   }
   return '';

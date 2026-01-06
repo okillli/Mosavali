@@ -130,9 +130,11 @@ export default function TransferPage() {
           </select>
         </div>
 
-        <Input 
+        <Input
           label={STRINGS.UNIT_KG}
           type="number"
+          min="0.01"
+          step="0.01"
           value={formData.weight_kg}
           onChange={e => setFormData({...formData, weight_kg: e.target.value})}
         />
