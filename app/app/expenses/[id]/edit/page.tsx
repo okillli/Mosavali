@@ -50,7 +50,7 @@ export default function EditExpensePage() {
     const { data: s } = await supabase.from('seasons').select('*').order('year', { ascending: false });
     if (s) setSeasons(s);
 
-    const { data: f } = await supabase.from('fields').select('id, name');
+    const { data: f } = await supabase.from('fields').select('id, name').order('name');
     if (f) setFields(f);
 
     const { data: w } = await supabase.from('works')

@@ -40,7 +40,7 @@ export default function NewSalePage() {
       supabase.from('v_bin_lot_stock').select('*'),
       supabase.from('lots').select('id, lot_code, crop_id, variety_id'),
       supabase.from('bins').select('id, name, warehouse_id, warehouses(name)'),
-      supabase.from('buyers').select('*'),
+      supabase.from('buyers').select('*').order('name'),
       supabase.from('seasons').select('*').order('year', { ascending: false })
     ]);
 

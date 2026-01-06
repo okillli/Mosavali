@@ -45,7 +45,7 @@ export default function EditSalePage() {
     }
 
     // Load buyers
-    const { data: buyersData } = await supabase.from('buyers').select('*');
+    const { data: buyersData } = await supabase.from('buyers').select('*').order('name');
     if (buyersData) setBuyers(buyersData);
 
     setInitialLoading(false);

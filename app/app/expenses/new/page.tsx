@@ -38,7 +38,7 @@ export default function NewExpensePage() {
         setFormData(p => ({ ...p, season_id: s.find((x:any) => x.is_current)?.id || s[0]?.id }));
     }
 
-    const { data: f } = await supabase.from('fields').select('id, name');
+    const { data: f } = await supabase.from('fields').select('id, name').order('name');
     if (f) setFields(f);
 
     const { data: w } = await supabase.from('works').select('id, work_types(name), fields(name), planned_date').order('planned_date', { ascending: false }).limit(20);

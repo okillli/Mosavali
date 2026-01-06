@@ -40,9 +40,9 @@ export default function NewLotPage() {
 
   const loadMasterData = async () => {
     const { data: s } = await supabase.from('seasons').select('*').order('year', { ascending: false });
-    const { data: c } = await supabase.from('crops').select('*');
-    const { data: f } = await supabase.from('fields').select('*');
-    const { data: w } = await supabase.from('warehouses').select('*');
+    const { data: c } = await supabase.from('crops').select('*').order('name_ka');
+    const { data: f } = await supabase.from('fields').select('*').order('name');
+    const { data: w } = await supabase.from('warehouses').select('*').order('name');
     
     if (s) { setSeasons(s); setFormData(p => ({ ...p, season_id: s.find((x:any) => x.is_current)?.id || s[0]?.id })); }
     if (c) setCrops(c);

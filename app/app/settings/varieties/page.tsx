@@ -29,7 +29,7 @@ export default function VarietiesSettings() {
   }, []);
 
   const fetchCrops = async () => {
-      const { data } = await supabase.from('crops').select('*');
+      const { data } = await supabase.from('crops').select('*').order('name_ka');
       if(data) {
           setCrops(data);
           setSelectedCrop(data[0]?.id || '');

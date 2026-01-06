@@ -27,8 +27,8 @@ export default function NewWorkPage() {
 
   useEffect(() => {
     const load = async () => {
-      const { data: f } = await supabase.from('fields').select('*');
-      const { data: wt } = await supabase.from('work_types').select('*');
+      const { data: f } = await supabase.from('fields').select('*').order('name');
+      const { data: wt } = await supabase.from('work_types').select('*').order('name');
       const { data: s } = await supabase.from('seasons').select('*').order('year', { ascending: false });
       
       if (f) setFields(f);
