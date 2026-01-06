@@ -3,6 +3,26 @@
 > **When to read:** Creating new entity pages, forms, or delete flows
 > **Skip if:** Only styling changes or database work → see [ui-patterns.md](./ui-patterns.md) or [database.md](./database.md)
 
+## List Sorting (Newest First)
+
+**Default rule:** Lists should show newest items first.
+
+| Entity | Sort By | Direction |
+|--------|---------|-----------|
+| Sales, Expenses, Works | `created_at` or date field | Descending |
+| Lots | `harvest_date` or `created_at` | Descending |
+| Seasons | `year` | Descending |
+| Fields, Warehouses, Buyers | `name` | Ascending (alphabetical) |
+
+```typescript
+// Date-based entities - newest first
+.order('created_at', { ascending: false })
+.order('sale_date', { ascending: false })
+
+// Name-based entities - alphabetical
+.order('name', { ascending: true })
+```
+
 ## Page Structure
 
 ```

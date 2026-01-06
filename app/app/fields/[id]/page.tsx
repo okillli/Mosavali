@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { supabase } from '../../../../lib/supabaseClient';
 import { STRINGS } from '../../../../lib/strings';
 import { useParams, useRouter } from 'next/navigation';
@@ -64,6 +64,8 @@ export default function FieldDetailPage() {
     }
     return STRINGS.DELETE_CANNOT_UNDO;
   };
+
+  const totalHarvestedKg = useMemo(() => lots.reduce((sum, l) => sum + l.harvested_kg, 0), [lots]);
 
   if (!field) return <div className="p-4">{STRINGS.LOADING}</div>;
 
@@ -143,7 +145,7 @@ export default function FieldDetailPage() {
               <div className="bg-green-50 p-4 rounded text-center">
                 <DollarSign className="mx-auto mb-2 text-green-500" />
                 <span className="block font-bold text-xl">
-                  {lots.reduce((sum, l) => sum + l.harvested_kg, 0).toLocaleString()} {STRINGS.UNIT_KG}
+                  {totalHarvestedKg.toLocaleString()} {STRINGS.UNIT_KG}
                 </span>
                 <span className="text-xs text-gray-500">{STRINGS.TOTAL_HARVEST}</span>
               </div>

@@ -1,41 +1,45 @@
-import React, { useState, useEffect, ReactNode } from 'react';
+import React, { useState, useEffect, ReactNode, Suspense, lazy } from 'react';
 import { createRoot } from 'react-dom/client';
+import { PageLoader } from './components/PageLoader';
+import { STRINGS } from './lib/strings';
+
+// Eagerly load auth pages (needed immediately)
 import Landing from './app/page';
 import Login from './app/login/page';
 import AppLayout from './app/app/layout';
 
-// Pages
-import Dashboard from './app/app/page';
-import FieldsList from './app/app/fields/page';
-import NewFieldPage from './app/app/fields/new/page';
-import FieldDetailPage from './app/app/fields/[id]/page';
-import FieldEditPage from './app/app/fields/[id]/edit/page';
-import WorksList from './app/app/works/page';
-import NewWorkPage from './app/app/works/new/page';
-import WorkDetailPage from './app/app/works/[id]/page';
-import WorkEditPage from './app/app/works/[id]/edit/page';
-import LotsList from './app/app/lots/page';
-import NewLotPage from './app/app/lots/new/page';
-import LotDetailPage from './app/app/lots/[id]/page';
-import LotEditPage from './app/app/lots/[id]/edit/page';
-import WarehousesList from './app/app/warehouses/page';
-import NewWarehousePage from './app/app/warehouses/new/page';
-import WarehouseDetailPage from './app/app/warehouses/[id]/page';
-import WarehouseEditPage from './app/app/warehouses/[id]/edit/page';
-import SalesList from './app/app/sales/page';
-import NewSalePage from './app/app/sales/new/page';
-import SaleDetailPage from './app/app/sales/[id]/page';
-import SaleEditPage from './app/app/sales/[id]/edit/page';
-import ExpensesList from './app/app/expenses/page';
-import NewExpensePage from './app/app/expenses/new/page';
-import ExpenseDetailPage from './app/app/expenses/[id]/page';
-import ExpenseEditPage from './app/app/expenses/[id]/edit/page';
-import ReportsPage from './app/app/reports/page';
-import TransferPage from './app/app/transfer/page';
-import SettingsPage from './app/app/settings/page';
-import SeasonsSettings from './app/app/settings/seasons/page';
-import VarietiesSettings from './app/app/settings/varieties/page';
-import BuyersSettings from './app/app/settings/buyers/page';
+// Lazy load all app pages for code splitting
+const Dashboard = lazy(() => import('./app/app/page'));
+const FieldsList = lazy(() => import('./app/app/fields/page'));
+const NewFieldPage = lazy(() => import('./app/app/fields/new/page'));
+const FieldDetailPage = lazy(() => import('./app/app/fields/[id]/page'));
+const FieldEditPage = lazy(() => import('./app/app/fields/[id]/edit/page'));
+const WorksList = lazy(() => import('./app/app/works/page'));
+const NewWorkPage = lazy(() => import('./app/app/works/new/page'));
+const WorkDetailPage = lazy(() => import('./app/app/works/[id]/page'));
+const WorkEditPage = lazy(() => import('./app/app/works/[id]/edit/page'));
+const LotsList = lazy(() => import('./app/app/lots/page'));
+const NewLotPage = lazy(() => import('./app/app/lots/new/page'));
+const LotDetailPage = lazy(() => import('./app/app/lots/[id]/page'));
+const LotEditPage = lazy(() => import('./app/app/lots/[id]/edit/page'));
+const WarehousesList = lazy(() => import('./app/app/warehouses/page'));
+const NewWarehousePage = lazy(() => import('./app/app/warehouses/new/page'));
+const WarehouseDetailPage = lazy(() => import('./app/app/warehouses/[id]/page'));
+const WarehouseEditPage = lazy(() => import('./app/app/warehouses/[id]/edit/page'));
+const SalesList = lazy(() => import('./app/app/sales/page'));
+const NewSalePage = lazy(() => import('./app/app/sales/new/page'));
+const SaleDetailPage = lazy(() => import('./app/app/sales/[id]/page'));
+const SaleEditPage = lazy(() => import('./app/app/sales/[id]/edit/page'));
+const ExpensesList = lazy(() => import('./app/app/expenses/page'));
+const NewExpensePage = lazy(() => import('./app/app/expenses/new/page'));
+const ExpenseDetailPage = lazy(() => import('./app/app/expenses/[id]/page'));
+const ExpenseEditPage = lazy(() => import('./app/app/expenses/[id]/edit/page'));
+const ReportsPage = lazy(() => import('./app/app/reports/page'));
+const TransferPage = lazy(() => import('./app/app/transfer/page'));
+const SettingsPage = lazy(() => import('./app/app/settings/page'));
+const SeasonsSettings = lazy(() => import('./app/app/settings/seasons/page'));
+const VarietiesSettings = lazy(() => import('./app/app/settings/varieties/page'));
+const BuyersSettings = lazy(() => import('./app/app/settings/buyers/page'));
 
 // Declare global to fix window property error
 declare global {
@@ -63,10 +67,10 @@ const Router = () => {
     if (route === '/' || route === '') return <Landing />;
     if (route === '/login') return <Login />;
 
-    // App Routes
+    // App Routes - wrapped in Suspense for lazy loading
     if (route.startsWith('/app')) {
       let page: ReactNode = <Dashboard />;
-      
+
       // Exact Matches
       if (route === '/app') page = <Dashboard />;
       else if (route === '/app/fields') page = <FieldsList />;
@@ -104,41 +108,46 @@ const Router = () => {
       else if (route.match(/^\/app\/sales\/[^/]+$/)) page = <SaleDetailPage />;
       else if (route.match(/^\/app\/expenses\/[^/]+$/)) page = <ExpenseDetailPage />;
 
-      // Fix "Property children is missing" error by explicitly passing prop
-      return <AppLayout children={page} />;
+      return (
+        <AppLayout>
+          <Suspense fallback={<PageLoader />}>
+            {page}
+          </Suspense>
+        </AppLayout>
+      );
     }
 
-    return <div className="p-4 text-center">404 - Not Found</div>;
+    return <div className="p-4 text-center">{STRINGS.PAGE_NOT_FOUND}</div>;
   };
 
   return <>{renderContent()}</>;
 };
 
 // Types for ErrorBoundary
-interface ErrorBoundaryProps { 
+interface ErrorBoundaryProps {
   children: ReactNode;
 }
-interface ErrorBoundaryState { 
-  hasError: boolean; 
-  message: string; 
+interface ErrorBoundaryState {
+  hasError: boolean;
+  message: string;
 }
 
 // Error Boundary to catch Router hooks errors
 class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
   state: ErrorBoundaryState = { hasError: false, message: '' };
-  
-  static getDerivedStateFromError(error: any): ErrorBoundaryState {
+
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
     return { hasError: true, message: error.message || String(error) };
   }
-  
+
   render() {
     if (this.state.hasError) {
       return (
         <div className="p-4 text-red-600 bg-red-50 min-h-screen">
-          <h2 className="font-bold mb-2">Application Error</h2>
+          <h2 className="font-bold mb-2">{STRINGS.APP_ERROR}</h2>
           <pre className="text-sm overflow-auto">{this.state.message}</pre>
           <button onClick={() => window.location.reload()} className="mt-4 px-4 py-2 bg-red-600 text-white rounded">
-            Reload
+            {STRINGS.RELOAD}
           </button>
         </div>
       );

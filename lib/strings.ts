@@ -117,6 +117,9 @@ export const STRINGS = {
   // Loading states
   LOADING: 'იტვირთება...',
   NOT_FOUND: 'ჩანაწერი ვერ მოიძებნა',
+  PAGE_NOT_FOUND: 'გვერდი ვერ მოიძებნა',
+  APP_ERROR: 'შეცდომა',
+  RELOAD: 'განახლება',
 
   // Season specific
   SET_AS_CURRENT: 'მიმდინარედ მონიშვნა',

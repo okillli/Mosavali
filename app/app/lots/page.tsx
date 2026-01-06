@@ -17,6 +17,7 @@ export default function LotsList() {
   const fetchLots = async () => {
     const { data } = await supabase.from('lots')
       .select('*, crops(name_ka), varieties(name), fields(name)')
+      .limit(50)
       .order('created_at', { ascending: false });
     if (data) setLots(data);
     setLoading(false);

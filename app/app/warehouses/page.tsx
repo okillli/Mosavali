@@ -15,7 +15,7 @@ export default function WarehousesList() {
   }, []);
 
   const fetchWarehouses = async () => {
-    const { data } = await supabase.from('warehouses').select('*').order('created_at', { ascending: false });
+    const { data } = await supabase.from('warehouses').select('*').limit(50).order('created_at', { ascending: false });
     if (data) setWarehouses(data);
     setLoading(false);
   };

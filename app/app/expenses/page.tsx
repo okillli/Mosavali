@@ -19,6 +19,7 @@ export default function ExpensesList() {
   const fetchExpenses = async () => {
     const { data } = await supabase.from('expenses')
       .select('*, seasons(year)')
+      .limit(50)
       .order('expense_date', { ascending: false });
     if (data) setExpenses(data);
     setLoading(false);

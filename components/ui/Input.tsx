@@ -6,7 +6,7 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   noMargin?: boolean;
 }
 
-export const Input: React.FC<InputProps> = ({ label, error, className, noMargin, ...props }) => {
+export const Input = React.memo<InputProps>(function Input({ label, error, className, noMargin, ...props }) {
   return (
     <div className={noMargin ? '' : 'mb-4'}>
       {label && <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>}
@@ -17,4 +17,4 @@ export const Input: React.FC<InputProps> = ({ label, error, className, noMargin,
       {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
     </div>
   );
-};
+});

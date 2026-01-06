@@ -35,23 +35,37 @@ export default function ExpenseDetailPage() {
   };
 
   const fetchTargetName = async (allocationType: string, targetId: string) => {
-    let name = null;
-    if (allocationType === 'FIELD') {
-      const { data } = await supabase.from('fields').select('name').eq('id', targetId).single();
-      name = data?.name;
-    } else if (allocationType === 'WORK') {
-      const { data } = await supabase.from('works')
-        .select('work_types(name), fields(name)')
-        .eq('id', targetId)
-        .single();
-      if (data) {
-        name = `${data.work_types?.name} @ ${data.fields?.name}`;
+    const tableConfig: Record<string, { table: string; select: string; transform: (data: Record<string, unknown>) => string | null }> = {
+      FIELD: {
+        table: 'fields',
+        select: 'name',
+        transform: (data) => data?.name as string | null
+      },
+      WORK: {
+        table: 'works',
+        select: 'work_types(name), fields(name)',
+        transform: (data) => data ? `${(data.work_types as { name: string })?.name} @ ${(data.fields as { name: string })?.name}` : null
+      },
+      LOT: {
+        table: 'lots',
+        select: 'lot_code',
+        transform: (data) => data?.lot_code as string | null
       }
-    } else if (allocationType === 'LOT') {
-      const { data } = await supabase.from('lots').select('lot_code').eq('id', targetId).single();
-      name = data?.lot_code;
+    };
+
+    const config = tableConfig[allocationType];
+    if (!config) {
+      setTargetName(null);
+      return;
     }
-    setTargetName(name);
+
+    const { data } = await supabase
+      .from(config.table)
+      .select(config.select)
+      .eq('id', targetId)
+      .single();
+
+    setTargetName(data ? config.transform(data) : null);
   };
 
   const getAllocationLabel = (type: string) => {

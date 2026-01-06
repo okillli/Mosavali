@@ -17,6 +17,7 @@ export default function SalesList() {
   const fetchSales = async () => {
     const { data } = await supabase.from('sales')
       .select('*, buyers(name), lots(lot_code)')
+      .limit(50)
       .order('sale_date', { ascending: false });
     if (data) setSales(data);
     setLoading(false);

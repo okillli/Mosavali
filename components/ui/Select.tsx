@@ -12,14 +12,14 @@ interface SelectProps extends Omit<React.SelectHTMLAttributes<HTMLSelectElement>
   placeholder?: string;
 }
 
-export const Select: React.FC<SelectProps> = ({
+export const Select = React.memo<SelectProps>(function Select({
   label,
   error,
   options,
   placeholder,
   className,
   ...props
-}) => {
+}) {
   return (
     <div className="mb-4">
       {label && <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>}
@@ -39,4 +39,4 @@ export const Select: React.FC<SelectProps> = ({
       {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
     </div>
   );
-};
+});

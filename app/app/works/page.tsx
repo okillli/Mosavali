@@ -17,6 +17,7 @@ export default function WorksList() {
   const fetchWorks = async () => {
     const { data } = await supabase.from('works')
       .select('*, fields(name), work_types(name)')
+      .limit(50)
       .order('planned_date', { ascending: false });
     if (data) setWorks(data);
     setLoading(false);

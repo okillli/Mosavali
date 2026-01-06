@@ -1,0 +1,1 @@
+export { useMasterData } from './useMasterData';

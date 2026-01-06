@@ -5,13 +5,13 @@ interface TextAreaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement
   error?: string;
 }
 
-export const TextArea: React.FC<TextAreaProps> = ({
+export const TextArea = React.memo<TextAreaProps>(function TextArea({
   label,
   error,
   className,
   rows = 3,
   ...props
-}) => {
+}) {
   return (
     <div className="mb-4">
       {label && <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>}
@@ -23,4 +23,4 @@ export const TextArea: React.FC<TextAreaProps> = ({
       {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
     </div>
   );
-};
+});

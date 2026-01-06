@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { supabase } from '../../../lib/supabaseClient';
 import { STRINGS } from '../../../lib/strings';
 import { StockViewWithRelations } from '../../../types';
@@ -60,7 +60,7 @@ export default function ReportsPage() {
     setLoading(false);
   };
 
-  const totalKg = stock.reduce((sum, item) => sum + item.stock_kg, 0);
+  const totalKg = useMemo(() => stock.reduce((sum, item) => sum + item.stock_kg, 0), [stock]);
 
   return (
     <div>

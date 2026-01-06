@@ -15,7 +15,7 @@ export default function FieldsList() {
   }, []);
 
   const fetchFields = async () => {
-    const { data } = await supabase.from('fields').select('*').order('created_at', { ascending: false });
+    const { data } = await supabase.from('fields').select('*').limit(50).order('created_at', { ascending: false });
     if (data) setFields(data);
     setLoading(false);
   };

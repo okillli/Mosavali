@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { supabase } from '../../../../lib/supabaseClient';
 import { STRINGS } from '../../../../lib/strings';
 import { useParams, useRouter } from 'next/navigation';
@@ -129,7 +129,7 @@ export default function WorkDetailPage() {
     return STRINGS.DELETE_CANNOT_UNDO;
   };
 
-  const totalExpenses = linkedExpenses.reduce((sum, e) => sum + Number(e.amount_gel), 0);
+  const totalExpenses = useMemo(() => linkedExpenses.reduce((sum, e) => sum + Number(e.amount_gel), 0), [linkedExpenses]);
 
   if(!work) return <div className="p-4">{STRINGS.LOADING}</div>;
 
