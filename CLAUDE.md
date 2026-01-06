@@ -21,11 +21,11 @@ npm run build   # Production build
 | `components/` | UI components |
 | `types.ts` | TypeScript types |
 
-## Key Rules
+## Key Rules (Always Apply)
 
 1. **All strings from `lib/strings.ts`** - never hardcode Georgian text
 2. **Dual validation** - UI + Postgres triggers for business rules
-3. **Complete CRUD** - every Add needs Edit + Delete with confirmation
+3. **Complete CRUD** - every Add needs Edit + Delete with ConfirmDialog
 4. **RLS enabled** - all queries via authenticated Supabase client
 
 ## Entities
@@ -37,7 +37,7 @@ npm run build   # Production build
 - **Works** (სამუშაოები) - farm activities
 - **Expenses** (ხარჯები) - cost tracking
 
-## Business Rules
+## Business Rules (DB-Enforced)
 
 - **No Mixing** - bin holds one lot only
 - **No Negative Stock** - blocked by trigger
@@ -45,15 +45,15 @@ npm run build   # Production build
 
 ## Extended Documentation
 
-Read these when working on specific areas:
+**Read these ONLY when working on that specific area:**
 
-| File | When to Read |
-|------|--------------|
-| [.claude/strings.md](.claude/strings.md) | Adding/editing UI text |
-| [.claude/crud-patterns.md](.claude/crud-patterns.md) | Creating forms, pages, delete flows |
-| [.claude/ui-patterns.md](.claude/ui-patterns.md) | Components, layouts, styling |
-| [.claude/database.md](.claude/database.md) | Schema changes, RPC, migrations |
-| [.claude/testing.md](.claude/testing.md) | Writing/running E2E tests |
+| File | Read When... | Skip When... |
+|------|--------------|--------------|
+| [strings.md](.claude/strings.md) | Adding ANY user-visible text | Reading/debugging existing code |
+| [crud-patterns.md](.claude/crud-patterns.md) | Creating new entity pages/forms | Styling or DB work |
+| [ui-patterns.md](.claude/ui-patterns.md) | Building UI, need component API | CRUD flow questions |
+| [database.md](.claude/database.md) | Schema, triggers, direct queries | Frontend-only changes |
+| [testing.md](.claude/testing.md) | Writing or running E2E tests | Not testing |
 
 ## Source of Truth
 

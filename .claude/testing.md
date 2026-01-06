@@ -1,14 +1,17 @@
 # Testing
 
+> **When to read:** Writing or running E2E tests
+> **Skip if:** Not testing
+
 ## E2E Tests (Playwright)
 
 Location: `e2e/` directory
 
-### Run Tests
+### Commands
 
 ```bash
-npx playwright test              # Run all tests
-npx playwright test --ui         # Interactive UI mode
+npx playwright test              # Run all
+npx playwright test --ui         # Interactive UI
 npx playwright test --headed     # See browser
 npx playwright test e2e/auth.spec.ts  # Single file
 ```
@@ -26,13 +29,13 @@ Password: 10091955
 import { test, expect } from '@playwright/test';
 
 test('should create field', async ({ page }) => {
-  // Login first
+  // Login
   await page.goto('/');
   await page.fill('input[type="email"]', 'elizbar.55@gmail.com');
   await page.fill('input[type="password"]', '10091955');
   await page.click('button[type="submit"]');
 
-  // Navigate and test
+  // Test
   await page.click('text=მიწები');
   await page.click('text=დაამატე');
   // ...
@@ -47,9 +50,8 @@ e2e/
   fields.spec.ts    - Field CRUD
   lots.spec.ts      - Lot operations
   sales.spec.ts     - Sales flow
-  ...
 ```
 
 ## Component Testing
 
-For unit/component tests, use Vitest if needed.
+Use Vitest for unit/component tests if needed.

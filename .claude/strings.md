@@ -1,13 +1,15 @@
 # String Management
 
+> **When to read:** Adding ANY user-visible text to the UI
+> **Skip if:** Reading/debugging existing code, no new text being added
+
 **All UI text must be in Georgian and come from `lib/strings.ts`**
 
-## Rules
+## Workflow
 
-1. Check if string exists in `lib/strings.ts` before using
-2. If not, ADD it first, then use the constant
-3. Use descriptive names: `PAGE_BUYERS`, `DELETE_FIELD_CONFIRM`
-4. Group with comments: `// Form labels`, `// Error messages`
+1. Check if string exists in `lib/strings.ts`
+2. If not, ADD it first with descriptive name
+3. Import and use the constant
 
 ## Usage
 
@@ -33,7 +35,7 @@ alert(STRINGS.SAVE_ERROR);
 - Empty states
 - Confirmation dialogs
 - Table headers
-- Status labels (PAID, UNPAID, PLANNED, COMPLETED)
+- Status labels
 
 ## Naming Convention
 
@@ -44,3 +46,15 @@ alert(STRINGS.SAVE_ERROR);
 | Error | `*_ERROR` | `SAVE_ERROR` |
 | Not found | `*_NOT_FOUND` | `LOT_NOT_FOUND` |
 | Placeholder | `*_PLACEHOLDER` | `BUYER_NAME_PLACEHOLDER` |
+
+## Grouping
+
+Add comments to group related strings:
+```typescript
+// Form labels
+WEIGHT: 'წონა',
+SALE_DATE: 'გაყიდვის თარიღი',
+
+// Error messages
+SAVE_ERROR: 'შენახვა ვერ მოხერხდა',
+```

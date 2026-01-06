@@ -1,22 +1,21 @@
 # Database
 
+> **When to read:** Schema changes, writing RPC, running direct queries, debugging data
+> **Skip if:** Frontend-only changes → see [ui-patterns.md](ui-patterns.md)
+
 ## Direct Query Access
 
-Use the PostgreSQL MCP tool for direct database queries:
+Use PostgreSQL MCP for direct queries (bypasses RLS):
 
 ```
 mcp__postgres__query({ sql: "SELECT * FROM fields LIMIT 5" })
 ```
 
-This bypasses RLS (service role), useful for:
-- Debugging data issues
-- Checking schema/constraints
-- Verifying trigger behavior
-- Quick data inspection
+Useful for: debugging, checking constraints, verifying triggers
 
-## Setup Order
+## Schema Setup
 
-Run in Supabase SQL Editor:
+Run in Supabase SQL Editor (in order):
 1. `supabase/migrations/01_core_schema.txt` - Tables, enums
 2. `supabase/migrations/02_logic.txt` - Views, triggers, RPC
 3. `supabase/migrations/03_rls.txt` - Row Level Security
@@ -32,15 +31,15 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=...
 
 ## Business Rules (Trigger-Enforced)
 
-| Rule | Trigger |
-|------|---------|
-| No Mixing | Bin can hold one lot only |
+| Rule | Effect |
+|------|--------|
+| No Mixing | Bin holds one lot only |
 | No Negative Stock | Blocks movements causing negative |
-| Farm Isolation | RLS by `farm_id` |
+| Farm Isolation | RLS filters by `farm_id` |
 
 ## Atomic Operations
 
-**Sales must use RPC:**
+Sales MUST use RPC:
 ```typescript
 await supabase.rpc('create_sale_atomic', {
   p_lot_id: lotId,
@@ -62,11 +61,3 @@ Stock is calculated, not stored:
 - Enabled on ALL tables
 - Policies filter by `farm_id` from user profile
 - Always use authenticated Supabase client
-
-## Dual Validation
-
-Enforce rules at BOTH levels:
-1. **UI** - fast user feedback
-2. **Postgres** - authoritative enforcement
-
-Example: No Mixing checked in form + blocked by trigger

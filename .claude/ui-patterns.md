@@ -1,5 +1,8 @@
 # UI/UX Patterns
 
+> **When to read:** Building UI, need component props/API, styling questions
+> **Skip if:** CRUD flow/page structure questions → see [crud-patterns.md](crud-patterns.md)
+
 ## Components (`components/ui/`)
 
 ### Button
@@ -19,12 +22,6 @@
 - `noMargin` prop removes bottom margin for inline forms
 
 ### SearchableDropdown
-Feature-rich dropdown with:
-- Search with debounce (300ms)
-- Async loading via `loadOptions`
-- Create new inline via `allowCreate` + `onCreateOption`
-- Keyboard navigation (arrows, enter, escape)
-
 ```tsx
 <SearchableDropdown
   label="მყიდველი"
@@ -35,9 +32,9 @@ Feature-rich dropdown with:
   onCreateOption={handleCreate}
 />
 ```
+Features: search with debounce, async loading, create inline, keyboard nav
 
 ### ConfirmDialog
-Required for all delete operations:
 ```tsx
 <ConfirmDialog
   isOpen={show}
@@ -63,7 +60,6 @@ Required for all delete operations:
       <Plus size={16} className="mr-1" /> {STRINGS.ADD}
     </Link>
   </div>
-
   <div className="grid gap-4 md:grid-cols-2">
     {items.map(item => (
       <Link href={`/app/fields/${item.id}`} className="bg-white p-4 rounded-lg shadow-sm border hover:border-green-500">
@@ -77,7 +73,6 @@ Required for all delete operations:
 ### Detail Page
 ```tsx
 <div>
-  {/* Header */}
   <div className="mb-6">
     <Button variant="secondary" onClick={() => router.back()} className="mb-4">
       &larr; {STRINGS.BACK}
@@ -85,34 +80,22 @@ Required for all delete operations:
     <div className="flex justify-between items-start">
       <div>
         <h1 className="text-2xl font-bold flex items-center">
-          <Icon className="mr-2 text-green-600" />
-          {item.name}
+          <Icon className="mr-2 text-green-600" />{item.name}
         </h1>
         <p className="text-gray-500">{subtitle}</p>
       </div>
       <div className="flex gap-2">
-        <Button variant="outline" onClick={...}><Pencil size={16} /> {STRINGS.EDIT}</Button>
-        <Button variant="danger" onClick={...}><Trash2 size={16} /> {STRINGS.DELETE}</Button>
+        <Button variant="outline"><Pencil size={16} /> {STRINGS.EDIT}</Button>
+        <Button variant="danger"><Trash2 size={16} /> {STRINGS.DELETE}</Button>
       </div>
     </div>
   </div>
-
-  {/* Tabs (optional) */}
-  <div className="flex border-b mb-6">
-    <button className={`px-4 py-2 ${active ? 'border-b-2 border-green-600 text-green-700' : 'text-gray-500'}`}>
-      {label}
-    </button>
-  </div>
-
-  {/* Content */}
   <div className="bg-white p-6 rounded shadow">...</div>
-
   <ConfirmDialog {...} />
 </div>
 ```
 
 ### Inline Add Form
-For adding related items from detail page:
 ```tsx
 <button onClick={() => setShowForm(true)} className="border-2 border-dashed border-gray-300 p-3 rounded hover:bg-gray-50">
   + {STRINGS.ADD}
@@ -135,33 +118,28 @@ For adding related items from detail page:
 
 | Usage | Class |
 |-------|-------|
-| Primary action | `bg-green-600`, `text-green-600` |
+| Primary | `bg-green-600`, `text-green-600` |
 | Sidebar | `bg-green-900` |
-| Focus ring | `focus:ring-green-500` |
+| Focus | `focus:ring-green-500` |
 | Active tab | `border-green-600 text-green-700` |
 | Secondary | `bg-gray-100`, `text-gray-500` |
 | Danger | `bg-red-600`, `text-red-500` |
-| Error bg | `bg-red-100 text-red-700` |
+| Error | `bg-red-100 text-red-700` |
 
 ---
 
 ## States
 
-### Loading
 ```tsx
+// Loading
 {loading && <div className="text-gray-500">{STRINGS.LOADING}</div>}
 <Button disabled={loading}>{loading ? '...' : STRINGS.SAVE}</Button>
-```
 
-### Empty
-```tsx
+// Empty
 {items.length === 0 && <div className="text-center py-10 text-gray-500">{STRINGS.NO_DATA}</div>}
-```
 
-### Error
-```tsx
+// Error
 {error && <div className="bg-red-100 text-red-700 p-2 rounded">{error}</div>}
-<Input error={fieldError} />  // Shows below input in red
 ```
 
 ---
@@ -178,16 +156,13 @@ For adding related items from detail page:
 ## Icons (lucide-react)
 
 ```tsx
-// Sizing
 <Icon size={16} />  // buttons
 <Icon size={20} />  // nav
 <Icon size={24} />  // cards
-
-// With button text
 <Button><Plus size={16} className="mr-1" /> {STRINGS.ADD}</Button>
 ```
 
-Common: `Plus`, `Pencil`, `Trash2`, `Check`, `X`, `ChevronDown`, `Loader2`, `ArrowRight`
+Common: `Plus`, `Pencil`, `Trash2`, `Check`, `X`, `ChevronDown`, `Loader2`
 
 ---
 
