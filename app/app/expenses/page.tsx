@@ -27,8 +27,8 @@ export default function ExpensesList() {
   const getAllocationLabel = (type: string) => {
     return type === 'FIELD' ? STRINGS.NAV_FIELDS : 
            type === 'WORK' ? STRINGS.NAV_WORKS : 
-           type === 'LOT' ? STRINGS.NAV_LOTS : 
-           type === 'SEASON' ? STRINGS.SEASON : 'ზოგადი';
+           type === 'LOT' ? STRINGS.NAV_LOTS :
+           type === 'SEASON' ? STRINGS.SEASON : STRINGS.ALLOCATION_GENERAL;
   };
 
   return (
@@ -48,7 +48,7 @@ export default function ExpensesList() {
             className="bg-white p-4 rounded-lg shadow-sm border flex justify-between items-center cursor-pointer hover:bg-gray-50 transition-colors"
           >
             <div>
-               <h3 className="font-bold text-gray-800">{expense.description || 'ხარჯი'}</h3>
+               <h3 className="font-bold text-gray-800">{expense.description || STRINGS.NAV_EXPENSES}</h3>
                <div className="flex items-center text-xs text-gray-500 mt-1">
                   <Tag size={12} className="mr-1" />
                   {getAllocationLabel(expense.allocation_type)}
@@ -58,16 +58,16 @@ export default function ExpensesList() {
             </div>
             <div className="text-right">
                <div className="font-bold text-lg text-red-600">-{expense.amount_gel} {STRINGS.CURRENCY}</div>
-               <div className="text-xs text-gray-400">{expense.seasons?.year} სეზონი</div>
+               <div className="text-xs text-gray-400">{expense.seasons?.year} {STRINGS.SEASON}</div>
             </div>
           </div>
         ))}
         {loading && (
-          <div className="text-center py-10 text-gray-500">იტვირთება...</div>
+          <div className="text-center py-10 text-gray-500">{STRINGS.LOADING}</div>
         )}
         {!loading && expenses.length === 0 && (
           <div className="text-center py-10 text-gray-500">
-            მონაცემები არ მოიძებნა
+            {STRINGS.NO_DATA}
           </div>
         )}
       </div>

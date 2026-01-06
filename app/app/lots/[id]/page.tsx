@@ -84,14 +84,14 @@ export default function LotDetailPage() {
     return STRINGS.DELETE_CANNOT_UNDO;
   };
 
-  if (!lot) return <div className="p-4">იტვირთება...</div>;
+  if (!lot) return <div className="p-4">{STRINGS.LOADING}</div>;
 
   const currentTotalStock = stock.reduce((acc, curr) => acc + curr.stock_kg, 0);
 
   return (
     <div>
       <div className="mb-6">
-        <Button variant="secondary" onClick={() => router.back()} className="mb-4">&larr; უკან</Button>
+        <Button variant="secondary" onClick={() => router.back()} className="mb-4">&larr; {STRINGS.BACK}</Button>
         <div className="flex justify-between items-start">
           <div>
             <h1 className="text-2xl font-bold flex items-center text-green-800">
@@ -119,7 +119,7 @@ export default function LotDetailPage() {
                 onClick={() => setShowDeleteDialog(true)}
                 className="flex items-center gap-1"
                 disabled={sales.length > 0}
-                title={sales.length > 0 ? 'მოსავალს აქვს გაყიდვები - წაშლა შეუძლებელია' : ''}
+                title={sales.length > 0 ? STRINGS.LOT_DELETE_DISABLED : ''}
               >
                 <Trash2 size={16} />
                 {STRINGS.DELETE}
@@ -137,11 +137,11 @@ export default function LotDetailPage() {
             <span className="font-medium">{lot.fields?.name}</span>
           </div>
           <div className="flex justify-between border-b pb-2">
-            <span className="text-gray-500">საწყისი წონა</span>
+            <span className="text-gray-500">{STRINGS.INITIAL_WEIGHT}</span>
             <span className="font-medium">{lot.harvested_kg} {STRINGS.UNIT_KG}</span>
           </div>
           <div className="flex justify-between border-b pb-2">
-            <span className="text-gray-500">მიმდინარე ნაშთი</span>
+            <span className="text-gray-500">{STRINGS.CURRENT_BALANCE}</span>
             <span className={`font-bold ${currentTotalStock > 0 ? 'text-green-600' : 'text-red-500'}`}>
               {currentTotalStock} {STRINGS.UNIT_KG}
             </span>
@@ -158,10 +158,10 @@ export default function LotDetailPage() {
         <div className="bg-white p-6 rounded shadow">
           <h3 className="text-lg font-bold mb-4 flex items-center text-gray-700">
             <MapPin size={20} className="mr-2" />
-            ადგილმდებარეობა
+            {STRINGS.LOCATION}
           </h3>
           {stock.length === 0 ? (
-            <p className="text-gray-500 text-sm">ნაშთი განულებულია (გაიყიდა ან გადავიდა).</p>
+            <p className="text-gray-500 text-sm">{STRINGS.STOCK_ZERO}</p>
           ) : (
             <div className="space-y-3">
               {stock.map((item, idx) => (
@@ -183,16 +183,16 @@ export default function LotDetailPage() {
       {/* History */}
       <h3 className="text-xl font-bold mb-4 flex items-center">
         <History size={20} className="mr-2" />
-        მოძრაობის ისტორია
+        {STRINGS.MOVEMENT_HISTORY}
       </h3>
       <div className="bg-white rounded shadow overflow-hidden">
         <table className="min-w-full text-left text-sm">
           <thead className="bg-gray-50 text-gray-500 border-b">
             <tr>
-              <th className="px-6 py-3">თარიღი</th>
-              <th className="px-6 py-3">ტიპი</th>
-              <th className="px-6 py-3">საიდან &rarr; სად</th>
-              <th className="px-6 py-3 text-right">წონა</th>
+              <th className="px-6 py-3">{STRINGS.TABLE_DATE}</th>
+              <th className="px-6 py-3">{STRINGS.TABLE_TYPE}</th>
+              <th className="px-6 py-3">{STRINGS.TABLE_FROM_TO}</th>
+              <th className="px-6 py-3 text-right">{STRINGS.WEIGHT}</th>
             </tr>
           </thead>
           <tbody className="divide-y">
@@ -203,9 +203,9 @@ export default function LotDetailPage() {
                   <span className={`px-2 py-1 rounded text-xs font-bold
                       ${move.type === 'RECEIVE' ? 'bg-green-100 text-green-800' :
                       move.type === 'SALE_OUT' ? 'bg-blue-100 text-blue-800' : 'bg-orange-100 text-orange-800'}`}>
-                    {move.type === 'RECEIVE' ? 'მიღება' :
-                      move.type === 'SALE_OUT' ? 'გაყიდვა' :
-                        move.type === 'TRANSFER' ? 'გადატანა' : move.type}
+                    {move.type === 'RECEIVE' ? STRINGS.MOVEMENT_RECEIVE :
+                      move.type === 'SALE_OUT' ? STRINGS.MOVEMENT_SALE :
+                        move.type === 'TRANSFER' ? STRINGS.MOVEMENT_TRANSFER : move.type}
                   </span>
                 </td>
                 <td className="px-6 py-3 text-gray-600 flex items-center">

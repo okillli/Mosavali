@@ -152,4 +152,117 @@ export const STRINGS = {
   DROPDOWN_CLEAR: 'გასუფთავება',
   DROPDOWN_CREATE: 'შექმნა',
   DROPDOWN_CREATE_NEW: 'ახლის შექმნა',
+
+  // Page titles
+  PAGE_BUYERS: 'მყიდველები',
+  PAGE_SEASONS: 'სეზონები',
+  PAGE_VARIETIES: 'ჯიშები',
+
+  // Form labels
+  WEIGHT: 'წონა',
+  WEIGHT_KG: 'წონა (კგ)',
+  SALE_DATE: 'გაყიდვის თარიღი',
+  LOCATION: 'ლოკაცია',
+  AREA_HA: 'ფართობი (ჰა)',
+  CURRENT_SEASON: 'მიმდინარე',
+  BIN: 'სექცია',
+
+  // Placeholders
+  VARIETY_NAME_PLACEHOLDER: 'ჯიშის სახელი',
+  BUYER_NAME_PLACEHOLDER: 'მყიდველის სახელი',
+  YEAR_PLACEHOLDER: 'წელი (მაგ: 2027)',
+  BIN_NAME_PLACEHOLDER: 'მაგ: სილოსი 2',
+
+  // Expense allocation
+  ALLOCATION_TYPE: 'ხარჯის ტიპი (განაწილება)',
+  ALLOCATION_GENERAL: 'ზოგადი (ფერმის ხარჯი)',
+  ALLOCATION_SEASONAL: 'სეზონური (მთლიანი სეზონი)',
+  ALLOCATION_FIELD: 'მიწის მიხედვით',
+  ALLOCATION_LOT: 'მოსავლის მიხედვით',
+  ALLOCATION_WORK: 'სამუშაოს მიხედვით',
+  ALLOCATION_FIELD_SPECIFIC: 'კონკრეტულ მიწაზე',
+  ALLOCATION_LOT_SPECIFIC: 'კონკრეტულ მოსავალზე',
+  ALLOCATION_WORK_SPECIFIC: 'კონკრეტულ სამუშაოზე',
+  AMOUNT: 'თანხა',
+  DATE: 'თარიღი',
+  EXPENSE_EXAMPLE: 'მაგ: საწვავი, სასუქი...',
+
+  // Movement types
+  MOVEMENT_RECEIVE: 'მიღება',
+  MOVEMENT_SALE: 'გაყიდვა',
+  MOVEMENT_TRANSFER: 'გადატანა',
+  MOVEMENT_ADJUSTMENT: 'კორექცია',
+
+  // Info messages
+  WEIGHT_CANNOT_CHANGE: 'წონის შეცვლა შეუძლებელია',
+  LOT_CANNOT_CHANGE: 'მოსავლის შეცვლა შეუძლებელია',
+
+  // Not found messages
+  SALE_NOT_FOUND: 'გაყიდვა ვერ მოიძებნა',
+  LOT_NOT_FOUND: 'მოსავალი ვერ მოიძებნა',
+  FIELD_NOT_FOUND: 'მიწა ვერ მოიძებნა',
+  WAREHOUSE_NOT_FOUND: 'საწყობი ვერ მოიძებნა',
+  WORK_NOT_FOUND: 'სამუშაო ვერ მოიძებნა',
+  EXPENSE_NOT_FOUND: 'ხარჯი ვერ მოიძებნა',
+
+  // History and movements
+  MOVEMENT_HISTORY: 'მოძრაობის ისტორია',
+  NO_MOVEMENTS: 'მოძრაობა არ არის',
+
+  // Actions
+  BACK: 'უკან',
+  VIEW_DETAILS: 'დეტალები',
+  ADD_BIN: 'სექციის დამატება',
+
+  // Empty states
+  NO_BINS: 'სექციები არ არის',
+  NO_DATA: 'მონაცემები არ არის',
+  NO_RECORDS: 'ჩანაწერები არ არის',
+  STOCK_ZERO: 'ნაშთი განულებულია (გაიყიდა ან გადავიდა).',
+  BIN_EMPTY: 'ცარიელია',
+
+  // Detail page labels
+  PHONE_NOT_SET: 'ტელეფონი მითითებული არ არის',
+  ADDRESS_NOT_SET: 'მისამართი მითითებული არ არის',
+  INITIAL_WEIGHT: 'საწყისი წონა',
+  CURRENT_BALANCE: 'მიმდინარე ნაშთი',
+  TOTAL_WORKS: 'სულ სამუშაო',
+  TOTAL_HARVEST: 'სულ მოსავალი',
+  TOTAL_TO_PAY: 'სულ გადასახდელი',
+  CHANGE_STATUS: 'სტატუსის შეცვლა',
+  FINANCES: 'ფინანსები',
+  OVERVIEW: 'მიმოხილვა',
+  LOCATION_DESCRIPTION: 'ლოკაცია / აღწერა',
+  BINS_SECTIONS: 'სექციები (Bins)',
+  BIN_ADD_HINT: 'გამოიყენეთ სექციები საწყობში სხვადასხვა კულტურის ან ლოტის გასმიჯნად.',
+  BIN_ADD_ERROR: 'სექციის დამატება ვერ მოხერხდა',
+  BIN_STOCK_WARNING: 'ამ სექციაში არის მარაგი',
+  PRICE_PER_KG_SHORT: 'ფასი / კგ',
+
+  // Table headers
+  TABLE_DATE: 'თარიღი',
+  TABLE_TYPE: 'ტიპი',
+  TABLE_FROM_TO: 'საიდან → სად',
+
+  // Profile errors
+  PROFILE_NOT_FOUND: 'პროფილის მონაცემები ვერ მოიძებნა.',
+  PROFILE_CHECK_DB: 'პროფილის მონაცემები ვერ მოიძებნა. გთხოვთ შეამოწმოთ მონაცემთა ბაზა.',
+
+  // Add entity errors
+  ADD_BUYER_ERROR: 'მყიდველის დამატება ვერ მოხერხდა',
+  ADD_SEASON_ERROR: 'სეზონის დამატება ვერ მოხერხდა',
+  ADD_VARIETY_ERROR: 'ჯიშის დამატება ვერ მოხერხდა',
+  ADD_BIN_ERROR: 'სექციის დამატება ვერ მოხერხდა',
+
+  // Internal transfer
+  INTERNAL_TRANSFER: 'შიდა გადატანა',
+
+  // View actions
+  VIEW: 'ნახვა',
+  NO_ADDRESS: 'მისამართი გარეშე',
+  DETAILED_LIST: 'დეტალური სია',
+
+  // Form placeholders
+  PHONE_PLACEHOLDER: 'ტელეფონი',
+  NAME_PLACEHOLDER: 'სახელი',
 };

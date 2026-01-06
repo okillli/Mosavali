@@ -49,7 +49,7 @@ export default function SeasonsSettings() {
 
     if (profileError || !profile) {
       console.error('Profile error:', profileError);
-      alert('პროფილის მონაცემები ვერ მოიძებნა. გთხოვთ შეამოწმოთ მონაცემთა ბაზა.');
+      alert(STRINGS.PROFILE_CHECK_DB);
       setLoading(false);
       return;
     }
@@ -62,7 +62,7 @@ export default function SeasonsSettings() {
 
     if (insertError) {
       console.error('Insert error:', insertError);
-      alert('სეზონის დამატება ვერ მოხერხდა: ' + insertError.message);
+      alert(STRINGS.ADD_SEASON_ERROR + ': ' + insertError.message);
     }
 
     setNewYear('');
@@ -75,7 +75,7 @@ export default function SeasonsSettings() {
 
     if (profileError || !profile) {
       console.error('Profile error:', profileError);
-      alert('პროფილის მონაცემები ვერ მოიძებნა.');
+      alert(STRINGS.PROFILE_NOT_FOUND);
       return;
     }
 
@@ -151,15 +151,15 @@ export default function SeasonsSettings() {
 
   return (
     <div className="max-w-md">
-       <h1 className="text-xl font-bold mb-6">სეზონები</h1>
+       <h1 className="text-xl font-bold mb-6">{STRINGS.PAGE_SEASONS}</h1>
 
        <div className="flex gap-2 mb-6">
           <Input
-            placeholder="წელი (მაგ: 2027)"
+            placeholder={STRINGS.YEAR_PLACEHOLDER}
             type="number"
             value={newYear}
             onChange={e => setNewYear(e.target.value)}
-            className="mb-0"
+            noMargin
           />
           <Button onClick={handleAdd} disabled={loading}>{STRINGS.ADD}</Button>
        </div>
@@ -176,7 +176,8 @@ export default function SeasonsSettings() {
                        type="number"
                        value={editYear}
                        onChange={e => setEditYear(e.target.value)}
-                       className="!mb-0 flex-1"
+                       noMargin
+                       className="flex-1"
                      />
                      <button
                        onClick={() => handleEdit(s.id)}

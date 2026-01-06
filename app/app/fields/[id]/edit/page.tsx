@@ -33,11 +33,11 @@ export default function EditFieldPage() {
   };
 
   if (loading) {
-    return <div className="p-4">იტვირთება...</div>;
+    return <div className="p-4">{STRINGS.LOADING}</div>;
   }
 
   if (!field) {
-    return <div className="p-4">მიწა ვერ მოიძებნა</div>;
+    return <div className="p-4">{STRINGS.FIELD_NOT_FOUND}</div>;
   }
 
   return (

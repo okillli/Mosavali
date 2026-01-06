@@ -45,7 +45,7 @@ export default function BuyersSettings() {
     const { data: profile, error: profileError } = await supabase.from('profiles').select('farm_id').single();
 
     if (profileError || !profile) {
-      alert('პროფილის მონაცემები ვერ მოიძებნა.');
+      alert(STRINGS.PROFILE_NOT_FOUND);
       setLoading(false);
       return;
     }
@@ -57,7 +57,7 @@ export default function BuyersSettings() {
     });
 
     if (error) {
-      alert('მყიდველის დამატება ვერ მოხერხდა: ' + error.message);
+      alert(STRINGS.ADD_BUYER_ERROR + ': ' + error.message);
     }
 
     setNewName('');
@@ -119,16 +119,16 @@ export default function BuyersSettings() {
 
   return (
     <div className="max-w-md">
-      <h1 className="text-xl font-bold mb-6">მყიდველები</h1>
+      <h1 className="text-xl font-bold mb-6">{STRINGS.PAGE_BUYERS}</h1>
 
       <div className="bg-white p-4 rounded shadow mb-6 space-y-3">
         <Input
-          placeholder="მყიდველის სახელი / კომპანია"
+          placeholder={STRINGS.BUYER_NAME_PLACEHOLDER}
           value={newName}
           onChange={e => setNewName(e.target.value)}
         />
         <Input
-          placeholder="ტელეფონი"
+          placeholder={STRINGS.PHONE_PLACEHOLDER}
           value={newPhone}
           onChange={e => setNewPhone(e.target.value)}
         />
@@ -146,13 +146,13 @@ export default function BuyersSettings() {
                   <Input
                     value={editName}
                     onChange={e => setEditName(e.target.value)}
-                    placeholder="სახელი"
+                    placeholder={STRINGS.NAME_PLACEHOLDER}
                     className="!mb-2"
                   />
                   <Input
                     value={editPhone}
                     onChange={e => setEditPhone(e.target.value)}
-                    placeholder="ტელეფონი"
+                    placeholder={STRINGS.PHONE_PLACEHOLDER}
                     className="!mb-2"
                   />
                   <div className="flex gap-2">

@@ -36,17 +36,17 @@ export default function WarehousesList() {
             {w.location_text ? (
                 <p className="text-sm text-gray-500">{w.location_text}</p>
             ) : (
-                <p className="text-sm text-gray-300 italic">მისამართი გარეშე</p>
+                <p className="text-sm text-gray-300 italic">{STRINGS.NO_ADDRESS}</p>
             )}
-            <div className="mt-2 text-xs text-blue-600 font-medium">დეტალების ნახვა &rarr;</div>
+            <div className="mt-2 text-xs text-blue-600 font-medium">{STRINGS.VIEW_DETAILS} &rarr;</div>
           </Link>
         ))}
         {loading && (
-          <div className="col-span-full text-center py-10 text-gray-500">იტვირთება...</div>
+          <div className="col-span-full text-center py-10 text-gray-500">{STRINGS.LOADING}</div>
         )}
         {!loading && warehouses.length === 0 && (
           <div className="col-span-full text-center py-10 text-gray-500">
-            მონაცემები არ მოიძებნა
+            {STRINGS.NO_DATA}
           </div>
         )}
       </div>

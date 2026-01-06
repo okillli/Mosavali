@@ -73,7 +73,7 @@ export default function NewLotPage() {
       // Get farm_id first
       const { data: profile, error: profileError } = await supabase.from('profiles').select('farm_id').single();
       if (profileError || !profile) {
-        throw new Error('პროფილის მონაცემები ვერ მოიძებნა.');
+        throw new Error(STRINGS.PROFILE_NOT_FOUND);
       }
 
       const lotCode = `LOT-${new Date().getFullYear()}-${Math.floor(Math.random() * 10000)}`;

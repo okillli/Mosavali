@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '../lib/supabaseClient';
+import { STRINGS } from '../lib/strings';
 import { Loader2 } from 'lucide-react';
 
 export default function Landing() {
@@ -25,7 +26,7 @@ export default function Landing() {
   return (
     <div className="h-screen w-full flex items-center justify-center bg-gray-50 text-green-700">
       <Loader2 className="animate-spin mr-2" />
-      <span className="font-medium">იტვირთება...</span>
+      <span className="font-medium">{STRINGS.LOADING}</span>
     </div>
   );
 }

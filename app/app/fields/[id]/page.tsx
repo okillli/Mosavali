@@ -65,12 +65,12 @@ export default function FieldDetailPage() {
     return STRINGS.DELETE_CANNOT_UNDO;
   };
 
-  if (!field) return <div className="p-4">იტვირთება...</div>;
+  if (!field) return <div className="p-4">{STRINGS.LOADING}</div>;
 
   return (
     <div>
       <div className="mb-6">
-        <Button variant="secondary" onClick={() => router.push('/app/fields')} className="mb-4">&larr; უკან</Button>
+        <Button variant="secondary" onClick={() => router.push('/app/fields')} className="mb-4">&larr; {STRINGS.BACK}</Button>
         <div className="flex justify-between items-start">
           <div>
             <h1 className="text-2xl font-bold flex items-center">
@@ -106,7 +106,7 @@ export default function FieldDetailPage() {
           className={`px-4 py-2 font-medium ${activeTab === 'OVERVIEW' ? 'border-b-2 border-green-600 text-green-700' : 'text-gray-500'}`}
           onClick={() => setActiveTab('OVERVIEW')}
         >
-          მიმოხილვა
+          {STRINGS.OVERVIEW}
         </button>
         <button
           className={`px-4 py-2 font-medium ${activeTab === 'WORKS' ? 'border-b-2 border-green-600 text-green-700' : 'text-gray-500'}`}
@@ -127,7 +127,7 @@ export default function FieldDetailPage() {
         {activeTab === 'OVERVIEW' && (
           <div className="bg-white p-6 rounded shadow space-y-4">
             <div>
-              <h3 className="text-sm font-bold text-gray-500 uppercase mb-1">ლოკაცია / აღწერა</h3>
+              <h3 className="text-sm font-bold text-gray-500 uppercase mb-1">{STRINGS.LOCATION_DESCRIPTION}</h3>
               <p>{field.location_text || '-'}</p>
             </div>
             <div>
@@ -138,14 +138,14 @@ export default function FieldDetailPage() {
               <div className="bg-blue-50 p-4 rounded text-center">
                 <Tractor className="mx-auto mb-2 text-blue-500" />
                 <span className="block font-bold text-xl">{works.length}</span>
-                <span className="text-xs text-gray-500">სულ სამუშაო</span>
+                <span className="text-xs text-gray-500">{STRINGS.TOTAL_WORKS}</span>
               </div>
               <div className="bg-green-50 p-4 rounded text-center">
                 <DollarSign className="mx-auto mb-2 text-green-500" />
                 <span className="block font-bold text-xl">
                   {lots.reduce((sum, l) => sum + l.harvested_kg, 0).toLocaleString()} {STRINGS.UNIT_KG}
                 </span>
-                <span className="text-xs text-gray-500">სულ მოსავალი</span>
+                <span className="text-xs text-gray-500">{STRINGS.TOTAL_HARVEST}</span>
               </div>
             </div>
           </div>
@@ -164,7 +164,7 @@ export default function FieldDetailPage() {
                 <div className="text-sm">{w.status === 'COMPLETED' ? STRINGS.COMPLETED : STRINGS.PLANNED}</div>
               </div>
             ))}
-            {works.length === 0 && <div className="text-center text-gray-500 py-4">ჩანაწერები არ არის</div>}
+            {works.length === 0 && <div className="text-center text-gray-500 py-4">{STRINGS.NO_RECORDS}</div>}
           </div>
         )}
 
@@ -182,7 +182,7 @@ export default function FieldDetailPage() {
                 </div>
               </div>
             ))}
-            {lots.length === 0 && <div className="text-center text-gray-500 py-4">ჩანაწერები არ არის</div>}
+            {lots.length === 0 && <div className="text-center text-gray-500 py-4">{STRINGS.NO_RECORDS}</div>}
           </div>
         )}
       </div>

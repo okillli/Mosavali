@@ -61,7 +61,7 @@ export default function VarietiesSettings() {
 
     if (error) {
       console.error('Insert error:', error);
-      alert('ჯიშის დამატება ვერ მოხერხდა: ' + error.message);
+      alert(STRINGS.ADD_VARIETY_ERROR + ': ' + error.message);
     }
 
     setNewName('');
@@ -115,14 +115,14 @@ export default function VarietiesSettings() {
   const getDeleteWarning = (variety: VarietyWithCrop): string => {
     const count = lotsCount[variety.id] || 0;
     if (count > 0) {
-      return `ამ ჯიშს აქვს მოსავალი (${count}). ${STRINGS.DELETE_CANNOT_UNDO}`;
+      return `${STRINGS.VARIETY_HAS_LOTS} (${count}). ${STRINGS.DELETE_CANNOT_UNDO}`;
     }
     return STRINGS.DELETE_CANNOT_UNDO;
   };
 
   return (
     <div className="max-w-md">
-       <h1 className="text-xl font-bold mb-6">ჯიშები</h1>
+       <h1 className="text-xl font-bold mb-6">{STRINGS.PAGE_VARIETIES}</h1>
 
        <div className="bg-white p-4 rounded shadow mb-6 space-y-3">
           <label className="block text-sm font-medium">{STRINGS.CROP}</label>
@@ -135,7 +135,7 @@ export default function VarietiesSettings() {
           </select>
 
           <Input
-            placeholder="ჯიშის სახელი"
+            placeholder={STRINGS.VARIETY_NAME_PLACEHOLDER}
             value={newName}
             onChange={e => setNewName(e.target.value)}
           />
@@ -160,7 +160,7 @@ export default function VarietiesSettings() {
                      <Input
                        value={editName}
                        onChange={e => setEditName(e.target.value)}
-                       placeholder="ჯიშის სახელი"
+                       placeholder={STRINGS.VARIETY_NAME_PLACEHOLDER}
                        className="!mb-2"
                      />
                      <div className="flex gap-2">
@@ -212,7 +212,7 @@ export default function VarietiesSettings() {
        <ConfirmDialog
          isOpen={!!varietyToDelete}
          title={STRINGS.DELETE_CONFIRM_TITLE}
-         message={varietyToDelete ? `წაშალოთ ჯიში "${varietyToDelete.name}"? ${getDeleteWarning(varietyToDelete)}` : ''}
+         message={varietyToDelete ? `${STRINGS.DELETE_VARIETY_CONFIRM} "${varietyToDelete.name}"? ${getDeleteWarning(varietyToDelete)}` : ''}
          confirmLabel={STRINGS.DELETE}
          cancelLabel={STRINGS.CANCEL}
          variant="danger"

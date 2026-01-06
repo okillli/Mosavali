@@ -88,7 +88,7 @@ export default function ReportsPage() {
           </button>
       </div>
 
-      {loading && <div>იტვირთება...</div>}
+      {loading && <div>{STRINGS.LOADING}</div>}
 
       {!loading && tab === 'STOCK' && (
           <div className="space-y-6">
@@ -100,7 +100,7 @@ export default function ReportsPage() {
 
             <div className="bg-white rounded shadow overflow-hidden">
                 <div className="px-6 py-4 border-b bg-gray-50">
-                    <h3 className="font-bold text-gray-700">დეტალური სია</h3>
+                    <h3 className="font-bold text-gray-700">{STRINGS.DETAILED_LIST}</h3>
                 </div>
                 <div className="overflow-x-auto">
                     <table className="min-w-full text-left text-sm">
@@ -123,7 +123,7 @@ export default function ReportsPage() {
                                     </td>
                                 </tr>
                             ))}
-                            {stock.length === 0 && <tr><td colSpan={4} className="p-4 text-center text-gray-400">ცარიელია</td></tr>}
+                            {stock.length === 0 && <tr><td colSpan={4} className="p-4 text-center text-gray-400">{STRINGS.BIN_EMPTY}</td></tr>}
                         </tbody>
                     </table>
                 </div>

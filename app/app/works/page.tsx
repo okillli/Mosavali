@@ -56,11 +56,11 @@ export default function WorksList() {
           </Link>
         ))}
         {loading && (
-          <div className="text-center py-10 text-gray-500">იტვირთება...</div>
+          <div className="text-center py-10 text-gray-500">{STRINGS.LOADING}</div>
         )}
         {!loading && works.length === 0 && (
           <div className="text-center py-10 text-gray-500">
-            მონაცემები არ მოიძებნა
+            {STRINGS.NO_DATA}
           </div>
         )}
       </div>

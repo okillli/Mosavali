@@ -49,7 +49,7 @@ export default function NewWorkPage() {
 
     if (profileError || !profile) {
       console.error('Profile error:', profileError);
-      setError('პროფილის მონაცემები ვერ მოიძებნა.');
+      setError(STRINGS.PROFILE_NOT_FOUND);
       setLoading(false);
       return;
     }

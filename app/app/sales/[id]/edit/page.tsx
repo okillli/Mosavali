@@ -74,8 +74,8 @@ export default function EditSalePage() {
     }
   };
 
-  if (initialLoading) return <div className="p-4">იტვირთება...</div>;
-  if (!sale) return <div className="p-4">გაყიდვა ვერ მოიძებნა</div>;
+  if (initialLoading) return <div className="p-4">{STRINGS.LOADING}</div>;
+  if (!sale) return <div className="p-4">{STRINGS.SALE_NOT_FOUND}</div>;
 
   const buyerOptions = buyers.map(b => ({ value: b.id, label: b.name }));
   const statusOptions = [
@@ -100,9 +100,9 @@ export default function EditSalePage() {
 
         {/* Read-only weight */}
         <div className="bg-gray-50 p-3 rounded border">
-          <label className="block text-xs font-bold text-gray-500 uppercase mb-1">წონა</label>
+          <label className="block text-xs font-bold text-gray-500 uppercase mb-1">{STRINGS.WEIGHT}</label>
           <div className="font-medium">{sale.weight_kg} {STRINGS.UNIT_KG}</div>
-          <div className="text-xs text-gray-500">წონის შეცვლა შეუძლებელია</div>
+          <div className="text-xs text-gray-500">{STRINGS.WEIGHT_CANNOT_CHANGE}</div>
         </div>
 
         <Select
@@ -114,7 +114,7 @@ export default function EditSalePage() {
         />
 
         <Input
-          label="გაყიდვის თარიღი"
+          label={STRINGS.SALE_DATE}
           type="date"
           value={formData.sale_date}
           onChange={e => setFormData({ ...formData, sale_date: e.target.value })}

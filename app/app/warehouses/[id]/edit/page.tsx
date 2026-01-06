@@ -33,11 +33,11 @@ export default function EditWarehousePage() {
   };
 
   if (loading) {
-    return <div className="p-4">იტვირთება...</div>;
+    return <div className="p-4">{STRINGS.LOADING}</div>;
   }
 
   if (!warehouse) {
-    return <div className="p-4">საწყობი ვერ მოიძებნა</div>;
+    return <div className="p-4">{STRINGS.WAREHOUSE_NOT_FOUND}</div>;
   }
 
   return (

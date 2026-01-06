@@ -131,7 +131,7 @@ export default function WorkDetailPage() {
 
   const totalExpenses = linkedExpenses.reduce((sum, e) => sum + Number(e.amount_gel), 0);
 
-  if(!work) return <div className="p-4">იტვირთება...</div>;
+  if(!work) return <div className="p-4">{STRINGS.LOADING}</div>;
 
   return (
     <div className="max-w-2xl mx-auto">

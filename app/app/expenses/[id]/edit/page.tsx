@@ -92,16 +92,16 @@ export default function EditExpensePage() {
     }
   };
 
-  if (initialLoading) return <div className="p-4">იტვირთება...</div>;
-  if (!expense) return <div className="p-4">ხარჯი ვერ მოიძებნა</div>;
+  if (initialLoading) return <div className="p-4">{STRINGS.LOADING}</div>;
+  if (!expense) return <div className="p-4">{STRINGS.EXPENSE_NOT_FOUND}</div>;
 
   const seasonOptions = seasons.map(s => ({ value: s.id, label: s.year.toString() }));
   const allocationOptions = [
-    { value: 'GENERAL', label: 'ზოგადი (ფერმის ხარჯი)' },
-    { value: 'SEASON', label: 'სეზონური (მთლიანი სეზონი)' },
-    { value: 'FIELD', label: `${STRINGS.NAV_FIELDS} (კონკრეტულ მიწაზე)` },
-    { value: 'WORK', label: `${STRINGS.NAV_WORKS} (კონკრეტულ სამუშაოზე)` },
-    { value: 'LOT', label: `${STRINGS.NAV_LOTS} (კონკრეტულ მოსავალზე)` }
+    { value: 'GENERAL', label: STRINGS.ALLOCATION_GENERAL },
+    { value: 'SEASON', label: STRINGS.ALLOCATION_SEASONAL },
+    { value: 'FIELD', label: `${STRINGS.NAV_FIELDS} (${STRINGS.ALLOCATION_FIELD_SPECIFIC})` },
+    { value: 'WORK', label: `${STRINGS.NAV_WORKS} (${STRINGS.ALLOCATION_WORK_SPECIFIC})` },
+    { value: 'LOT', label: `${STRINGS.NAV_LOTS} (${STRINGS.ALLOCATION_LOT_SPECIFIC})` }
   ];
   const fieldOptions = fields.map(f => ({ value: f.id, label: f.name }));
   const workOptions = works.map(w => ({
@@ -128,7 +128,7 @@ export default function EditExpensePage() {
         />
 
         <Select
-          label="ხარჯის ტიპი (განაწილება)"
+          label={STRINGS.ALLOCATION_TYPE}
           value={formData.allocation_type}
           onChange={e => setFormData({ ...formData, allocation_type: e.target.value, target_id: '' })}
           options={allocationOptions}
@@ -165,7 +165,7 @@ export default function EditExpensePage() {
         )}
 
         <Input
-          label={`თანხა (${STRINGS.CURRENCY})`}
+          label={`${STRINGS.AMOUNT} (${STRINGS.CURRENCY})`}
           type="number"
           step="0.01"
           value={formData.amount_gel}
@@ -173,7 +173,7 @@ export default function EditExpensePage() {
         />
 
         <Input
-          label="თარიღი"
+          label={STRINGS.DATE}
           type="date"
           value={formData.expense_date}
           onChange={e => setFormData({ ...formData, expense_date: e.target.value })}
@@ -183,7 +183,7 @@ export default function EditExpensePage() {
           label={STRINGS.NOTES}
           value={formData.description}
           onChange={e => setFormData({ ...formData, description: e.target.value })}
-          placeholder="მაგ: საწვავი, სასუქი..."
+          placeholder={STRINGS.EXPENSE_EXAMPLE}
         />
 
         <div className="flex gap-2 pt-2">

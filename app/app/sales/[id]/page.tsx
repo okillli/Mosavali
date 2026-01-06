@@ -73,7 +73,7 @@ export default function SaleDetailPage() {
     }
   };
 
-  if (!sale) return <div className="p-4">იტვირთება...</div>;
+  if (!sale) return <div className="p-4">{STRINGS.LOADING}</div>;
 
   const getStatusColor = (status: string) => {
     if (status === 'PAID') return 'bg-green-100 text-green-800 border-green-200';
@@ -90,7 +90,7 @@ export default function SaleDetailPage() {
   return (
     <div className="max-w-3xl mx-auto">
       <div className="mb-6 flex justify-between items-center">
-         <Button variant="secondary" onClick={() => router.push('/app/sales')}>&larr; უკან</Button>
+         <Button variant="secondary" onClick={() => router.push('/app/sales')}>&larr; {STRINGS.BACK}</Button>
          <div className="flex items-center gap-3">
              <div className={`px-4 py-1 rounded-full border font-bold text-sm ${getStatusColor(sale.payment_status)}`}>
                  {getStatusLabel(sale.payment_status)}
@@ -124,7 +124,7 @@ export default function SaleDetailPage() {
                       <User className="mr-2 text-gray-500" />
                       {sale.buyers?.name || '-'}
                   </h1>
-                  <p className="text-gray-500 ml-8">{sale.buyers?.phone || 'ტელეფონი მითითებული არ არის'}</p>
+                  <p className="text-gray-500 ml-8">{sale.buyers?.phone || STRINGS.PHONE_NOT_SET}</p>
               </div>
               <div className="text-right">
                   <div className="flex items-center text-gray-500 justify-end mb-1">
@@ -145,20 +145,20 @@ export default function SaleDetailPage() {
                   </div>
                   <div className="mt-4 space-y-2">
                       <div className="flex justify-between border-b border-gray-100 pb-1">
-                          <span className="text-gray-600">წონა</span>
+                          <span className="text-gray-600">{STRINGS.WEIGHT}</span>
                           <span className="font-medium">{sale.weight_kg} {STRINGS.UNIT_KG}</span>
                       </div>
                       <div className="flex justify-between border-b border-gray-100 pb-1">
-                          <span className="text-gray-600">ფასი / კგ</span>
+                          <span className="text-gray-600">{STRINGS.PRICE_PER_KG_SHORT}</span>
                           <span className="font-medium">{sale.price_per_kg} {STRINGS.CURRENCY}</span>
                       </div>
                   </div>
               </div>
 
               <div>
-                  <h3 className="text-sm font-bold text-gray-500 uppercase mb-4">ფინანსები</h3>
+                  <h3 className="text-sm font-bold text-gray-500 uppercase mb-4">{STRINGS.FINANCES}</h3>
                   <div className="bg-green-50 p-6 rounded border border-green-100 text-center">
-                      <div className="text-sm text-green-600 mb-1">სულ გადასახდელი</div>
+                      <div className="text-sm text-green-600 mb-1">{STRINGS.TOTAL_TO_PAY}</div>
                       <div className="text-3xl font-bold text-green-800">
                           {sale.total_gel.toLocaleString()} {STRINGS.CURRENCY}
                       </div>
@@ -166,7 +166,7 @@ export default function SaleDetailPage() {
 
                   {/* Status Actions */}
                   <div className="mt-6">
-                      <label className="block text-xs font-bold text-gray-400 uppercase mb-2">სტატუსის შეცვლა</label>
+                      <label className="block text-xs font-bold text-gray-400 uppercase mb-2">{STRINGS.CHANGE_STATUS}</label>
                       <div className="grid grid-cols-3 gap-2">
                           <button 
                              onClick={() => updateStatus('UNPAID')}

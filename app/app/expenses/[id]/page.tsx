@@ -58,7 +58,7 @@ export default function ExpenseDetailPage() {
     return type === 'FIELD' ? STRINGS.NAV_FIELDS :
            type === 'WORK' ? STRINGS.NAV_WORKS :
            type === 'LOT' ? STRINGS.NAV_LOTS :
-           type === 'SEASON' ? STRINGS.SEASON : 'ზოგადი';
+           type === 'SEASON' ? STRINGS.SEASON : STRINGS.ALLOCATION_GENERAL;
   };
 
   const handleDelete = async () => {
@@ -74,11 +74,11 @@ export default function ExpenseDetailPage() {
     }
   };
 
-  if (!expense) return <div className="p-4">იტვირთება...</div>;
+  if (!expense) return <div className="p-4">{STRINGS.LOADING}</div>;
 
   return (
     <div className="max-w-2xl mx-auto">
-      <Button variant="secondary" onClick={() => router.back()} className="mb-4">&larr; უკან</Button>
+      <Button variant="secondary" onClick={() => router.back()} className="mb-4">&larr; {STRINGS.BACK}</Button>
 
       <div className="bg-white rounded shadow overflow-hidden">
         <div className="p-6 border-b bg-gray-50 flex justify-between items-start">

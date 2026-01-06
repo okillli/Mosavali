@@ -94,8 +94,8 @@ export default function EditLotPage() {
     }
   };
 
-  if (initialLoading) return <div className="p-4">იტვირთება...</div>;
-  if (!lot) return <div className="p-4">მოსავალი ვერ მოიძებნა</div>;
+  if (initialLoading) return <div className="p-4">{STRINGS.LOADING}</div>;
+  if (!lot) return <div className="p-4">{STRINGS.LOT_NOT_FOUND}</div>;
 
   const seasonOptions = seasons.map(s => ({ value: s.id, label: s.year.toString() }));
   const cropOptions = crops.map(c => ({ value: c.id, label: c.name_ka }));

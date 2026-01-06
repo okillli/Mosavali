@@ -28,13 +28,27 @@ export default function TransferPage() {
   }, []);
 
   const fetchData = async () => {
-    const { data: s } = await supabase.from('v_bin_lot_stock')
-        .select('*, lots(lot_code), bins(name, warehouses(name))');
-    if (s) setStock(s);
+    // Fetch stock, lots, and bins separately (views can't be joined in PostgREST)
+    const [stockRes, lotsRes, binsRes] = await Promise.all([
+      supabase.from('v_bin_lot_stock').select('*'),
+      supabase.from('lots').select('id, lot_code'),
+      supabase.from('bins').select('*, warehouses(name)')
+    ]);
 
-    const { data: b } = await supabase.from('bins')
-        .select('*, warehouses(name)');
-    if (b) setTargetBins(b);
+    // Combine stock with related data
+    if (stockRes.data && lotsRes.data && binsRes.data) {
+      const lotsMap = new Map(lotsRes.data.map(l => [l.id, l]));
+      const binsMap = new Map(binsRes.data.map(b => [b.id, b]));
+
+      const stockWithRelations: StockViewWithRelations[] = stockRes.data.map(s => ({
+        ...s,
+        lots: lotsMap.get(s.lot_id),
+        bins: binsMap.get(s.bin_id)
+      }));
+      setStock(stockWithRelations);
+    }
+
+    if (binsRes.data) setTargetBins(binsRes.data);
   };
 
   const handleSubmit = async () => {
@@ -45,7 +59,7 @@ export default function TransferPage() {
 
     if (profileError || !profile) {
       console.error('Profile error:', profileError);
-      setError('პროფილის მონაცემები ვერ მოიძებნა.');
+      setError(STRINGS.PROFILE_NOT_FOUND);
       setLoading(false);
       return;
     }
@@ -58,7 +72,7 @@ export default function TransferPage() {
       to_bin_id: formData.to_bin_id,
       weight_kg: parseFloat(formData.weight_kg),
       movement_date: formData.movement_date,
-      reason: 'შიდა გადატანა'
+      reason: STRINGS.INTERNAL_TRANSFER
     });
 
     if (moveError) {
@@ -94,7 +108,7 @@ export default function TransferPage() {
             <option value="">{STRINGS.SELECT_OPTION}</option>
             {stock.map(s => (
                 <option key={s.lot_id + s.bin_id} value={s.lot_id + s.bin_id}>
-                    {s.lots.lot_code} @ {s.bins.warehouses.name}/{s.bins.name} ({s.stock_kg} {STRINGS.UNIT_KG})
+                    {s.lots?.lot_code} @ {s.bins?.warehouses?.name}/{s.bins?.name} ({s.stock_kg} {STRINGS.UNIT_KG})
                 </option>
             ))}
           </select>

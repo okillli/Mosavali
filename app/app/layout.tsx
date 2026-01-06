@@ -23,7 +23,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     checkUser();
   }, [router]);
 
-  if (loading) return <div className="p-4 text-center">Loading...</div>;
+  if (loading) return <div className="p-4 text-center">{STRINGS.LOADING}</div>;
 
   return (
     <div className="pb-16 md:pb-0 md:flex">

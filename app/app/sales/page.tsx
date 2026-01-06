@@ -61,16 +61,16 @@ export default function SalesList() {
                  <span className={`text-xs px-2 py-1 rounded font-medium ${getStatusColor(sale.payment_status)}`}>
                      {getStatusLabel(sale.payment_status)}
                  </span>
-                 <span className="text-xs text-blue-600">ნახვა &rarr;</span>
+                 <span className="text-xs text-blue-600">{STRINGS.VIEW} &rarr;</span>
             </div>
           </Link>
         ))}
         {loading && (
-          <div className="text-center py-10 text-gray-500">იტვირთება...</div>
+          <div className="text-center py-10 text-gray-500">{STRINGS.LOADING}</div>
         )}
         {!loading && sales.length === 0 && (
           <div className="text-center py-10 text-gray-500">
-            მონაცემები არ მოიძებნა
+            {STRINGS.NO_DATA}
           </div>
         )}
       </div>

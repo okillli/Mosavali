@@ -63,7 +63,7 @@ export default function WarehouseDetailPage() {
     });
 
     if (error) {
-      alert('სექციის დამატება ვერ მოხერხდა: ' + error.message);
+      alert(STRINGS.BIN_ADD_ERROR + ': ' + error.message);
     } else {
       setNewBinName('');
       loadData();
@@ -118,7 +118,7 @@ export default function WarehouseDetailPage() {
     setEditBinName('');
   };
 
-  if (!warehouse) return <div className="p-4">იტვირთება...</div>;
+  if (!warehouse) return <div className="p-4">{STRINGS.LOADING}</div>;
 
   const getBinStock = (binId: string) => {
     return stock.find(s => s.bin_id === binId) || null;
@@ -136,7 +136,7 @@ export default function WarehouseDetailPage() {
   const getBinDeleteWarning = (bin: Bin): string => {
     const binStock = getBinStock(bin.id);
     if (binStock && binStock.stock_kg > 0) {
-      return `ამ სექციაში არის მარაგი (${binStock.stock_kg} ${STRINGS.UNIT_KG}). ${STRINGS.DELETE_CANNOT_UNDO}`;
+      return `${STRINGS.BIN_STOCK_WARNING} (${binStock.stock_kg} ${STRINGS.UNIT_KG}). ${STRINGS.DELETE_CANNOT_UNDO}`;
     }
     return STRINGS.DELETE_CANNOT_UNDO;
   };
@@ -144,14 +144,14 @@ export default function WarehouseDetailPage() {
   return (
     <div>
       <div className="mb-6">
-        <Button variant="secondary" onClick={() => router.push('/app/warehouses')} className="mb-4">&larr; უკან</Button>
+        <Button variant="secondary" onClick={() => router.push('/app/warehouses')} className="mb-4">&larr; {STRINGS.BACK}</Button>
         <div className="flex justify-between items-start">
           <div>
             <h1 className="text-2xl font-bold flex items-center text-gray-800">
               <WarehouseIcon className="mr-2" />
               {warehouse.name}
             </h1>
-            <p className="text-gray-500">{warehouse.location_text || 'მისამართი მითითებული არ არის'}</p>
+            <p className="text-gray-500">{warehouse.location_text || STRINGS.ADDRESS_NOT_SET}</p>
           </div>
           <div className="flex items-start gap-4">
             <div className="bg-blue-50 px-4 py-2 rounded border border-blue-100 text-right">
@@ -185,7 +185,7 @@ export default function WarehouseDetailPage() {
         <div className="md:col-span-2 space-y-4">
           <h3 className="font-bold text-gray-700 flex items-center">
             <Box className="mr-2" size={20} />
-            სექციები (Bins)
+            {STRINGS.BINS_SECTIONS}
           </h3>
 
           {bins.map(bin => {
@@ -201,7 +201,8 @@ export default function WarehouseDetailPage() {
                         <Input
                           value={editBinName}
                           onChange={e => setEditBinName(e.target.value)}
-                          className="!mb-0 flex-1"
+                          noMargin
+                          className="flex-1"
                         />
                         <button
                           onClick={() => handleEditBin(bin.id)}
@@ -229,7 +230,7 @@ export default function WarehouseDetailPage() {
                               {binStock.lots?.lot_code || '-'} ({binStock.lots?.crops?.name_ka || '-'})
                             </span>
                           ) : (
-                            <span className="text-gray-400 italic">ცარიელია</span>
+                            <span className="text-gray-400 italic">{STRINGS.BIN_EMPTY}</span>
                           )}
                         </div>
                       </>
@@ -239,7 +240,7 @@ export default function WarehouseDetailPage() {
                     <div className="flex items-center gap-4">
                       <div className="text-right">
                         {binStock ? (
-                          <div className="font-mono font-bold text-lg">{binStock.stock_kg} <span className="text-xs">კგ</span></div>
+                          <div className="font-mono font-bold text-lg">{binStock.stock_kg} <span className="text-xs">{STRINGS.UNIT_KG}</span></div>
                         ) : (
                           <div className="text-gray-300">-</div>
                         )}
@@ -272,20 +273,20 @@ export default function WarehouseDetailPage() {
         {/* Add Bin Sidebar */}
         <div>
           <div className="bg-gray-50 p-4 rounded border">
-            <h3 className="font-bold text-gray-700 mb-3 text-sm uppercase">სექციის დამატება</h3>
+            <h3 className="font-bold text-gray-700 mb-3 text-sm uppercase">{STRINGS.ADD_BIN}</h3>
             <div className="space-y-2">
               <Input
-                placeholder="მაგ: სილოსი 2"
+                placeholder={STRINGS.BIN_NAME_PLACEHOLDER}
                 value={newBinName}
                 onChange={e => setNewBinName(e.target.value)}
                 className="bg-white"
               />
               <Button onClick={handleAddBin} disabled={addingBin || !newBinName} className="w-full flex justify-center items-center">
-                <Plus size={16} className="mr-1" /> დამატება
+                <Plus size={16} className="mr-1" /> {STRINGS.ADD}
               </Button>
             </div>
             <p className="text-xs text-gray-400 mt-4">
-              გამოიყენეთ სექციები საწყობში სხვადასხვა კულტურის ან ლოტის გასმიჯნად.
+              {STRINGS.BIN_ADD_HINT}
             </p>
           </div>
         </div>

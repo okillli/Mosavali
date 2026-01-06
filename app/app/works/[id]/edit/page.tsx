@@ -85,8 +85,8 @@ export default function EditWorkPage() {
     }
   };
 
-  if (initialLoading) return <div className="p-4">იტვირთება...</div>;
-  if (!work) return <div className="p-4">სამუშაო ვერ მოიძებნა</div>;
+  if (initialLoading) return <div className="p-4">{STRINGS.LOADING}</div>;
+  if (!work) return <div className="p-4">{STRINGS.WORK_NOT_FOUND}</div>;
 
   const fieldOptions = fields.map(f => ({ value: f.id, label: f.name }));
   const workTypeOptions = workTypes.map(wt => ({ value: wt.id, label: wt.name }));
