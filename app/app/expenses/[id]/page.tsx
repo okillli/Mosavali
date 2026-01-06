@@ -1,0 +1,160 @@
+'use client';
+import React, { useEffect, useState } from 'react';
+import { supabase } from '../../../../lib/supabaseClient';
+import { STRINGS } from '../../../../lib/strings';
+import { useParams, useRouter } from 'next/navigation';
+import { Button, ConfirmDialog } from '../../../../components/ui';
+import { Tag, Calendar, Trash2, Pencil } from 'lucide-react';
+import { ExpenseWithRelations } from '../../../../types';
+
+export default function ExpenseDetailPage() {
+  const { id } = useParams();
+  const router = useRouter();
+  const [expense, setExpense] = useState<ExpenseWithRelations | null>(null);
+  const [targetName, setTargetName] = useState<string | null>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    if (id) fetchExpense();
+  }, [id]);
+
+  const fetchExpense = async () => {
+    const { data } = await supabase.from('expenses')
+      .select('*, seasons(year)')
+      .eq('id', id)
+      .single();
+
+    if (data) {
+      setExpense(data);
+      // Fetch target name if allocated to specific entity
+      if (data.target_id) {
+        await fetchTargetName(data.allocation_type, data.target_id);
+      }
+    }
+  };
+
+  const fetchTargetName = async (allocationType: string, targetId: string) => {
+    let name = null;
+    if (allocationType === 'FIELD') {
+      const { data } = await supabase.from('fields').select('name').eq('id', targetId).single();
+      name = data?.name;
+    } else if (allocationType === 'WORK') {
+      const { data } = await supabase.from('works')
+        .select('work_types(name), fields(name)')
+        .eq('id', targetId)
+        .single();
+      if (data) {
+        name = `${data.work_types?.name} @ ${data.fields?.name}`;
+      }
+    } else if (allocationType === 'LOT') {
+      const { data } = await supabase.from('lots').select('lot_code').eq('id', targetId).single();
+      name = data?.lot_code;
+    }
+    setTargetName(name);
+  };
+
+  const getAllocationLabel = (type: string) => {
+    return type === 'FIELD' ? STRINGS.NAV_FIELDS :
+           type === 'WORK' ? STRINGS.NAV_WORKS :
+           type === 'LOT' ? STRINGS.NAV_LOTS :
+           type === 'SEASON' ? STRINGS.SEASON : 'ზოგადი';
+  };
+
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    const { error } = await supabase.from('expenses').delete().eq('id', id);
+
+    if (error) {
+      alert(STRINGS.DELETE_ERROR + ': ' + error.message);
+      setIsDeleting(false);
+      setShowDeleteDialog(false);
+    } else {
+      router.back();
+    }
+  };
+
+  if (!expense) return <div className="p-4">იტვირთება...</div>;
+
+  return (
+    <div className="max-w-2xl mx-auto">
+      <Button variant="secondary" onClick={() => router.back()} className="mb-4">&larr; უკან</Button>
+
+      <div className="bg-white rounded shadow overflow-hidden">
+        <div className="p-6 border-b bg-gray-50 flex justify-between items-start">
+          <div>
+            <h1 className="text-xl font-bold text-gray-800">
+              {expense.description || STRINGS.NAV_EXPENSES}
+            </h1>
+            <div className="flex items-center text-gray-600 mt-2">
+              <Tag size={16} className="mr-2" />
+              <span>{getAllocationLabel(expense.allocation_type)}</span>
+              {targetName && (
+                <span className="ml-2 text-gray-500">• {targetName}</span>
+              )}
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => router.push(`/app/expenses/${id}/edit`)}
+              className="flex items-center gap-1"
+            >
+              <Pencil size={16} />
+              {STRINGS.EDIT}
+            </Button>
+            <Button
+              variant="danger"
+              onClick={() => setShowDeleteDialog(true)}
+              className="flex items-center gap-1"
+            >
+              <Trash2 size={16} />
+              {STRINGS.DELETE}
+            </Button>
+          </div>
+        </div>
+
+        <div className="p-6 space-y-6">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-xs font-bold text-gray-500 uppercase">{STRINGS.EXPENSE_AMOUNT}</label>
+              <div className="text-2xl font-bold text-red-600">-{Number(expense.amount_gel).toLocaleString()} {STRINGS.CURRENCY}</div>
+            </div>
+            <div>
+              <label className="text-xs font-bold text-gray-500 uppercase flex items-center gap-1">
+                <Calendar size={12} /> {STRINGS.EXPENSE_DATE}
+              </label>
+              <div className="text-lg">{expense.expense_date}</div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-xs font-bold text-gray-500 uppercase">{STRINGS.SEASON}</label>
+              <div className="text-lg">{expense.seasons?.year}</div>
+            </div>
+          </div>
+
+          {expense.description && (
+            <div>
+              <label className="text-xs font-bold text-gray-500 uppercase">{STRINGS.NOTES}</label>
+              <p className="text-gray-700 mt-1">{expense.description}</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <ConfirmDialog
+        isOpen={showDeleteDialog}
+        title={STRINGS.DELETE_CONFIRM_TITLE}
+        message={`${STRINGS.DELETE_EXPENSE_CONFIRM}? ${STRINGS.DELETE_CANNOT_UNDO}`}
+        confirmLabel={STRINGS.DELETE}
+        cancelLabel={STRINGS.CANCEL}
+        variant="danger"
+        onConfirm={handleDelete}
+        onCancel={() => setShowDeleteDialog(false)}
+        isLoading={isDeleting}
+      />
+    </div>
+  );
+}

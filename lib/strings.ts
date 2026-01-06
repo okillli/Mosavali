@@ -82,6 +82,34 @@ export const STRINGS = {
   NO_MIXING_ERROR: 'ეს სექცია უკვე შეიცავს სხვა ლოტს. შერევა აკრძალულია.',
   NEGATIVE_STOCK_ERROR: 'მარაგი არასაკმარისია.',
   SAVED_SUCCESS: 'წარმატებით შეინახა',
+  DELETED_SUCCESS: 'წარმატებით წაიშალა',
+  DELETE_ERROR: 'წაშლა ვერ მოხერხდა',
+  SAVE_ERROR: 'შენახვა ვერ მოხერხდა',
+  LOAD_ERROR: 'მონაცემების ჩატვირთვა ვერ მოხერხდა',
+
+  // Delete Confirmation
+  DELETE_CONFIRM_TITLE: 'წაშლის დადასტურება',
+  DELETE_FIELD_CONFIRM: 'წაშალოთ მიწა',
+  DELETE_LOT_CONFIRM: 'წაშალოთ მოსავალი',
+  DELETE_WAREHOUSE_CONFIRM: 'წაშალოთ საწყობი',
+  DELETE_BIN_CONFIRM: 'წაშალოთ სექცია',
+  DELETE_SALE_CONFIRM: 'წაშალოთ გაყიდვა',
+  DELETE_WORK_CONFIRM: 'წაშალოთ სამუშაო',
+  DELETE_EXPENSE_CONFIRM: 'წაშალოთ ხარჯი',
+  DELETE_BUYER_CONFIRM: 'წაშალოთ მყიდველი',
+  DELETE_SEASON_CONFIRM: 'წაშალოთ სეზონი',
+  DELETE_VARIETY_CONFIRM: 'წაშალოთ ჯიში',
+  DELETE_WARNING_RELATED: 'ეს ჩანაწერი დაკავშირებულია სხვა მონაცემებთან.',
+  DELETE_CANNOT_UNDO: 'ეს მოქმედება ვეღარ შეიცვლება.',
+
+  // Related data warnings
+  FIELD_HAS_LOTS: 'ამ მიწას აქვს მოსავალი',
+  FIELD_HAS_WORKS: 'ამ მიწას აქვს სამუშაოები',
+  WAREHOUSE_HAS_STOCK: 'ამ საწყობში არის მარაგი',
+  LOT_HAS_STOCK: 'ამ მოსავალს აქვს მარაგი',
+  LOT_HAS_SALES: 'ამ მოსავალს აქვს გაყიდვები',
+  BUYER_HAS_SALES: 'ამ მყიდველს აქვს გაყიდვები',
+  SEASON_HAS_DATA: 'ამ სეზონს აქვს მონაცემები',
   
   // Placeholders
   SELECT_OPTION: 'აირჩიეთ...',
@@ -92,4 +120,12 @@ export const STRINGS = {
   REPORT_PNL: 'მოგება/ზარალი',
   REPORT_OUTSTANDING: 'დაუფარავი გადახდები',
   REPORT_YIELD: 'მოსავლიანობა',
+
+  // Expenses linked to works
+  LINKED_EXPENSES: 'დაკავშირებული ხარჯები',
+  ADD_EXPENSE_TO_WORK: 'ხარჯის დამატება',
+  TOTAL_EXPENSES: 'სულ ხარჯები',
+  NO_LINKED_EXPENSES: 'ხარჯები არ არის',
+  EXPENSE_AMOUNT: 'თანხა',
+  EXPENSE_DATE: 'თარიღი',
 };
