@@ -1,27 +1,121 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { supabase } from '../../../lib/supabaseClient';
 import { STRINGS } from '../../../lib/strings';
 import Link from 'next/link';
 import { Plus } from 'lucide-react';
-import { Lot } from '../../../types';
+import { Lot, Crop, Field } from '../../../types';
+import { SearchFilterBar, FilterConfig } from '../../../components/ui';
 
 export default function LotsList() {
   const [lots, setLots] = useState<Lot[]>([]);
+  const [crops, setCrops] = useState<Crop[]>([]);
+  const [fields, setFields] = useState<Field[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Filter state
+  const [searchValue, setSearchValue] = useState('');
+  const [filterValues, setFilterValues] = useState<Record<string, string>>({
+    crop_id: '',
+    field_id: '',
+  });
 
   useEffect(() => {
-    fetchLots();
+    fetchData();
   }, []);
 
-  const fetchLots = async () => {
-    const { data } = await supabase.from('lots')
-      .select('*, crops(name_ka), varieties(name), fields(name)')
-      .limit(50)
-      .order('created_at', { ascending: false });
-    if (data) setLots(data);
-    setLoading(false);
+  const fetchData = async () => {
+    try {
+      const [lotsRes, cropsRes, fieldsRes] = await Promise.all([
+        supabase.from('lots')
+          .select('*, crops(name_ka), varieties(name), fields(name)')
+          .limit(50)
+          .order('created_at', { ascending: false }),
+        supabase.from('crops')
+          .select('id, name_ka')
+          .order('name_ka'),
+        supabase.from('fields')
+          .select('id, name')
+          .order('name'),
+      ]);
+
+      if (lotsRes.error) {
+        console.error('Failed to fetch lots:', lotsRes.error);
+        setError(STRINGS.LOAD_ERROR);
+        return;
+      }
+      if (cropsRes.error) {
+        console.error('Failed to fetch crops:', cropsRes.error);
+        setError(STRINGS.LOAD_ERROR);
+        return;
+      }
+      if (fieldsRes.error) {
+        console.error('Failed to fetch fields:', fieldsRes.error);
+        setError(STRINGS.LOAD_ERROR);
+        return;
+      }
+
+      if (lotsRes.data) setLots(lotsRes.data);
+      if (cropsRes.data) setCrops(cropsRes.data);
+      if (fieldsRes.data) setFields(fieldsRes.data);
+    } catch (err) {
+      console.error('Fetch error:', err);
+      setError(STRINGS.LOAD_ERROR);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  // Filter configuration
+  const filters: FilterConfig[] = useMemo(() => [
+    {
+      key: 'crop_id',
+      label: STRINGS.CROP,
+      options: crops.map(c => ({ value: c.id, label: c.name_ka })),
+    },
+    {
+      key: 'field_id',
+      label: STRINGS.NAV_FIELDS,
+      options: fields.map(f => ({ value: f.id, label: f.name })),
+    },
+  ], [crops, fields]);
+
+  // Filter logic
+  const filteredLots = useMemo(() => {
+    return lots.filter(lot => {
+      // Search filter
+      if (searchValue) {
+        const search = searchValue.toLowerCase();
+        const lotCode = lot.lot_code?.toLowerCase() || '';
+        const cropName = lot.crops?.name_ka?.toLowerCase() || '';
+        const varietyName = lot.varieties?.name?.toLowerCase() || '';
+        if (!lotCode.includes(search) && !cropName.includes(search) && !varietyName.includes(search)) {
+          return false;
+        }
+      }
+
+      // Crop filter
+      if (filterValues.crop_id && lot.crop_id !== filterValues.crop_id) {
+        return false;
+      }
+
+      // Field filter
+      if (filterValues.field_id && lot.field_id !== filterValues.field_id) {
+        return false;
+      }
+
+      return true;
+    });
+  }, [lots, searchValue, filterValues]);
+
+  const handleFilterChange = useCallback((key: string, value: string) => {
+    setFilterValues(prev => ({ ...prev, [key]: value }));
+  }, []);
+
+  const handleClearFilters = useCallback(() => {
+    setFilterValues({ crop_id: '', field_id: '' });
+  }, []);
 
   return (
     <div>
@@ -31,20 +125,33 @@ export default function LotsList() {
           <Plus size={16} className="mr-1" /> {STRINGS.ADD}
         </Link>
       </div>
-      
+
+      <SearchFilterBar
+        searchValue={searchValue}
+        onSearchChange={setSearchValue}
+        filters={filters}
+        filterValues={filterValues}
+        onFilterChange={handleFilterChange}
+        onClearFilters={handleClearFilters}
+      />
+
+      {error && (
+        <div className="bg-red-100 text-red-700 p-3 rounded mb-4">{error}</div>
+      )}
+
       <div className="space-y-4">
-        {lots.map((lot) => (
+        {filteredLots.map((lot) => (
           <Link href={`/app/lots/${lot.id}`} key={lot.id} className="block bg-white p-4 rounded-lg shadow-sm border hover:border-green-500 transition-colors">
             <div className="flex justify-between items-start">
-               <div>
-                 <h3 className="font-bold text-lg text-green-800">{lot.lot_code}</h3>
-                 <p className="text-sm text-gray-700 font-medium">{lot.crops?.name_ka || '-'} - {lot.varieties?.name || '-'}</p>
-                 <p className="text-xs text-gray-500 mt-1">{STRINGS.NAV_FIELDS}: {lot.fields?.name || '-'}</p>
-               </div>
-               <div className="text-right">
-                  <span className="block font-bold text-gray-800">{lot.harvested_kg} {STRINGS.UNIT_KG}</span>
-                  <span className="text-xs text-gray-500">{lot.harvest_date}</span>
-               </div>
+              <div>
+                <h3 className="font-bold text-lg text-green-800">{lot.lot_code}</h3>
+                <p className="text-sm text-gray-700 font-medium">{lot.crops?.name_ka || '-'} - {lot.varieties?.name || '-'}</p>
+                <p className="text-xs text-gray-500 mt-1">{STRINGS.NAV_FIELDS}: {lot.fields?.name || '-'}</p>
+              </div>
+              <div className="text-right">
+                <span className="block font-bold text-gray-800">{lot.harvested_kg} {STRINGS.UNIT_KG}</span>
+                <span className="text-xs text-gray-500">{lot.harvest_date}</span>
+              </div>
             </div>
           </Link>
         ))}
@@ -54,6 +161,11 @@ export default function LotsList() {
         {!loading && lots.length === 0 && (
           <div className="text-center py-10 text-gray-500">
             {STRINGS.NO_DATA}
+          </div>
+        )}
+        {!loading && lots.length > 0 && filteredLots.length === 0 && (
+          <div className="text-center py-10 text-gray-500">
+            {STRINGS.NO_RESULTS}
           </div>
         )}
       </div>

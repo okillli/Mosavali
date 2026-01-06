@@ -47,6 +47,38 @@ Features: search with debounce, async loading, create inline, keyboard nav
 />
 ```
 
+### SearchFilterBar
+```tsx
+<SearchFilterBar
+  searchValue={searchValue}
+  onSearchChange={setSearchValue}
+  filters={filters}                    // Optional: FilterConfig[]
+  filterValues={filterValues}          // Optional: Record<string, string>
+  onFilterChange={handleFilterChange}  // Optional
+  onClearFilters={handleClearFilters}  // Optional
+/>
+```
+Features: search input, collapsible filter panel, active filter count badge, clear all button
+
+**Filter Configuration:**
+```tsx
+const filters: FilterConfig[] = useMemo(() => [
+  {
+    key: 'status',
+    label: STRINGS.STATUS,
+    options: [
+      { value: 'ACTIVE', label: STRINGS.ACTIVE },
+      { value: 'INACTIVE', label: STRINGS.INACTIVE },
+    ],
+  },
+  {
+    key: 'category_id',
+    label: STRINGS.CATEGORY,
+    options: categories.map(c => ({ value: c.id, label: c.name })),
+  },
+], [categories]);
+```
+
 ---
 
 ## Layout Patterns

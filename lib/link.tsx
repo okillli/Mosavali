@@ -6,10 +6,10 @@ interface LinkProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
   children: React.ReactNode;
 }
 
-export default function Link({ href, children, className, ...props }: LinkProps) {
+export default function Link({ href, children, ...props }: LinkProps) {
   const finalHref = href.startsWith('/') ? '#' + href : href;
   return (
-    <a href={finalHref} className={className} {...props}>
+    <a href={finalHref} {...props}>
       {children}
     </a>
   );

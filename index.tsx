@@ -134,6 +134,7 @@ interface ErrorBoundaryState {
 
 // Error Boundary to catch Router hooks errors
 class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  declare props: ErrorBoundaryProps;
   state: ErrorBoundaryState = { hasError: false, message: '' };
 
   static getDerivedStateFromError(error: Error): ErrorBoundaryState {
