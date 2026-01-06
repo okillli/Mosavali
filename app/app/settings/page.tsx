@@ -24,7 +24,7 @@ export default function SettingsPage() {
           ))}
       </div>
       <div className="mt-8 text-center text-sm text-gray-400">
-          Versio 1.0.0
+          ვერსია 1.0.0
       </div>
     </div>
   );

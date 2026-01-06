@@ -41,7 +41,7 @@ export default function WarehousesList() {
         ))}
         {warehouses.length === 0 && (
           <div className="col-span-full text-center py-10 text-gray-500">
-            {STRINGS.SEARCH}... (მონაცემები არ მოიძებნა)
+            მონაცემები არ მოიძებნა
           </div>
         )}
       </div>
