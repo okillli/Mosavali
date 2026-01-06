@@ -72,6 +72,31 @@ These rules apply to ALL code changes. Violations are bugs.
 - Full-width buttons on mobile forms
 - See [ui-patterns.md](.claude/ui-patterns.md#mobile-first-primary-target) for details
 
+### 7. Error Handling
+- **Always handle errors** - never ignore `.catch()` or `error` from Supabase
+- Show user-friendly Georgian error messages from `STRINGS.*`
+- Log technical details to console for debugging
+- Use try/catch for async operations in event handlers
+
+```typescript
+// ✅ CORRECT
+const { error } = await supabase.from('fields').insert({...});
+if (error) {
+  console.error('Insert failed:', error);
+  setError(STRINGS.SAVE_ERROR);
+  return;
+}
+
+// ❌ WRONG - silent failure
+await supabase.from('fields').insert({...});
+```
+
+### 8. TypeScript Strictness
+- **Explicit types** for function parameters and return values
+- **No `any`** - use proper types from `types.ts`
+- **Null checks** - handle `null`/`undefined` from Supabase responses
+- Use `!` assertion only when you've verified data exists
+
 ---
 
 ## Entities
@@ -101,6 +126,27 @@ These rules apply to ALL code changes. Violations are bugs.
 | [ui-patterns.md](.claude/ui-patterns.md) | Need component API, styling | CRUD flow questions |
 | [database.md](.claude/database.md) | Schema, triggers, direct queries | Frontend-only changes |
 | [testing.md](.claude/testing.md) | Writing or running E2E tests | Not testing |
+| [performance.md](.claude/performance.md) | Performance optimization patterns | Basic feature work |
+
+---
+
+## Performance Guidelines
+
+### Code Splitting
+- All `/app/app/*` pages are lazy loaded via `React.lazy()`
+- Use `PageLoader` component for Suspense fallback
+- Landing and Login pages are eagerly loaded
+
+### Data Fetching
+- Use `useMasterData()` hook for seasons, crops, fields, warehouses, workTypes
+- Use `useUser()` hook for profile/farm_id (requires UserProvider in layout)
+- Add `.limit(50)` to list queries
+- Use `Promise.all()` for parallel queries
+
+### React Optimizations
+- UI components (Button, Input, Select, TextArea, MobileNav) are memoized
+- Use `useMemo` for expensive calculations (reduce, filter, sort on arrays)
+- Use stable IDs for list keys, never array indices
 
 ---
 
