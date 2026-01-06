@@ -9,20 +9,27 @@ import Dashboard from './app/app/page';
 import FieldsList from './app/app/fields/page';
 import NewFieldPage from './app/app/fields/new/page';
 import FieldDetailPage from './app/app/fields/[id]/page';
+import FieldEditPage from './app/app/fields/[id]/edit/page';
 import WorksList from './app/app/works/page';
 import NewWorkPage from './app/app/works/new/page';
 import WorkDetailPage from './app/app/works/[id]/page';
+import WorkEditPage from './app/app/works/[id]/edit/page';
 import LotsList from './app/app/lots/page';
 import NewLotPage from './app/app/lots/new/page';
 import LotDetailPage from './app/app/lots/[id]/page';
+import LotEditPage from './app/app/lots/[id]/edit/page';
 import WarehousesList from './app/app/warehouses/page';
 import NewWarehousePage from './app/app/warehouses/new/page';
 import WarehouseDetailPage from './app/app/warehouses/[id]/page';
+import WarehouseEditPage from './app/app/warehouses/[id]/edit/page';
 import SalesList from './app/app/sales/page';
 import NewSalePage from './app/app/sales/new/page';
 import SaleDetailPage from './app/app/sales/[id]/page';
+import SaleEditPage from './app/app/sales/[id]/edit/page';
 import ExpensesList from './app/app/expenses/page';
 import NewExpensePage from './app/app/expenses/new/page';
+import ExpenseDetailPage from './app/app/expenses/[id]/page';
+import ExpenseEditPage from './app/app/expenses/[id]/edit/page';
 import ReportsPage from './app/app/reports/page';
 import TransferPage from './app/app/transfer/page';
 import SettingsPage from './app/app/settings/page';
@@ -81,12 +88,21 @@ const Router = () => {
       else if (route === '/app/settings/varieties') page = <VarietiesSettings />;
       else if (route === '/app/settings/buyers') page = <BuyersSettings />;
 
-      // Dynamic Matches (Basic regex or split)
+      // Dynamic Matches - Edit pages (must be before detail pages)
+      else if (route.match(/^\/app\/fields\/[^/]+\/edit$/)) page = <FieldEditPage />;
+      else if (route.match(/^\/app\/works\/[^/]+\/edit$/)) page = <WorkEditPage />;
+      else if (route.match(/^\/app\/lots\/[^/]+\/edit$/)) page = <LotEditPage />;
+      else if (route.match(/^\/app\/warehouses\/[^/]+\/edit$/)) page = <WarehouseEditPage />;
+      else if (route.match(/^\/app\/sales\/[^/]+\/edit$/)) page = <SaleEditPage />;
+      else if (route.match(/^\/app\/expenses\/[^/]+\/edit$/)) page = <ExpenseEditPage />;
+
+      // Dynamic Matches - Detail pages
       else if (route.match(/^\/app\/fields\/[^/]+$/)) page = <FieldDetailPage />;
       else if (route.match(/^\/app\/works\/[^/]+$/)) page = <WorkDetailPage />;
       else if (route.match(/^\/app\/lots\/[^/]+$/)) page = <LotDetailPage />;
       else if (route.match(/^\/app\/warehouses\/[^/]+$/)) page = <WarehouseDetailPage />;
       else if (route.match(/^\/app\/sales\/[^/]+$/)) page = <SaleDetailPage />;
+      else if (route.match(/^\/app\/expenses\/[^/]+$/)) page = <ExpenseDetailPage />;
 
       // Fix "Property children is missing" error by explicitly passing prop
       return <AppLayout children={page} />;

@@ -3,10 +3,12 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '../../../lib/supabaseClient';
 import { STRINGS } from '../../../lib/strings';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Plus, Tag } from 'lucide-react';
 import { ExpenseWithRelations } from '../../../types';
 
 export default function ExpensesList() {
+  const router = useRouter();
   const [expenses, setExpenses] = useState<ExpenseWithRelations[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -40,7 +42,11 @@ export default function ExpensesList() {
       
       <div className="space-y-4">
         {expenses.map((expense) => (
-          <div key={expense.id} className="bg-white p-4 rounded-lg shadow-sm border flex justify-between items-center">
+          <div
+            key={expense.id}
+            onClick={() => router.push(`/app/expenses/${expense.id}`)}
+            className="bg-white p-4 rounded-lg shadow-sm border flex justify-between items-center cursor-pointer hover:bg-gray-50 transition-colors"
+          >
             <div>
                <h3 className="font-bold text-gray-800">{expense.description || 'ხარჯი'}</h3>
                <div className="flex items-center text-xs text-gray-500 mt-1">

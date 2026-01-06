@@ -3,8 +3,8 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '../../../../lib/supabaseClient';
 import { STRINGS } from '../../../../lib/strings';
 import { useParams, useRouter } from 'next/navigation';
-import { Button } from '../../../../components/ui/Button';
-import { DollarSign, User, Calendar, FileText } from 'lucide-react';
+import { Button, ConfirmDialog } from '../../../../components/ui';
+import { User, Calendar, FileText, Pencil, Trash2 } from 'lucide-react';
 import { SaleWithRelations } from '../../../../types';
 
 export default function SaleDetailPage() {
@@ -13,6 +13,8 @@ export default function SaleDetailPage() {
   const [sale, setSale] = useState<SaleWithRelations | null>(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     if (id) loadData();
@@ -32,12 +34,46 @@ export default function SaleDetailPage() {
       setUpdating(true);
       const { error } = await supabase.from('sales').update({ payment_status: status }).eq('id', id);
       if (!error) {
-          setSale({ ...sale, payment_status: status });
+          setSale({ ...sale, payment_status: status } as SaleWithRelations);
       }
       setUpdating(false);
   };
 
-  if (!sale) return <div className="p-4">Loading...</div>;
+  const handleDelete = async () => {
+    if (!sale || !sale.lot_id) {
+      alert(STRINGS.DELETE_ERROR);
+      return;
+    }
+
+    setIsDeleting(true);
+
+    // First delete the associated inventory movement (SALE_OUT)
+    const { error: movementError } = await supabase.from('inventory_movements')
+      .delete()
+      .eq('type', 'SALE_OUT')
+      .eq('lot_id', sale.lot_id)
+      .eq('sale_id', id);
+
+    if (movementError) {
+      alert(STRINGS.DELETE_ERROR + ': ' + movementError.message);
+      setIsDeleting(false);
+      setShowDeleteDialog(false);
+      return;
+    }
+
+    // Then delete the sale
+    const { error } = await supabase.from('sales').delete().eq('id', id);
+
+    if (error) {
+      alert(STRINGS.DELETE_ERROR + ': ' + error.message);
+      setIsDeleting(false);
+      setShowDeleteDialog(false);
+    } else {
+      router.push('/app/sales');
+    }
+  };
+
+  if (!sale) return <div className="p-4">იტვირთება...</div>;
 
   const getStatusColor = (status: string) => {
     if (status === 'PAID') return 'bg-green-100 text-green-800 border-green-200';
@@ -55,8 +91,28 @@ export default function SaleDetailPage() {
     <div className="max-w-3xl mx-auto">
       <div className="mb-6 flex justify-between items-center">
          <Button variant="secondary" onClick={() => router.push('/app/sales')}>&larr; უკან</Button>
-         <div className={`px-4 py-1 rounded-full border font-bold text-sm ${getStatusColor(sale.payment_status)}`}>
-             {getStatusLabel(sale.payment_status)}
+         <div className="flex items-center gap-3">
+             <div className={`px-4 py-1 rounded-full border font-bold text-sm ${getStatusColor(sale.payment_status)}`}>
+                 {getStatusLabel(sale.payment_status)}
+             </div>
+             <div className="flex gap-2">
+                 <Button
+                     variant="outline"
+                     onClick={() => router.push(`/app/sales/${id}/edit`)}
+                     className="flex items-center gap-1"
+                 >
+                     <Pencil size={16} />
+                     {STRINGS.EDIT}
+                 </Button>
+                 <Button
+                     variant="danger"
+                     onClick={() => setShowDeleteDialog(true)}
+                     className="flex items-center gap-1"
+                 >
+                     <Trash2 size={16} />
+                     {STRINGS.DELETE}
+                 </Button>
+             </div>
          </div>
       </div>
 
@@ -145,6 +201,19 @@ export default function SaleDetailPage() {
               </div>
           )}
       </div>
+
+      {/* Delete Confirmation */}
+      <ConfirmDialog
+          isOpen={showDeleteDialog}
+          title={STRINGS.DELETE_CONFIRM_TITLE}
+          message={`${STRINGS.DELETE_SALE_CONFIRM} ${sale.buyers?.name || ''}-ს (${sale.weight_kg} ${STRINGS.UNIT_KG})? ${STRINGS.DELETE_CANNOT_UNDO}`}
+          confirmLabel={STRINGS.DELETE}
+          cancelLabel={STRINGS.CANCEL}
+          variant="danger"
+          onConfirm={handleDelete}
+          onCancel={() => setShowDeleteDialog(false)}
+          isLoading={isDeleting}
+      />
     </div>
   );
 }
