@@ -1,0 +1,17 @@
+-- Migration: Change seasons.year (INTEGER) to seasons.name (TEXT)
+-- Purpose: Allow flexible season names like "2024-25", "Spring 2024", etc.
+
+-- Step 1: Add new name column
+ALTER TABLE seasons ADD COLUMN name TEXT;
+
+-- Step 2: Migrate existing data (convert integer year to text)
+UPDATE seasons SET name = year::TEXT WHERE name IS NULL;
+
+-- Step 3: Make name NOT NULL
+ALTER TABLE seasons ALTER COLUMN name SET NOT NULL;
+
+-- Step 4: Drop old year column
+ALTER TABLE seasons DROP COLUMN year;
+
+-- Step 5: Add unique constraint per farm (prevent duplicate names)
+ALTER TABLE seasons ADD CONSTRAINT seasons_farm_name_unique UNIQUE (farm_id, name);

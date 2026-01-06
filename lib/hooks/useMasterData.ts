@@ -81,7 +81,7 @@ export function useMasterData(): MasterData {
       warehousesResult,
       workTypesResult,
     ] = await Promise.all([
-      supabase.from('seasons').select('*').order('year', { ascending: false }),
+      supabase.from('seasons').select('*').order('created_at', { ascending: false }),
       supabase.from('crops').select('*').order('name_ka'),
       supabase.from('fields').select('*').order('name'),
       supabase.from('warehouses').select('*').order('name'),

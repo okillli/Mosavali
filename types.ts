@@ -41,7 +41,7 @@ export interface Profile {
 export interface Season {
   id: UUID;
   farm_id: UUID;
-  year: number;
+  name: string;
   is_current: boolean;
 }
 

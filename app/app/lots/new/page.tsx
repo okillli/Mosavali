@@ -136,7 +136,7 @@ export default function NewLotPage() {
           <div>
             <label className="block text-sm font-medium mb-1">{STRINGS.SEASON}</label>
             <select className="w-full border rounded p-2" value={formData.season_id} onChange={e => setFormData({...formData, season_id: e.target.value})}>
-              {seasons.map(s => <option key={s.id} value={s.id}>{s.year}</option>)}
+              {seasons.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
             </select>
           </div>
           <div>

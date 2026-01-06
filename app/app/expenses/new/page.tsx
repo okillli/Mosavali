@@ -98,7 +98,7 @@ export default function NewExpensePage() {
             value={formData.season_id}
             onChange={e => setFormData({...formData, season_id: e.target.value})}
           >
-            {seasons.map(s => <option key={s.id} value={s.id}>{s.year}</option>)}
+            {seasons.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
           </select>
         </div>
 

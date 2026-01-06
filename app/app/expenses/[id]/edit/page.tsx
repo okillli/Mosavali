@@ -95,7 +95,7 @@ export default function EditExpensePage() {
   if (initialLoading) return <div className="p-4">{STRINGS.LOADING}</div>;
   if (!expense) return <div className="p-4">{STRINGS.EXPENSE_NOT_FOUND}</div>;
 
-  const seasonOptions = seasons.map(s => ({ value: s.id, label: s.year.toString() }));
+  const seasonOptions = seasons.map(s => ({ value: s.id, label: s.name }));
   const allocationOptions = [
     { value: 'GENERAL', label: STRINGS.ALLOCATION_GENERAL },
     { value: 'SEASON', label: STRINGS.ALLOCATION_SEASONAL },

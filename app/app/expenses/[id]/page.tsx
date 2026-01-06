@@ -145,7 +145,7 @@ export default function ExpenseDetailPage() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="text-xs font-bold text-gray-500 uppercase">{STRINGS.SEASON}</label>
-              <div className="text-lg">{expense.seasons?.year}</div>
+              <div className="text-lg">{expense.seasons?.name}</div>
             </div>
           </div>
 

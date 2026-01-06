@@ -90,7 +90,7 @@ export default function EditWorkPage() {
 
   const fieldOptions = fields.map(f => ({ value: f.id, label: f.name }));
   const workTypeOptions = workTypes.map(wt => ({ value: wt.id, label: wt.name }));
-  const seasonOptions = seasons.map(s => ({ value: s.id, label: s.year.toString() }));
+  const seasonOptions = seasons.map(s => ({ value: s.id, label: s.name }));
   const statusOptions = [
     { value: 'PLANNED', label: STRINGS.PLANNED },
     { value: 'COMPLETED', label: STRINGS.COMPLETED }

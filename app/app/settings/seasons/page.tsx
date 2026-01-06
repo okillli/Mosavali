@@ -23,7 +23,7 @@ export default function SeasonsSettings() {
   useEffect(() => { fetchSeasons(); }, []);
 
   const fetchSeasons = async () => {
-    const { data } = await supabase.from('seasons').select('*').order('year', { ascending: false });
+    const { data } = await supabase.from('seasons').select('*').order('created_at', { ascending: false });
     if (data) {
       setSeasons(data);
       // Fetch related counts for each season (lots, works, expenses, sales)

@@ -31,6 +31,10 @@ export const STRINGS = {
   EDIT: 'რედაქტირება',
   SEARCH: 'ძებნა',
   FILTER: 'ფილტრი',
+  CLEAR_FILTERS: 'გასუფთავება',
+  ALL: 'ყველა',
+  NO_RESULTS: 'შედეგი არ მოიძებნა',
+  SEARCH_PLACEHOLDER: 'ძებნა...',
 
   // Fields
   FIELD_NAME: 'სახელი',
@@ -173,7 +177,7 @@ export const STRINGS = {
   // Placeholders
   VARIETY_NAME_PLACEHOLDER: 'ჯიშის სახელი',
   BUYER_NAME_PLACEHOLDER: 'მყიდველის სახელი',
-  YEAR_PLACEHOLDER: 'წელი (მაგ: 2027)',
+  SEASON_NAME_PLACEHOLDER: 'სეზონის სახელი (მაგ: 2024-25)',
   BIN_NAME_PLACEHOLDER: 'მაგ: სილოსი 2',
 
   // Expense allocation

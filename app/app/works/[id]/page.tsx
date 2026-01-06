@@ -185,7 +185,7 @@ export default function WorkDetailPage() {
                     </div>
                     <div>
                         <label className="text-xs font-bold text-gray-500 uppercase">{STRINGS.SEASON}</label>
-                        <div className="text-lg">{work.seasons.year}</div>
+                        <div className="text-lg">{work.seasons.name}</div>
                     </div>
                 </div>
 

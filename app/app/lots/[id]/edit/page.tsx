@@ -97,7 +97,7 @@ export default function EditLotPage() {
   if (initialLoading) return <div className="p-4">{STRINGS.LOADING}</div>;
   if (!lot) return <div className="p-4">{STRINGS.LOT_NOT_FOUND}</div>;
 
-  const seasonOptions = seasons.map(s => ({ value: s.id, label: s.year.toString() }));
+  const seasonOptions = seasons.map(s => ({ value: s.id, label: s.name }));
   const cropOptions = crops.map(c => ({ value: c.id, label: c.name_ka }));
   const varietyOptions = varieties.map(v => ({ value: v.id, label: v.name }));
   const fieldOptions = fields.map(f => ({ value: f.id, label: f.name }));
