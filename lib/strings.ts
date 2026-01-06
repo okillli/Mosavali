@@ -110,7 +110,22 @@ export const STRINGS = {
   LOT_HAS_SALES: 'ამ მოსავალს აქვს გაყიდვები',
   BUYER_HAS_SALES: 'ამ მყიდველს აქვს გაყიდვები',
   SEASON_HAS_DATA: 'ამ სეზონს აქვს მონაცემები',
-  
+  BIN_HAS_STOCK: 'სექციას აქვს მარაგი - წაშლა შეუძლებელია',
+  VARIETY_HAS_LOTS: 'ამ ჯიშს აქვს მოსავალი',
+  WORK_HAS_EXPENSES: 'ამ სამუშაოს აქვს დაკავშირებული ხარჯი',
+
+  // Loading states
+  LOADING: 'იტვირთება...',
+  NOT_FOUND: 'ჩანაწერი ვერ მოიძებნა',
+
+  // Season specific
+  SET_AS_CURRENT: 'მიმდინარედ მონიშვნა',
+  CURRENT_SEASON_DELETE_DISABLED: 'მიმდინარე სეზონის წაშლა შეუძლებელია',
+  SEASON_HAS_RELATED_RECORDS: 'ამ სეზონს აქვს დაკავშირებული ჩანაწერები',
+
+  // Lot deletion
+  LOT_DELETE_DISABLED: 'მოსავალს აქვს გაყიდვები - წაშლა შეუძლებელია',
+
   // Placeholders
   SELECT_OPTION: 'აირჩიეთ...',
   NOTES: 'შენიშვნა',
@@ -128,4 +143,13 @@ export const STRINGS = {
   NO_LINKED_EXPENSES: 'ხარჯები არ არის',
   EXPENSE_AMOUNT: 'თანხა',
   EXPENSE_DATE: 'თარიღი',
+
+  // Dropdown states
+  DROPDOWN_LOADING: 'იტვირთება...',
+  DROPDOWN_ERROR: 'შეცდომა მოხდა',
+  DROPDOWN_NO_DATA: 'მონაცემები არ მოიძებნა',
+  DROPDOWN_NO_RESULTS: 'შედეგი არ მოიძებნა',
+  DROPDOWN_CLEAR: 'გასუფთავება',
+  DROPDOWN_CREATE: 'შექმნა',
+  DROPDOWN_CREATE_NEW: 'ახლის შექმნა',
 };
