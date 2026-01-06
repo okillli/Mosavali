@@ -130,8 +130,74 @@ export interface InventoryMovement {
 
 export interface StockView {
   farm_id: UUID;
-  warehouse_id: UUID;
   bin_id: UUID;
   lot_id: UUID;
   stock_kg: number;
+}
+
+export interface WorkType {
+  id: UUID;
+  name: string;
+}
+
+export interface Work {
+  id: UUID;
+  farm_id: UUID;
+  field_id: UUID;
+  season_id: UUID;
+  work_type_id: UUID;
+  planned_date: string;
+  completed_date?: string;
+  status: WorkStatus;
+  notes?: string;
+  work_types?: WorkType;
+  fields?: Field;
+  seasons?: Season;
+}
+
+export interface Expense {
+  id: UUID;
+  farm_id: UUID;
+  season_id: UUID;
+  allocation_type: AllocationType;
+  target_id?: UUID;
+  amount_gel: number;
+  expense_date: string;
+  description?: string;
+  seasons?: Season;
+}
+
+// Extended types for joined queries
+export interface BinWithWarehouse extends Bin {
+  warehouses?: Warehouse;
+}
+
+export interface LotWithCropVariety extends Lot {
+  crops?: Crop;
+  varieties?: Variety;
+}
+
+export interface StockViewWithRelations extends StockView {
+  lots?: LotWithCropVariety;
+  bins?: BinWithWarehouse;
+}
+
+export interface SaleWithRelations extends Sale {
+  lots?: LotWithCropVariety;
+  buyers?: Buyer;
+}
+
+export interface WorkWithRelations extends Work {
+  work_types?: WorkType;
+  fields?: Field;
+}
+
+export interface VarietyWithCrop extends Variety {
+  crops?: Crop;
+}
+
+export interface ExpenseWithRelations extends Expense {
+  work_types?: WorkType;
+  fields?: Field;
+  lots?: Lot;
 }

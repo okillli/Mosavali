@@ -4,10 +4,11 @@ import { supabase } from '../../../../lib/supabaseClient';
 import { STRINGS } from '../../../../lib/strings';
 import { Button } from '../../../../components/ui/Button';
 import { Input } from '../../../../components/ui/Input';
+import { VarietyWithCrop, Crop } from '../../../../types';
 
 export default function VarietiesSettings() {
-  const [varieties, setVarieties] = useState<any[]>([]);
-  const [crops, setCrops] = useState<any[]>([]);
+  const [varieties, setVarieties] = useState<VarietyWithCrop[]>([]);
+  const [crops, setCrops] = useState<Crop[]>([]);
   const [newName, setNewName] = useState('');
   const [selectedCrop, setSelectedCrop] = useState('');
   const [loading, setLoading] = useState(false);

@@ -5,13 +5,14 @@ import { STRINGS } from '../../../../lib/strings';
 import { useParams, useRouter } from 'next/navigation';
 import { Button } from '../../../../components/ui/Button';
 import { Sprout, Tractor, DollarSign, Calendar } from 'lucide-react';
+import { Field, WorkWithRelations, Lot } from '../../../../types';
 
 export default function FieldDetailPage() {
   const { id } = useParams();
   const router = useRouter();
-  const [field, setField] = useState<any>(null);
-  const [works, setWorks] = useState<any[]>([]);
-  const [lots, setLots] = useState<any[]>([]);
+  const [field, setField] = useState<Field | null>(null);
+  const [works, setWorks] = useState<WorkWithRelations[]>([]);
+  const [lots, setLots] = useState<Lot[]>([]);
   const [activeTab, setActiveTab] = useState('OVERVIEW'); // OVERVIEW, WORKS, LOTS
 
   useEffect(() => {

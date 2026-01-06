@@ -6,11 +6,12 @@ import { useParams, useRouter } from 'next/navigation';
 import { Button } from '../../../../components/ui/Button';
 import { Input } from '../../../../components/ui/Input';
 import { CheckCircle2, Clock, Tractor } from 'lucide-react';
+import { WorkWithRelations } from '../../../../types';
 
 export default function WorkDetailPage() {
   const { id } = useParams();
   const router = useRouter();
-  const [work, setWork] = useState<any>(null);
+  const [work, setWork] = useState<WorkWithRelations | null>(null);
   
   // Completion form state
   const [completedDate, setCompletedDate] = useState(new Date().toISOString().split('T')[0]);

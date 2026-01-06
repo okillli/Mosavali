@@ -5,13 +5,14 @@ import { STRINGS } from '../../../../lib/strings';
 import { useParams, useRouter } from 'next/navigation';
 import { Button } from '../../../../components/ui/Button';
 import { Package, MapPin, History, ArrowRight } from 'lucide-react';
+import { Lot, StockViewWithRelations, InventoryMovement } from '../../../../types';
 
 export default function LotDetailPage() {
   const { id } = useParams();
   const router = useRouter();
-  const [lot, setLot] = useState<any>(null);
-  const [stock, setStock] = useState<any[]>([]);
-  const [history, setHistory] = useState<any[]>([]);
+  const [lot, setLot] = useState<Lot | null>(null);
+  const [stock, setStock] = useState<StockViewWithRelations[]>([]);
+  const [history, setHistory] = useState<InventoryMovement[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

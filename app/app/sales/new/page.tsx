@@ -5,14 +5,14 @@ import { STRINGS } from '../../../../lib/strings';
 import { useRouter } from 'next/navigation';
 import { Input } from '../../../../components/ui/Input';
 import { Button } from '../../../../components/ui/Button';
-import { Buyer, StockView, Season } from '../../../../types';
+import { Buyer, StockViewWithRelations, Season } from '../../../../types';
 
 export default function NewSalePage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [stock, setStock] = useState<any[]>([]);
+  const [stock, setStock] = useState<StockViewWithRelations[]>([]);
   const [buyers, setBuyers] = useState<Buyer[]>([]);
   const [seasons, setSeasons] = useState<Season[]>([]);
 
@@ -27,7 +27,7 @@ export default function NewSalePage() {
     notes: ''
   });
 
-  const [selectedStockItem, setSelectedStockItem] = useState<any>(null);
+  const [selectedStockItem, setSelectedStockItem] = useState<StockViewWithRelations | null>(null);
 
   useEffect(() => {
     loadData();

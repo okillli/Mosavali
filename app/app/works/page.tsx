@@ -4,9 +4,10 @@ import { supabase } from '../../../lib/supabaseClient';
 import { STRINGS } from '../../../lib/strings';
 import Link from 'next/link';
 import { Plus, Calendar, CheckCircle2, Clock } from 'lucide-react';
+import { WorkWithRelations } from '../../../types';
 
 export default function WorksList() {
-  const [works, setWorks] = useState<any[]>([]);
+  const [works, setWorks] = useState<WorkWithRelations[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -54,9 +55,12 @@ export default function WorksList() {
             </div>
           </Link>
         ))}
-        {works.length === 0 && !loading && (
+        {loading && (
+          <div className="text-center py-10 text-gray-500">იტვირთება...</div>
+        )}
+        {!loading && works.length === 0 && (
           <div className="text-center py-10 text-gray-500">
-            {STRINGS.SEARCH}... (მონაცემები არ მოიძებნა)
+            მონაცემები არ მოიძებნა
           </div>
         )}
       </div>

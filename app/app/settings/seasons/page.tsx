@@ -5,9 +5,10 @@ import { STRINGS } from '../../../../lib/strings';
 import { Button } from '../../../../components/ui/Button';
 import { Input } from '../../../../components/ui/Input';
 import { Check } from 'lucide-react';
+import { Season } from '../../../../types';
 
 export default function SeasonsSettings() {
-  const [seasons, setSeasons] = useState<any[]>([]);
+  const [seasons, setSeasons] = useState<Season[]>([]);
   const [newYear, setNewYear] = useState('');
   const [loading, setLoading] = useState(false);
 

@@ -5,7 +5,7 @@ import { STRINGS } from '../../../../lib/strings';
 import { useRouter } from 'next/navigation';
 import { Input } from '../../../../components/ui/Input';
 import { Button } from '../../../../components/ui/Button';
-import { Crop, Variety, Field, Warehouse, Bin } from '../../../../types';
+import { Crop, Variety, Field, Warehouse, Bin, Season } from '../../../../types';
 
 export default function NewLotPage() {
   const router = useRouter();
@@ -14,7 +14,7 @@ export default function NewLotPage() {
   const [error, setError] = useState<string | null>(null);
 
   // Data Selects
-  const [seasons, setSeasons] = useState<any[]>([]);
+  const [seasons, setSeasons] = useState<Season[]>([]);
   const [crops, setCrops] = useState<Crop[]>([]);
   const [varieties, setVarieties] = useState<Variety[]>([]);
   const [fields, setFields] = useState<Field[]>([]);

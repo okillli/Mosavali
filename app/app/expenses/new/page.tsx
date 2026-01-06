@@ -5,17 +5,18 @@ import { STRINGS } from '../../../../lib/strings';
 import { useRouter } from 'next/navigation';
 import { Input } from '../../../../components/ui/Input';
 import { Button } from '../../../../components/ui/Button';
+import { Season, Field, WorkWithRelations, Lot } from '../../../../types';
 
 export default function NewExpensePage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Dynamic Options
-  const [seasons, setSeasons] = useState<any[]>([]);
-  const [fields, setFields] = useState<any[]>([]);
-  const [works, setWorks] = useState<any[]>([]);
-  const [lots, setLots] = useState<any[]>([]);
+  const [seasons, setSeasons] = useState<Season[]>([]);
+  const [fields, setFields] = useState<Field[]>([]);
+  const [works, setWorks] = useState<WorkWithRelations[]>([]);
+  const [lots, setLots] = useState<Lot[]>([]);
 
   const [formData, setFormData] = useState({
     season_id: '',

@@ -5,14 +5,15 @@ import { STRINGS } from '../../../lib/strings';
 import { useRouter } from 'next/navigation';
 import { Input } from '../../../components/ui/Input';
 import { Button } from '../../../components/ui/Button';
+import { StockViewWithRelations, BinWithWarehouse } from '../../../types';
 
 export default function TransferPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [stock, setStock] = useState<any[]>([]);
-  const [targetBins, setTargetBins] = useState<any[]>([]);
+  const [stock, setStock] = useState<StockViewWithRelations[]>([]);
+  const [targetBins, setTargetBins] = useState<BinWithWarehouse[]>([]);
 
   const [formData, setFormData] = useState({
     lot_id: '',

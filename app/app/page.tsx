@@ -4,10 +4,11 @@ import { supabase } from '../../lib/supabaseClient';
 import Link from 'next/link';
 import { STRINGS } from '../../lib/strings';
 import { PlusCircle, ArrowRightLeft, DollarSign, Clock, Leaf } from 'lucide-react';
+import { WorkWithRelations, Lot } from '../../types';
 
 export default function Dashboard() {
-  const [pendingWorks, setPendingWorks] = useState<any[]>([]);
-  const [recentLots, setRecentLots] = useState<any[]>([]);
+  const [pendingWorks, setPendingWorks] = useState<WorkWithRelations[]>([]);
+  const [recentLots, setRecentLots] = useState<Lot[]>([]);
 
   useEffect(() => {
     loadDashboardData();

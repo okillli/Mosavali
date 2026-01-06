@@ -2,12 +2,19 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../../../lib/supabaseClient';
 import { STRINGS } from '../../../lib/strings';
+import { StockViewWithRelations } from '../../../types';
+
+interface YieldDataItem {
+  name: string;
+  area: number;
+  total_kg: number;
+}
 
 export default function ReportsPage() {
   const [loading, setLoading] = useState(true);
-  const [stock, setStock] = useState<any[]>([]);
+  const [stock, setStock] = useState<StockViewWithRelations[]>([]);
   const [financials, setFinancials] = useState({ income: 0, expense: 0, profit: 0 });
-  const [yieldData, setYieldData] = useState<any[]>([]);
+  const [yieldData, setYieldData] = useState<YieldDataItem[]>([]);
   const [tab, setTab] = useState<'STOCK' | 'FINANCE' | 'YIELD'>('STOCK');
 
   useEffect(() => {
@@ -35,14 +42,14 @@ export default function ReportsPage() {
         .select('harvested_kg, field_id, fields(name, area_ha)');
     
     if (l) {
-        const grouped: any = {};
-        l.forEach((lot: any) => {
+        const grouped: Record<string, YieldDataItem> = {};
+        l.forEach((lot) => {
             const fid = lot.field_id;
             if(!grouped[fid]) {
-                grouped[fid] = { 
-                    name: lot.fields?.name, 
-                    area: lot.fields?.area_ha || 1, 
-                    total_kg: 0 
+                grouped[fid] = {
+                    name: lot.fields?.name || '-',
+                    area: lot.fields?.area_ha || 1,
+                    total_kg: 0
                 };
             }
             grouped[fid].total_kg += lot.harvested_kg;

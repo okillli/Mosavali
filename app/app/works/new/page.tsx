@@ -5,15 +5,16 @@ import { STRINGS } from '../../../../lib/strings';
 import { useRouter } from 'next/navigation';
 import { Input } from '../../../../components/ui/Input';
 import { Button } from '../../../../components/ui/Button';
+import { Field, WorkType, Season } from '../../../../types';
 
 export default function NewWorkPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [fields, setFields] = useState<any[]>([]);
-  const [workTypes, setWorkTypes] = useState<any[]>([]);
-  const [seasons, setSeasons] = useState<any[]>([]);
+  const [fields, setFields] = useState<Field[]>([]);
+  const [workTypes, setWorkTypes] = useState<WorkType[]>([]);
+  const [seasons, setSeasons] = useState<Season[]>([]);
 
   const [formData, setFormData] = useState({
     field_id: '',

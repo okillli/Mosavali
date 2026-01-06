@@ -5,14 +5,15 @@ import { STRINGS } from '../../../../lib/strings';
 import { useParams, useRouter } from 'next/navigation';
 import { Button } from '../../../../components/ui/Button';
 import { Input } from '../../../../components/ui/Input';
-import { Warehouse, Box, Package, Plus } from 'lucide-react';
+import { Warehouse as WarehouseIcon, Box, Package, Plus } from 'lucide-react';
+import type { Warehouse, Bin, StockViewWithRelations } from '../../../../types';
 
 export default function WarehouseDetailPage() {
   const { id } = useParams();
   const router = useRouter();
-  const [warehouse, setWarehouse] = useState<any>(null);
-  const [bins, setBins] = useState<any[]>([]);
-  const [stock, setStock] = useState<any[]>([]);
+  const [warehouse, setWarehouse] = useState<Warehouse | null>(null);
+  const [bins, setBins] = useState<Bin[]>([]);
+  const [stock, setStock] = useState<StockViewWithRelations[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Add Bin State

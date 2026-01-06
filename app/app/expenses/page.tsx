@@ -4,9 +4,10 @@ import { supabase } from '../../../lib/supabaseClient';
 import { STRINGS } from '../../../lib/strings';
 import Link from 'next/link';
 import { Plus, Tag } from 'lucide-react';
+import { ExpenseWithRelations } from '../../../types';
 
 export default function ExpensesList() {
-  const [expenses, setExpenses] = useState<any[]>([]);
+  const [expenses, setExpenses] = useState<ExpenseWithRelations[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -55,9 +56,12 @@ export default function ExpensesList() {
             </div>
           </div>
         ))}
-        {expenses.length === 0 && !loading && (
+        {loading && (
+          <div className="text-center py-10 text-gray-500">იტვირთება...</div>
+        )}
+        {!loading && expenses.length === 0 && (
           <div className="text-center py-10 text-gray-500">
-            {STRINGS.SEARCH}... (მონაცემები არ მოიძებნა)
+            მონაცემები არ მოიძებნა
           </div>
         )}
       </div>

@@ -5,11 +5,12 @@ import { STRINGS } from '../../../../lib/strings';
 import { useParams, useRouter } from 'next/navigation';
 import { Button } from '../../../../components/ui/Button';
 import { DollarSign, User, Calendar, FileText } from 'lucide-react';
+import { SaleWithRelations } from '../../../../types';
 
 export default function SaleDetailPage() {
   const { id } = useParams();
   const router = useRouter();
-  const [sale, setSale] = useState<any>(null);
+  const [sale, setSale] = useState<SaleWithRelations | null>(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
 
