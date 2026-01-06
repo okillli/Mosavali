@@ -21,12 +21,47 @@ npm run build   # Production build
 | `components/` | UI components |
 | `types.ts` | TypeScript types |
 
-## Key Rules (Always Apply)
+---
 
-1. **All strings from `lib/strings.ts`** - never hardcode Georgian text
-2. **Dual validation** - UI + Postgres triggers for business rules
-3. **Complete CRUD** - every Add needs Edit + Delete with ConfirmDialog
-4. **RLS enabled** - all queries via authenticated Supabase client
+## MANDATORY RULES (Never Skip)
+
+These rules apply to ALL code changes. Violations are bugs.
+
+### 1. All Strings from `lib/strings.ts`
+- **NEVER** hardcode Georgian text in components
+- Check if string exists → if not, ADD it first → then use constant
+- Applies to: labels, buttons, errors, placeholders, messages, everything
+
+```typescript
+// ✅ CORRECT
+<button>{STRINGS.SAVE}</button>
+
+// ❌ WRONG - will be rejected
+<button>შენახვა</button>
+```
+
+### 2. Complete CRUD with Confirmations
+- Every **Add** action requires **Edit** and **Delete**
+- Every **Delete** MUST use `ConfirmDialog` with specific message
+- Include entity name in message: `"წაშალოთ მიწა 'ჩემი მინდორი'?"`
+- Warn about related data before delete
+
+### 3. Dual Validation
+- Business rules enforced at BOTH levels:
+  - **UI** - immediate user feedback
+  - **Postgres triggers** - authoritative enforcement
+- Applies to: No Mixing, No Negative Stock, all constraints
+
+### 4. RLS Always Active
+- All queries via authenticated Supabase client
+- Never bypass Row Level Security
+- All tables filter by `farm_id`
+
+### 5. Atomic Sales
+- Sales MUST use `create_sale_atomic()` RPC
+- Never create sales with separate insert statements
+
+---
 
 ## Entities
 
@@ -41,19 +76,22 @@ npm run build   # Production build
 
 - **No Mixing** - bin holds one lot only
 - **No Negative Stock** - blocked by trigger
-- **Atomic Sales** - use `create_sale_atomic()` RPC
 
-## Extended Documentation
+---
+
+## Reference Documentation
 
 **Read these ONLY when working on that specific area:**
 
 | File | Read When... | Skip When... |
 |------|--------------|--------------|
-| [strings.md](.claude/strings.md) | Adding ANY user-visible text | Reading/debugging existing code |
+| [strings.md](.claude/strings.md) | Need string naming conventions | Just using existing strings |
 | [crud-patterns.md](.claude/crud-patterns.md) | Creating new entity pages/forms | Styling or DB work |
-| [ui-patterns.md](.claude/ui-patterns.md) | Building UI, need component API | CRUD flow questions |
+| [ui-patterns.md](.claude/ui-patterns.md) | Need component API, styling | CRUD flow questions |
 | [database.md](.claude/database.md) | Schema, triggers, direct queries | Frontend-only changes |
 | [testing.md](.claude/testing.md) | Writing or running E2E tests | Not testing |
+
+---
 
 ## Source of Truth
 
