@@ -87,7 +87,37 @@ Stock is calculated from `inventory_movements` table, not stored directly. The v
 ### Language Requirements
 - UI must be 100% Georgian (ka-GE) - no English in UI including errors, empty states, placeholders
 - Database error messages that surface to UI must also be Georgian
-- All strings come from `lib/strings.ts`
+- **ALL strings MUST come from `lib/strings.ts`** - NEVER hardcode Georgian text in components
+
+**String Management Rules:**
+1. Before writing any user-visible text, check if it exists in `lib/strings.ts`
+2. If the string doesn't exist, ADD it to `strings.ts` first, then use the constant
+3. Use descriptive constant names: `PAGE_BUYERS`, `DELETE_FIELD_CONFIRM`, `PHONE_NOT_SET`
+4. Group related strings with comments (e.g., `// Form labels`, `// Error messages`)
+5. Import and use: `import { STRINGS } from '../../lib/strings';` then `{STRINGS.LOADING}`
+
+**Examples of what goes in strings.ts:**
+- Page titles and headers
+- Button labels and action text
+- Form labels, placeholders, and validation messages
+- Error and success messages
+- Empty state messages
+- Confirmation dialog text
+- Table headers
+- Status labels (PAID, UNPAID, PLANNED, COMPLETED, etc.)
+
+**Never hardcode strings like:**
+```typescript
+// ❌ BAD - hardcoded Georgian text
+<div>იტვირთება...</div>
+<button>დამატება</button>
+alert('შენახვა ვერ მოხერხდა');
+
+// ✅ GOOD - using STRINGS constants
+<div>{STRINGS.LOADING}</div>
+<button>{STRINGS.ADD}</button>
+alert(STRINGS.SAVE_ERROR);
+```
 
 ### Dual Validation Pattern
 Enforce business rules at BOTH levels:
