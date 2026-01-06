@@ -3,7 +3,7 @@ export const STRINGS = {
   CURRENCY: '₾',
   UNIT_KG: 'კგ',
   UNIT_TON: 'ტ',
-  
+
   // Navigation
   NAV_DASHBOARD: 'მთავარი',
   NAV_FIELDS: 'მიწები',
@@ -14,7 +14,7 @@ export const STRINGS = {
   NAV_EXPENSES: 'ხარჯები',
   NAV_REPORTS: 'რეპორტები',
   NAV_SETTINGS: 'პარამეტრები',
-  
+
   // Auth
   LOGIN_TITLE: 'შესვლა',
   EMAIL: 'ელფოსტა',
@@ -22,23 +22,23 @@ export const STRINGS = {
   LOGIN_BUTTON: 'შესვლა',
   LOGOUT: 'გამოსვლა',
   AUTH_ERROR: 'ელფოსტა ან პაროლი არასწორია.',
-  
+
   // Common Actions
-  ADD: 'დამატება',
+  ADD: 'დაამატე',
   SAVE: 'შენახვა',
   CANCEL: 'გაუქმება',
   DELETE: 'წაშლა',
   EDIT: 'რედაქტირება',
   SEARCH: 'ძებნა',
   FILTER: 'ფილტრი',
-  
+
   // Fields
   FIELD_NAME: 'სახელი',
   FIELD_AREA: 'ფართობი (ჰა)',
   FIELD_OWNERSHIP: 'სტატუსი',
   OWNED: 'საკუთარი',
   RENTED: 'ნაქირავები',
-  
+
   // Works
   WORK_TYPE: 'სამუშაოს ტიპი',
   STATUS: 'სტატუსი',
@@ -46,7 +46,7 @@ export const STRINGS = {
   COMPLETED: 'შესრულებული',
   PLANNED_DATE: 'დაგეგმილი თარიღი',
   COMPLETED_DATE: 'შესრულების თარიღი',
-  
+
   // Lots
   LOT_CODE: 'მოსავლის კოდი',
   HARVEST_DATE: 'მოსავლის თარიღი',
@@ -54,8 +54,8 @@ export const STRINGS = {
   SEASON: 'სეზონი',
   CROP: 'კულტურა',
   VARIETY: 'ჯიში',
-  RECEIVE_INTO_WAREHOUSE: 'მიღება საწყობში',
-  
+  RECEIVE_INTO_WAREHOUSE: 'საწყობში მიღება',
+
   // Warehouses
   WAREHOUSE_NAME: 'საწყობის სახელი',
   BIN_NAME: 'სექციის სახელი',
@@ -65,7 +65,7 @@ export const STRINGS = {
   ADJUSTMENT: 'კორექცია',
   FROM: 'საიდან',
   TO: 'სად',
-  
+
   // Sales
   PRICE_PER_KG: 'ფასი / კგ (₾)',
   TOTAL: 'ჯამი',
@@ -75,7 +75,7 @@ export const STRINGS = {
   PART_PAID: 'ნაწილობრივ გადახდილი',
   PAID: 'გადახდილი',
   ADD_PAYMENT: 'გადახდის დამატება',
-  
+
   // Validation Messages
   REQUIRED_FIELD: 'სავალდებულო ველი',
   INVALID_VALUE: 'არასწორი მნიშვნელობა',
@@ -89,16 +89,16 @@ export const STRINGS = {
 
   // Delete Confirmation
   DELETE_CONFIRM_TITLE: 'წაშლის დადასტურება',
-  DELETE_FIELD_CONFIRM: 'წაშალოთ მიწა',
-  DELETE_LOT_CONFIRM: 'წაშალოთ მოსავალი',
-  DELETE_WAREHOUSE_CONFIRM: 'წაშალოთ საწყობი',
-  DELETE_BIN_CONFIRM: 'წაშალოთ სექცია',
-  DELETE_SALE_CONFIRM: 'წაშალოთ გაყიდვა',
-  DELETE_WORK_CONFIRM: 'წაშალოთ სამუშაო',
-  DELETE_EXPENSE_CONFIRM: 'წაშალოთ ხარჯი',
-  DELETE_BUYER_CONFIRM: 'წაშალოთ მყიდველი',
-  DELETE_SEASON_CONFIRM: 'წაშალოთ სეზონი',
-  DELETE_VARIETY_CONFIRM: 'წაშალოთ ჯიში',
+  DELETE_FIELD_CONFIRM: 'მიწის წაშლა',
+  DELETE_LOT_CONFIRM: 'მოსავლის წაშლა',
+  DELETE_WAREHOUSE_CONFIRM: 'საწყობის წაშლა',
+  DELETE_BIN_CONFIRM: 'სექციის წაშლა',
+  DELETE_SALE_CONFIRM: 'გაყიდვის წაშლა',
+  DELETE_WORK_CONFIRM: 'სამუშაოს წაშლა',
+  DELETE_EXPENSE_CONFIRM: 'ხარჯის წაშლა',
+  DELETE_BUYER_CONFIRM: 'მყიდველის წაშლა',
+  DELETE_SEASON_CONFIRM: 'სეზონის წაშლა',
+  DELETE_VARIETY_CONFIRM: 'ჯიშის წაშლა',
   DELETE_WARNING_RELATED: 'ეს ჩანაწერი დაკავშირებულია სხვა მონაცემებთან.',
   DELETE_CANNOT_UNDO: 'ეს მოქმედება ვეღარ შეიცვლება.',
 
@@ -129,7 +129,7 @@ export const STRINGS = {
   // Placeholders
   SELECT_OPTION: 'აირჩიეთ...',
   NOTES: 'შენიშვნა',
-  
+
   // Reports
   REPORT_STOCK: 'მიმდინარე მარაგი',
   REPORT_PNL: 'მოგება/ზარალი',
@@ -162,7 +162,7 @@ export const STRINGS = {
   WEIGHT: 'წონა',
   WEIGHT_KG: 'წონა (კგ)',
   SALE_DATE: 'გაყიდვის თარიღი',
-  LOCATION: 'ლოკაცია',
+  LOCATION: 'მდებარეობა',
   AREA_HA: 'ფართობი (ჰა)',
   CURRENT_SEASON: 'მიმდინარე',
   BIN: 'სექცია',
@@ -232,8 +232,8 @@ export const STRINGS = {
   CHANGE_STATUS: 'სტატუსის შეცვლა',
   FINANCES: 'ფინანსები',
   OVERVIEW: 'მიმოხილვა',
-  LOCATION_DESCRIPTION: 'ლოკაცია / აღწერა',
-  BINS_SECTIONS: 'სექციები (Bins)',
+  LOCATION_DESCRIPTION: 'მდებარეობის აღწერა',
+  BINS_SECTIONS: 'სექციები',
   BIN_ADD_HINT: 'გამოიყენეთ სექციები საწყობში სხვადასხვა კულტურის ან ლოტის გასმიჯნად.',
   BIN_ADD_ERROR: 'სექციის დამატება ვერ მოხერხდა',
   BIN_STOCK_WARNING: 'ამ სექციაში არის მარაგი',
@@ -259,7 +259,7 @@ export const STRINGS = {
 
   // View actions
   VIEW: 'ნახვა',
-  NO_ADDRESS: 'მისამართი გარეშე',
+  NO_ADDRESS: 'მისამართის გარეშე',
   DETAILED_LIST: 'დეტალური სია',
 
   // Form placeholders
