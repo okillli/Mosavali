@@ -51,6 +51,7 @@ Read these when working on specific areas:
 |------|--------------|
 | [.claude/strings.md](.claude/strings.md) | Adding/editing UI text |
 | [.claude/crud-patterns.md](.claude/crud-patterns.md) | Creating forms, pages, delete flows |
+| [.claude/ui-patterns.md](.claude/ui-patterns.md) | Components, layouts, styling |
 | [.claude/database.md](.claude/database.md) | Schema changes, RPC, migrations |
 | [.claude/testing.md](.claude/testing.md) | Writing/running E2E tests |
 
