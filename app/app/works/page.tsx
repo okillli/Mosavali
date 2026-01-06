@@ -34,8 +34,8 @@ export default function WorksList() {
         {works.map((work) => (
           <Link href={`/app/works/${work.id}`} key={work.id} className="block bg-white p-4 rounded-lg shadow-sm border hover:border-green-500 transition-colors flex justify-between items-center">
             <div>
-               <h3 className="font-bold text-gray-800">{work.work_types?.name}</h3>
-               <p className="text-sm text-gray-600">{STRINGS.NAV_FIELDS}: {work.fields?.name}</p>
+               <h3 className="font-bold text-gray-800">{work.work_types?.name || '-'}</h3>
+               <p className="text-sm text-gray-600">{STRINGS.NAV_FIELDS}: {work.fields?.name || '-'}</p>
                <div className="flex items-center text-xs text-gray-400 mt-2">
                   <Calendar size={12} className="mr-1" />
                   {work.status === 'COMPLETED' ? work.completed_date : work.planned_date}

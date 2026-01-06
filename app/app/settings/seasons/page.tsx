@@ -48,7 +48,14 @@ export default function SeasonsSettings() {
   };
 
   const setAsCurrent = async (id: string) => {
-    const { data: profile } = await supabase.from('profiles').select('farm_id').single();
+    const { data: profile, error: profileError } = await supabase.from('profiles').select('farm_id').single();
+
+    if (profileError || !profile) {
+      console.error('Profile error:', profileError);
+      alert('პროფილის მონაცემები ვერ მოიძებნა.');
+      return;
+    }
+
     // Reset all
     await supabase.from('seasons').update({ is_current: false }).eq('farm_id', profile.farm_id);
     // Set new

@@ -57,7 +57,7 @@ export default function LotDetailPage() {
                     <Package className="mr-2" />
                     {lot.lot_code}
                 </h1>
-                <p className="text-gray-600 font-medium">{lot.crops.name_ka} / {lot.varieties.name}</p>
+                <p className="text-gray-600 font-medium">{lot.crops?.name_ka || '-'} / {lot.varieties?.name || '-'}</p>
             </div>
             <div className="text-right">
                 <span className="block text-sm text-gray-500">{STRINGS.HARVEST_DATE}</span>

@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { STRINGS } from '../lib/strings';
-import { Home, Sprout, Tractor, Package, ShoppingCart } from 'lucide-react';
+import { Home, Sprout, Package, ShoppingCart } from 'lucide-react';
 
 export const MobileNav: React.FC = () => {
   return (

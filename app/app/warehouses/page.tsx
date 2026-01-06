@@ -8,6 +8,7 @@ import { Warehouse } from '../../../types';
 
 export default function WarehousesList() {
   const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchWarehouses();
@@ -16,6 +17,7 @@ export default function WarehousesList() {
   const fetchWarehouses = async () => {
     const { data } = await supabase.from('warehouses').select('*').order('created_at', { ascending: false });
     if (data) setWarehouses(data);
+    setLoading(false);
   };
 
   return (
@@ -39,7 +41,10 @@ export default function WarehousesList() {
             <div className="mt-2 text-xs text-blue-600 font-medium">დეტალების ნახვა &rarr;</div>
           </Link>
         ))}
-        {warehouses.length === 0 && (
+        {loading && (
+          <div className="col-span-full text-center py-10 text-gray-500">იტვირთება...</div>
+        )}
+        {!loading && warehouses.length === 0 && (
           <div className="col-span-full text-center py-10 text-gray-500">
             მონაცემები არ მოიძებნა
           </div>

@@ -8,6 +8,7 @@ import { Sale } from '../../../types';
 
 export default function SalesList() {
   const [sales, setSales] = useState<Sale[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchSales();
@@ -18,6 +19,7 @@ export default function SalesList() {
       .select('*, buyers(name), lots(lot_code)')
       .order('sale_date', { ascending: false });
     if (data) setSales(data);
+    setLoading(false);
   };
 
   const getStatusColor = (status: string) => {
@@ -47,8 +49,8 @@ export default function SalesList() {
             <div className="flex justify-between items-start mb-2">
                 <div>
                     <div className="text-sm text-gray-500 mb-1">{sale.sale_date}</div>
-                    <div className="font-bold text-lg">{sale.buyers?.name}</div>
-                    <div className="text-xs text-gray-500">{STRINGS.LOT_CODE}: {sale.lots?.lot_code}</div>
+                    <div className="font-bold text-lg">{sale.buyers?.name || '-'}</div>
+                    <div className="text-xs text-gray-500">{STRINGS.LOT_CODE}: {sale.lots?.lot_code || '-'}</div>
                 </div>
                 <div className="text-right">
                     <div className="font-bold text-lg">{sale.total_gel} {STRINGS.CURRENCY}</div>
@@ -63,7 +65,10 @@ export default function SalesList() {
             </div>
           </Link>
         ))}
-        {sales.length === 0 && (
+        {loading && (
+          <div className="text-center py-10 text-gray-500">იტვირთება...</div>
+        )}
+        {!loading && sales.length === 0 && (
           <div className="text-center py-10 text-gray-500">
             მონაცემები არ მოიძებნა
           </div>

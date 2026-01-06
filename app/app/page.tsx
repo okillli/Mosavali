@@ -65,10 +65,10 @@ export default function Dashboard() {
                   {pendingWorks.map(w => (
                       <Link href={`/app/works/${w.id}`} key={w.id} className="block border-b last:border-0 pb-2 last:pb-0 hover:bg-gray-50 p-2 rounded">
                           <div className="flex justify-between">
-                              <span className="font-bold text-gray-800">{w.work_types.name}</span>
+                              <span className="font-bold text-gray-800">{w.work_types?.name || '-'}</span>
                               <span className="text-xs text-gray-500">{w.planned_date}</span>
                           </div>
-                          <div className="text-sm text-gray-600">{w.fields.name}</div>
+                          <div className="text-sm text-gray-600">{w.fields?.name || '-'}</div>
                       </Link>
                   ))}
                   {pendingWorks.length === 0 && <div className="text-sm text-gray-400">დაგეგმილი სამუშაოები არ არის.</div>}
@@ -91,7 +91,7 @@ export default function Dashboard() {
                               <span className="font-bold text-gray-800">{l.lot_code}</span>
                               <span className="font-bold text-green-700">{l.harvested_kg} კგ</span>
                           </div>
-                          <div className="text-sm text-gray-600">{l.crops.name_ka} / {l.varieties.name}</div>
+                          <div className="text-sm text-gray-600">{l.crops?.name_ka || '-'} / {l.varieties?.name || '-'}</div>
                       </Link>
                   ))}
                   {recentLots.length === 0 && <div className="text-sm text-gray-400">მონაცემები არ არის.</div>}

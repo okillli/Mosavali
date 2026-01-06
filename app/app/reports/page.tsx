@@ -108,9 +108,9 @@ export default function ReportsPage() {
                         <tbody className="divide-y">
                             {stock.map((item, idx) => (
                                 <tr key={idx} className="hover:bg-gray-50">
-                                    <td className="px-6 py-3 font-medium">{item.bins.warehouses.name} - {item.bins.name}</td>
-                                    <td className="px-6 py-3">{item.lots.lot_code}</td>
-                                    <td className="px-6 py-3">{item.lots.crops.name_ka} / {item.lots.varieties.name}</td>
+                                    <td className="px-6 py-3 font-medium">{item.bins?.warehouses?.name || '-'} - {item.bins?.name || '-'}</td>
+                                    <td className="px-6 py-3">{item.lots?.lot_code || '-'}</td>
+                                    <td className="px-6 py-3">{item.lots?.crops?.name_ka || '-'} / {item.lots?.varieties?.name || '-'}</td>
                                     <td className="px-6 py-3 text-right font-mono font-bold">
                                         {item.stock_kg} <span className="text-xs font-normal">{STRINGS.UNIT_KG}</span>
                                     </td>

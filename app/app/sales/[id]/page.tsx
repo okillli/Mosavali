@@ -65,9 +65,9 @@ export default function SaleDetailPage() {
               <div>
                   <h1 className="text-2xl font-bold text-gray-800 flex items-center">
                       <User className="mr-2 text-gray-500" />
-                      {sale.buyers.name}
+                      {sale.buyers?.name || '-'}
                   </h1>
-                  <p className="text-gray-500 ml-8">{sale.buyers.phone || 'ტელეფონი მითითებული არ არის'}</p>
+                  <p className="text-gray-500 ml-8">{sale.buyers?.phone || 'ტელეფონი მითითებული არ არის'}</p>
               </div>
               <div className="text-right">
                   <div className="flex items-center text-gray-500 justify-end mb-1">
@@ -83,8 +83,8 @@ export default function SaleDetailPage() {
               <div>
                   <h3 className="text-sm font-bold text-gray-500 uppercase mb-4">{STRINGS.NAV_LOTS}</h3>
                   <div className="bg-blue-50 p-4 rounded border border-blue-100">
-                      <div className="font-bold text-blue-900">{sale.lots.lot_code}</div>
-                      <div className="text-blue-700">{sale.lots.crops.name_ka} - {sale.lots.varieties.name}</div>
+                      <div className="font-bold text-blue-900">{sale.lots?.lot_code || '-'}</div>
+                      <div className="text-blue-700">{sale.lots?.crops?.name_ka || '-'} - {sale.lots?.varieties?.name || '-'}</div>
                   </div>
                   <div className="mt-4 space-y-2">
                       <div className="flex justify-between border-b border-gray-100 pb-1">

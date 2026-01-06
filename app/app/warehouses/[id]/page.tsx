@@ -33,11 +33,16 @@ export default function WarehouseDetailPage() {
     const { data: b } = await supabase.from('bins').select('*').eq('warehouse_id', id).order('created_at');
     if (b) setBins(b);
 
-    // 3. Stock in this warehouse
-    const { data: s } = await supabase.from('v_bin_lot_stock')
-        .select('*, lots(lot_code, crops(name_ka), varieties(name))')
-        .eq('warehouse_id', id);
-    if (s) setStock(s);
+    // 3. Stock in this warehouse - filter by bin_ids since view doesn't have warehouse_id
+    if (b && b.length > 0) {
+      const binIds = b.map(bin => bin.id);
+      const { data: s } = await supabase.from('v_bin_lot_stock')
+          .select('*, lots(lot_code, crops(name_ka), varieties(name))')
+          .in('bin_id', binIds);
+      if (s) setStock(s);
+    } else {
+      setStock([]);
+    }
 
     setLoading(false);
   };
@@ -49,8 +54,11 @@ export default function WarehouseDetailPage() {
           warehouse_id: id,
           name: newBinName
       });
-      
-      if (!error) {
+
+      if (error) {
+          console.error('Bin insert error:', error);
+          alert('სექციის დამატება ვერ მოხერხდა: ' + error.message);
+      } else {
           setNewBinName('');
           loadData(); // Reload to see new bin
       }
@@ -106,7 +114,7 @@ export default function WarehouseDetailPage() {
                                   {binStock ? (
                                       <span className="text-green-700 font-medium flex items-center">
                                           <Package size={14} className="mr-1"/>
-                                          {binStock.lots.lot_code} ({binStock.lots.crops.name_ka})
+                                          {binStock.lots?.lot_code || '-'} ({binStock.lots?.crops?.name_ka || '-'})
                                       </span>
                                   ) : (
                                       <span className="text-gray-400 italic">ცარიელია</span>

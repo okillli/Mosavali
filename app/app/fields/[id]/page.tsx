@@ -107,7 +107,7 @@ export default function FieldDetailPage() {
                 {works.map(w => (
                     <div key={w.id} className="bg-white p-3 rounded border flex justify-between">
                         <div>
-                            <div className="font-bold">{w.work_types.name}</div>
+                            <div className="font-bold">{w.work_types?.name || '-'}</div>
                             <div className="text-xs text-gray-500 flex items-center mt-1">
                                 <Calendar size={12} className="mr-1"/> {w.planned_date}
                             </div>
@@ -125,7 +125,7 @@ export default function FieldDetailPage() {
                     <div key={l.id} className="bg-white p-3 rounded border flex justify-between">
                          <div>
                             <div className="font-bold">{l.lot_code}</div>
-                            <div className="text-sm">{l.crops.name_ka} / {l.varieties.name}</div>
+                            <div className="text-sm">{l.crops?.name_ka || '-'} / {l.varieties?.name || '-'}</div>
                         </div>
                         <div className="text-right">
                              <div className="font-bold">{l.harvested_kg} {STRINGS.UNIT_KG}</div>

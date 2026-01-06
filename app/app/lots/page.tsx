@@ -8,6 +8,7 @@ import { Lot } from '../../../types';
 
 export default function LotsList() {
   const [lots, setLots] = useState<Lot[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchLots();
@@ -18,6 +19,7 @@ export default function LotsList() {
       .select('*, crops(name_ka), varieties(name), fields(name)')
       .order('created_at', { ascending: false });
     if (data) setLots(data);
+    setLoading(false);
   };
 
   return (
@@ -35,8 +37,8 @@ export default function LotsList() {
             <div className="flex justify-between items-start">
                <div>
                  <h3 className="font-bold text-lg text-green-800">{lot.lot_code}</h3>
-                 <p className="text-sm text-gray-700 font-medium">{lot.crops?.name_ka} - {lot.varieties?.name}</p>
-                 <p className="text-xs text-gray-500 mt-1">{STRINGS.NAV_FIELDS}: {lot.fields?.name}</p>
+                 <p className="text-sm text-gray-700 font-medium">{lot.crops?.name_ka || '-'} - {lot.varieties?.name || '-'}</p>
+                 <p className="text-xs text-gray-500 mt-1">{STRINGS.NAV_FIELDS}: {lot.fields?.name || '-'}</p>
                </div>
                <div className="text-right">
                   <span className="block font-bold text-gray-800">{lot.harvested_kg} {STRINGS.UNIT_KG}</span>
@@ -45,7 +47,10 @@ export default function LotsList() {
             </div>
           </Link>
         ))}
-        {lots.length === 0 && (
+        {loading && (
+          <div className="text-center py-10 text-gray-500">იტვირთება...</div>
+        )}
+        {!loading && lots.length === 0 && (
           <div className="text-center py-10 text-gray-500">
             მონაცემები არ მოიძებნა
           </div>

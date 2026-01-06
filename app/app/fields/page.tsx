@@ -8,14 +8,16 @@ import { Field } from '../../../types';
 
 export default function FieldsList() {
   const [fields, setFields] = useState<Field[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchFields();
   }, []);
 
   const fetchFields = async () => {
-    const { data, error } = await supabase.from('fields').select('*').order('created_at', { ascending: false });
+    const { data } = await supabase.from('fields').select('*').order('created_at', { ascending: false });
     if (data) setFields(data);
+    setLoading(false);
   };
 
   return (
@@ -38,7 +40,10 @@ export default function FieldsList() {
             {field.location_text && <p className="text-xs text-gray-500 mt-2 truncate">{field.location_text}</p>}
           </Link>
         ))}
-        {fields.length === 0 && (
+        {loading && (
+          <div className="col-span-full text-center py-10 text-gray-500">იტვირთება...</div>
+        )}
+        {!loading && fields.length === 0 && (
           <div className="col-span-full text-center py-10 text-gray-500">
             მონაცემები არ მოიძებნა
           </div>

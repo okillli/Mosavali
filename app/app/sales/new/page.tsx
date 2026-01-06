@@ -109,17 +109,18 @@ export default function NewSalePage() {
         {/* Lot Selection */}
         <div>
             <label className="block text-sm font-medium mb-1">{STRINGS.NAV_LOTS} / {STRINGS.STOCK}</label>
-            <select 
-                className="w-full border rounded p-2" 
+            <select
+                className="w-full border rounded p-2"
                 onChange={e => {
-                    const item = stock.find(s => s.lot_id === e.target.value);
+                    const [lotId, binId] = e.target.value.split('|');
+                    const item = stock.find(s => s.lot_id === lotId && s.bin_id === binId);
                     if(item) handleStockSelect(item);
                 }}
             >
                 <option value="">{STRINGS.SELECT_OPTION}</option>
                 {stock.map(s => (
-                    <option key={s.lot_id + s.bin_id} value={s.lot_id}>
-                        {s.lots.lot_code} - {s.bins.warehouses.name}/{s.bins.name} ({s.stock_kg} {STRINGS.UNIT_KG})
+                    <option key={s.lot_id + s.bin_id} value={`${s.lot_id}|${s.bin_id}`}>
+                        {s.lots?.lot_code} - {s.bins?.warehouses?.name}/{s.bins?.name} ({s.stock_kg} {STRINGS.UNIT_KG})
                     </option>
                 ))}
             </select>
