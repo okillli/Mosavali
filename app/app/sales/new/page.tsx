@@ -41,7 +41,7 @@ export default function NewSalePage() {
       supabase.from('lots').select('id, lot_code, crop_id, variety_id'),
       supabase.from('bins').select('id, name, warehouse_id, warehouses(name)'),
       supabase.from('buyers').select('*').order('name'),
-      supabase.from('seasons').select('*').order('year', { ascending: false })
+      supabase.from('seasons').select('*').order('created_at', { ascending: false })
     ]);
 
     // Combine stock with related data
@@ -196,6 +196,8 @@ export default function NewSalePage() {
         <Input
             label={STRINGS.HARVEST_WEIGHT}
             type="number"
+            min="0.01"
+            step="0.01"
             value={formData.weight_kg}
             onChange={e => setFormData({...formData, weight_kg: e.target.value})}
         />
@@ -208,6 +210,7 @@ export default function NewSalePage() {
         <Input
             label={STRINGS.PRICE_PER_KG}
             type="number"
+            min="0.01"
             step="0.01"
             value={formData.price_per_kg}
             onChange={e => setFormData({...formData, price_per_kg: e.target.value})}

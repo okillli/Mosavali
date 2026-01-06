@@ -49,7 +49,7 @@ export default function EditLotPage() {
     }
 
     // Load master data
-    const { data: s } = await supabase.from('seasons').select('*').order('year', { ascending: false });
+    const { data: s } = await supabase.from('seasons').select('*').order('created_at', { ascending: false });
     const { data: c } = await supabase.from('crops').select('*').order('name_ka');
     const { data: f } = await supabase.from('fields').select('*').order('name');
 

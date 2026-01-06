@@ -29,13 +29,13 @@ export default function NewWorkPage() {
     const load = async () => {
       const { data: f } = await supabase.from('fields').select('*').order('name');
       const { data: wt } = await supabase.from('work_types').select('*').order('name');
-      const { data: s } = await supabase.from('seasons').select('*').order('year', { ascending: false });
+      const { data: s } = await supabase.from('seasons').select('*').order('created_at', { ascending: false });
       
       if (f) setFields(f);
       if (wt) setWorkTypes(wt);
       if (s) {
         setSeasons(s);
-        setFormData(p => ({ ...p, season_id: s.find((x:any) => x.is_current)?.id || s[0]?.id }));
+        setFormData(p => ({ ...p, season_id: s.find((x: Season) => x.is_current)?.id || s[0]?.id }));
       }
     };
     load();

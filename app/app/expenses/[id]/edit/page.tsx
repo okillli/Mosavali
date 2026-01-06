@@ -47,7 +47,7 @@ export default function EditExpensePage() {
     }
 
     // Load master data
-    const { data: s } = await supabase.from('seasons').select('*').order('year', { ascending: false });
+    const { data: s } = await supabase.from('seasons').select('*').order('created_at', { ascending: false });
     if (s) setSeasons(s);
 
     const { data: f } = await supabase.from('fields').select('id, name').order('name');

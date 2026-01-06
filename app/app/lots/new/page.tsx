@@ -39,12 +39,12 @@ export default function NewLotPage() {
   }, []);
 
   const loadMasterData = async () => {
-    const { data: s } = await supabase.from('seasons').select('*').order('year', { ascending: false });
+    const { data: s } = await supabase.from('seasons').select('*').order('created_at', { ascending: false });
     const { data: c } = await supabase.from('crops').select('*').order('name_ka');
     const { data: f } = await supabase.from('fields').select('*').order('name');
     const { data: w } = await supabase.from('warehouses').select('*').order('name');
     
-    if (s) { setSeasons(s); setFormData(p => ({ ...p, season_id: s.find((x:any) => x.is_current)?.id || s[0]?.id })); }
+    if (s) { setSeasons(s); setFormData(p => ({ ...p, season_id: s.find((x: Season) => x.is_current)?.id || s[0]?.id })); }
     if (c) setCrops(c);
     if (f) setFields(f);
     if (w) setWarehouses(w);
@@ -109,13 +109,13 @@ export default function NewLotPage() {
       }
 
       router.push('/app/lots');
-    } catch (err: any) {
+    } catch (err: unknown) {
       // Rollback: Delete orphan lot if movement failed
       if (createdLotId) {
           await supabase.from('lots').delete().eq('id', createdLotId);
       }
-      
-      const msg = err.message || '';
+
+      const msg = err instanceof Error ? err.message : String(err);
       if (msg.includes('შერევა')) {
           setError(STRINGS.NO_MIXING_ERROR);
       } else if (msg.includes('row-level security')) {
@@ -166,11 +166,13 @@ export default function NewLotPage() {
             value={formData.harvest_date} 
             onChange={e => setFormData({...formData, harvest_date: e.target.value})} 
           />
-          <Input 
-            label={STRINGS.HARVEST_WEIGHT} 
-            type="number" 
-            value={formData.harvested_kg} 
-            onChange={e => setFormData({...formData, harvested_kg: e.target.value})} 
+          <Input
+            label={STRINGS.HARVEST_WEIGHT}
+            type="number"
+            min="0.01"
+            step="0.01"
+            value={formData.harvested_kg}
+            onChange={e => setFormData({...formData, harvested_kg: e.target.value})}
           />
            <Input 
             label={STRINGS.NOTES} 

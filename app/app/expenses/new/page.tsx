@@ -32,10 +32,10 @@ export default function NewExpensePage() {
   }, []);
 
   const loadData = async () => {
-    const { data: s } = await supabase.from('seasons').select('*').order('year', { ascending: false });
+    const { data: s } = await supabase.from('seasons').select('*').order('created_at', { ascending: false });
     if (s) {
         setSeasons(s);
-        setFormData(p => ({ ...p, season_id: s.find((x:any) => x.is_current)?.id || s[0]?.id }));
+        setFormData(p => ({ ...p, season_id: s.find((x: Season) => x.is_current)?.id || s[0]?.id }));
     }
 
     const { data: f } = await supabase.from('fields').select('id, name').order('name');
@@ -136,7 +136,7 @@ export default function NewExpensePage() {
                  <option value="">{STRINGS.SELECT_OPTION}</option>
                  {works.map(w => (
                     <option key={w.id} value={w.id}>
-                        {w.work_types.name} @ {w.fields.name} ({w.planned_date})
+                        {w.work_types?.name || '-'} @ {w.fields?.name || '-'} ({w.planned_date})
                     </option>
                  ))}
               </select>
@@ -150,16 +150,17 @@ export default function NewExpensePage() {
                  <option value="">{STRINGS.SELECT_OPTION}</option>
                  {lots.map(l => (
                     <option key={l.id} value={l.id}>
-                        {l.lot_code} ({l.crops.name_ka})
+                        {l.lot_code} ({l.crops?.name_ka || '-'})
                     </option>
                  ))}
               </select>
            </div>
         )}
 
-        <Input 
+        <Input
           label={`თანხა (${STRINGS.CURRENCY})`}
           type="number"
+          min="0.01"
           step="0.01"
           value={formData.amount_gel}
           onChange={e => setFormData({...formData, amount_gel: e.target.value})}
