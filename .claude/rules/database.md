@@ -1,7 +1,7 @@
 # Database
 
 > **When to read:** Schema changes, writing RPC, running direct queries, debugging data
-> **Skip if:** Frontend-only changes → see [ui-patterns.md](ui-patterns.md)
+> **Skip if:** Frontend-only changes → see [ui-patterns.md](./ui-patterns.md)
 
 ## Direct Query Access
 

@@ -1,7 +1,7 @@
 # UI/UX Patterns
 
 > **When to read:** Building UI, need component props/API, styling questions
-> **Skip if:** CRUD flow/page structure questions → see [crud-patterns.md](crud-patterns.md)
+> **Skip if:** CRUD flow/page structure questions → see [crud-patterns.md](./crud-patterns.md)
 
 ## Components (`components/ui/`)
 
@@ -242,7 +242,7 @@ Common: `Plus`, `Pencil`, `Trash2`, `Check`, `X`, `ChevronDown`, `Loader2`
 
 ## Performance
 
-> **Full details:** See [performance.md](performance.md)
+> **Full details:** See [performance.md](./performance.md)
 
 ### Memoized Components
 

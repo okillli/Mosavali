@@ -70,7 +70,7 @@ These rules apply to ALL code changes. Violations are bugs.
 - Minimum 44px touch targets (`py-3` or `p-4` on buttons)
 - Single column on mobile → `md:grid-cols-2` for desktop
 - Full-width buttons on mobile forms
-- See [ui-patterns.md](.claude/ui-patterns.md#mobile-first-primary-target) for details
+- See [ui-patterns.md](.claude/rules/ui-patterns.md#mobile-first-primary-target) for details
 
 ### 7. Error Handling
 - **Always handle errors** - never ignore `.catch()` or `error` from Supabase
@@ -121,12 +121,12 @@ await supabase.from('fields').insert({...});
 
 | File | Read When... | Skip When... |
 |------|--------------|--------------|
-| [strings.md](.claude/strings.md) | Need string naming conventions | Just using existing strings |
-| [crud-patterns.md](.claude/crud-patterns.md) | Creating new entity pages/forms | Styling or DB work |
-| [ui-patterns.md](.claude/ui-patterns.md) | Need component API, styling | CRUD flow questions |
-| [database.md](.claude/database.md) | Schema, triggers, direct queries | Frontend-only changes |
-| [testing.md](.claude/testing.md) | Writing or running E2E tests | Not testing |
-| [performance.md](.claude/performance.md) | Performance optimization patterns | Basic feature work |
+| [strings.md](.claude/rules/strings.md) | Need string naming conventions | Just using existing strings |
+| [crud-patterns.md](.claude/rules/crud-patterns.md) | Creating new entity pages/forms | Styling or DB work |
+| [ui-patterns.md](.claude/rules/ui-patterns.md) | Need component API, styling | CRUD flow questions |
+| [database.md](.claude/rules/database.md) | Schema, triggers, direct queries | Frontend-only changes |
+| [testing.md](.claude/rules/testing.md) | Writing or running E2E tests | Not testing |
+| [performance.md](.claude/rules/performance.md) | Performance optimization patterns | Basic feature work |
 
 ---
 

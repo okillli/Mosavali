@@ -1,7 +1,7 @@
 # CRUD Patterns
 
 > **When to read:** Creating new entity pages, forms, or delete flows
-> **Skip if:** Only styling changes or database work → see [ui-patterns.md](ui-patterns.md) or [database.md](database.md)
+> **Skip if:** Only styling changes or database work → see [ui-patterns.md](./ui-patterns.md) or [database.md](./database.md)
 
 ## Page Structure
 
@@ -58,4 +58,4 @@ const [formData, setFormData] = useState({...defaults});
 const [isSaving, setIsSaving] = useState(false);
 ```
 
-For UI implementation details → see [ui-patterns.md](ui-patterns.md#inline-add-form)
+For UI implementation details → see [ui-patterns.md](./ui-patterns.md#inline-add-form)
