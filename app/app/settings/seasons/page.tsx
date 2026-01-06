@@ -56,7 +56,7 @@ export default function SeasonsSettings() {
 
     const { error: insertError } = await supabase.from('seasons').insert({
         farm_id: profile.farm_id,
-        year: parseInt(newYear),
+        name: newYear.trim(),
         is_current: false
     });
 
@@ -98,7 +98,7 @@ export default function SeasonsSettings() {
 
   const startEdit = (season: Season) => {
     setEditingId(season.id);
-    setEditYear(season.year.toString());
+    setEditYear(season.name);
   };
 
   const cancelEdit = () => {
@@ -110,7 +110,7 @@ export default function SeasonsSettings() {
     if (!editYear.trim()) return;
 
     const { error } = await supabase.from('seasons').update({
-      year: parseInt(editYear)
+      name: editYear.trim()
     }).eq('id', seasonId);
 
     if (error) {
@@ -155,8 +155,8 @@ export default function SeasonsSettings() {
 
        <div className="flex gap-2 mb-6">
           <Input
-            placeholder={STRINGS.YEAR_PLACEHOLDER}
-            type="number"
+            placeholder={STRINGS.SEASON_NAME_PLACEHOLDER}
+            type="text"
             value={newYear}
             onChange={e => setNewYear(e.target.value)}
             noMargin
@@ -173,7 +173,7 @@ export default function SeasonsSettings() {
                  {isEditing ? (
                    <div className="flex items-center gap-2">
                      <Input
-                       type="number"
+                       type="text"
                        value={editYear}
                        onChange={e => setEditYear(e.target.value)}
                        noMargin
@@ -195,7 +195,7 @@ export default function SeasonsSettings() {
                  ) : (
                    <div className="flex justify-between items-center">
                      <div className="font-bold text-lg">
-                       {s.year}
+                       {s.name}
                        {s.is_current && <span className="ml-2 text-xs bg-green-100 text-green-800 px-2 py-1 rounded">{STRINGS.CURRENT_SEASON}</span>}
                      </div>
                      <div className="flex items-center gap-2">
@@ -232,7 +232,7 @@ export default function SeasonsSettings() {
        <ConfirmDialog
          isOpen={!!seasonToDelete}
          title={STRINGS.DELETE_CONFIRM_TITLE}
-         message={seasonToDelete ? `${STRINGS.DELETE_SEASON_CONFIRM} "${seasonToDelete.year}"? ${getDeleteWarning(seasonToDelete)}` : ''}
+         message={seasonToDelete ? `${STRINGS.DELETE_SEASON_CONFIRM} "${seasonToDelete.name}"? ${getDeleteWarning(seasonToDelete)}` : ''}
          confirmLabel={STRINGS.DELETE}
          cancelLabel={STRINGS.CANCEL}
          variant="danger"
