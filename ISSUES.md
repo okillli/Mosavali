@@ -128,25 +128,28 @@ Updated 17 page components with proper TypeScript types.
 
 ---
 
-### 11. Hard-coded Georgian Strings Not in strings.ts - DOCUMENTED (Not Fixed)
+### 11. Hard-coded Georgian Strings Not in strings.ts - FIXED
 
 **Files:** Multiple pages
 
-**Examples:**
-- `"იტვირთება..."` - Loading indicator
-- `"ჩანაწერები არ არის"` - No records
-- `"ცარიელია"` - Empty
-- Various labels and placeholders
+**Problem:** Many Georgian strings were hard-coded directly in components.
 
-**Status:** Not fixed - low priority. Recommend adding to `lib/strings.ts` in future cleanup.
+**Fix Applied:** Moved 25+ strings to `lib/strings.ts`:
+- Loading states (`იტვირთება...`)
+- Empty states (`ცარიელია`, `მონაცემები არ არის`)
+- Profile errors (`პროფილის მონაცემები ვერ მოიძებნა`)
+- Form placeholders and entity add errors
+- UI labels across 29 page files
 
 ---
 
-### 12. Input Component Always Has mb-4 Margin - DOCUMENTED (Not Fixed)
+### 12. Input Component Always Has mb-4 Margin - FIXED
 
 **File:** `components/ui/Input.tsx:10`
 
-**Status:** Not fixed - low impact. Components using it sometimes override with `className="mb-0"`.
+**Problem:** Input component always applied `mb-4` margin, requiring className overrides.
+
+**Fix Applied:** Added `noMargin` prop to Input component. Updated 3 files to use `noMargin` prop instead of className overrides.
 
 ---
 
@@ -157,8 +160,8 @@ Updated 17 page components with proper TypeScript types.
 | Critical | 2     | 2     | 0          |
 | High     | 3     | 3     | 0          |
 | Medium   | 4     | 3     | 1          |
-| Low      | 3     | 1     | 2          |
-| **Total**| **12**| **9** | **3**      |
+| Low      | 3     | 3     | 0          |
+| **Total**| **12**| **11**| **1**      |
 
 ## Previous Session Fixes
 
@@ -171,5 +174,4 @@ These were fixed in an earlier audit session:
 ## Recommendations for Future Work
 
 1. **TypeScript Strict Mode** - Enable `strict: true` in tsconfig
-2. **Centralize Strings** - Move all Georgian strings to `lib/strings.ts`
-3. **Email Confirmation** - Update sign-up flow based on Supabase auth settings
+2. **Email Confirmation** - Update sign-up flow based on Supabase auth settings
