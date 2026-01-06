@@ -1,27 +1,34 @@
 export const STRINGS = {
   APP_NAME: 'მოსავალი',
   CURRENCY: '₾',
+  UNIT_HA: 'ჰა',
   UNIT_KG: 'კგ',
   UNIT_TON: 'ტ',
+  UNIT_TON_PER_HA: 'ტ/ჰა',
 
   // Navigation
   NAV_DASHBOARD: 'მთავარი',
-  NAV_FIELDS: 'მიწები',
-  NAV_WORKS: 'სამუშაოები',
-  NAV_LOTS: 'მოსავალი',
-  NAV_WAREHOUSES: 'საწყობები',
-  NAV_SALES: 'გაყიდვები',
   NAV_EXPENSES: 'ხარჯები',
+  NAV_FIELDS: 'მიწები',
+  NAV_LOTS: 'მოსავალი',
+  NAV_MORE: 'მეტი',
   NAV_REPORTS: 'რეპორტები',
+  NAV_SALES: 'გაყიდვები',
   NAV_SETTINGS: 'პარამეტრები',
+  NAV_WAREHOUSES: 'საწყობები',
+  NAV_WORKS: 'სამუშაოები',
 
   // Auth
-  LOGIN_TITLE: 'შესვლა',
-  EMAIL: 'ელფოსტა',
-  PASSWORD: 'პაროლი',
-  LOGIN_BUTTON: 'შესვლა',
-  LOGOUT: 'გამოსვლა',
+  ALREADY_HAVE_ACCOUNT: 'უკვე გაქვთ ანგარიში? შესვლა',
   AUTH_ERROR: 'ელფოსტა ან პაროლი არასწორია.',
+  EMAIL: 'ელფოსტა',
+  LOGIN_BUTTON: 'შესვლა',
+  LOGIN_TITLE: 'შესვლა',
+  LOGOUT: 'გამოსვლა',
+  NEW_USER_REGISTER: 'ახალი ხართ? დარეგისტრირდით',
+  PASSWORD: 'პაროლი',
+  REGISTER: 'რეგისტრაცია',
+  REGISTRATION_SUCCESS: 'რეგისტრაცია წარმატებულია! გთხოვთ გაიაროთ ავტორიზაცია.',
 
   // Common Actions
   ADD: 'დაამატე',
@@ -44,12 +51,14 @@ export const STRINGS = {
   RENTED: 'ნაქირავები',
 
   // Works
-  WORK_TYPE: 'სამუშაოს ტიპი',
-  STATUS: 'სტატუსი',
-  PLANNED: 'დაგეგმილი',
+  COMPLETE_WORK: 'სამუშაოს დასრულება',
   COMPLETED: 'შესრულებული',
-  PLANNED_DATE: 'დაგეგმილი თარიღი',
   COMPLETED_DATE: 'შესრულების თარიღი',
+  MARK_AS_COMPLETED: 'დასრულებულად მონიშვნა',
+  PLANNED: 'დაგეგმილი',
+  PLANNED_DATE: 'დაგეგმილი თარიღი',
+  STATUS: 'სტატუსი',
+  WORK_TYPE: 'სამუშაოს ტიპი',
 
   // Lots
   LOT_CODE: 'მოსავლის კოდი',
@@ -81,15 +90,19 @@ export const STRINGS = {
   ADD_PAYMENT: 'გადახდის დამატება',
 
   // Validation Messages
-  REQUIRED_FIELD: 'სავალდებულო ველი',
-  INVALID_VALUE: 'არასწორი მნიშვნელობა',
-  NO_MIXING_ERROR: 'ეს სექცია უკვე შეიცავს სხვა ლოტს. შერევა აკრძალულია.',
-  NEGATIVE_STOCK_ERROR: 'მარაგი არასაკმარისია.',
-  SAVED_SUCCESS: 'წარმატებით შეინახა',
-  DELETED_SUCCESS: 'წარმატებით წაიშალა',
+  AVAILABLE_STOCK: 'ხელმისაწვდომი მარაგი',
   DELETE_ERROR: 'წაშლა ვერ მოხერხდა',
-  SAVE_ERROR: 'შენახვა ვერ მოხერხდა',
+  DELETED_SUCCESS: 'წარმატებით წაიშალა',
+  EXCEEDS_STOCK: 'მითითებული წონა აღემატება მარაგს',
+  INVALID_VALUE: 'არასწორი მნიშვნელობა',
   LOAD_ERROR: 'მონაცემების ჩატვირთვა ვერ მოხერხდა',
+  NEGATIVE_STOCK_ERROR: 'მარაგი არასაკმარისია.',
+  NO_MIXING_ERROR: 'ეს სექცია უკვე შეიცავს სხვა ლოტს. შერევა აკრძალულია.',
+  REQUIRED_FIELD: 'სავალდებულო ველი',
+  RLS_ERROR: 'უფლების შეცდომა (RLS).',
+  SAVE_ERROR: 'შენახვა ვერ მოხერხდა',
+  SAVED_SUCCESS: 'წარმატებით შეინახა',
+  VALUE_MUST_BE_POSITIVE: 'მნიშვნელობა უნდა იყოს დადებითი',
 
   // Delete Confirmation
   DELETE_CONFIRM_TITLE: 'წაშლის დადასტურება',
@@ -103,6 +116,7 @@ export const STRINGS = {
   DELETE_BUYER_CONFIRM: 'მყიდველის წაშლა',
   DELETE_SEASON_CONFIRM: 'სეზონის წაშლა',
   DELETE_VARIETY_CONFIRM: 'ჯიშის წაშლა',
+  DELETE_WORK_TYPE_CONFIRM: 'სამუშაოს ტიპის წაშლა',
   DELETE_WARNING_RELATED: 'ეს ჩანაწერი დაკავშირებულია სხვა მონაცემებთან.',
   DELETE_CANNOT_UNDO: 'ეს მოქმედება ვეღარ შეიცვლება.',
 
@@ -117,6 +131,7 @@ export const STRINGS = {
   BIN_HAS_STOCK: 'სექციას აქვს მარაგი - წაშლა შეუძლებელია',
   VARIETY_HAS_LOTS: 'ამ ჯიშს აქვს მოსავალი',
   WORK_HAS_EXPENSES: 'ამ სამუშაოს აქვს დაკავშირებული ხარჯი',
+  WORK_TYPE_HAS_WORKS: 'ამ ტიპს აქვს სამუშაოები',
 
   // Loading states
   LOADING: 'იტვირთება...',
@@ -138,10 +153,22 @@ export const STRINGS = {
   NOTES: 'შენიშვნა',
 
   // Reports
-  REPORT_STOCK: 'მიმდინარე მარაგი',
-  REPORT_PNL: 'მოგება/ზარალი',
   REPORT_OUTSTANDING: 'დაუფარავი გადახდები',
+  REPORT_PNL: 'მოგება/ზარალი',
+  REPORT_STOCK: 'მიმდინარე მარაგი',
   REPORT_YIELD: 'მოსავლიანობა',
+
+  // Financial
+  EXPENSE_LABEL: 'ხარჯი',
+  INCOME: 'შემოსავალი',
+  PROFIT: 'მოგება',
+
+  // Dashboard
+  ALL_SEASONS_DATA: 'მონაცემები მოიცავს ყველა სეზონს.',
+  NO_PLANNED_WORKS: 'დაგეგმილი სამუშაოები არ არის.',
+  PLANNED_WORKS: 'დაგეგმილი სამუშაოები',
+  RECENT_HARVEST: 'ბოლო მოსავალი',
+  VIEW_ALL: 'ყველას ნახვა',
 
   // Expenses linked to works
   LINKED_EXPENSES: 'დაკავშირებული ხარჯები',
@@ -164,6 +191,7 @@ export const STRINGS = {
   PAGE_BUYERS: 'მყიდველები',
   PAGE_SEASONS: 'სეზონები',
   PAGE_VARIETIES: 'ჯიშები',
+  PAGE_WORK_TYPES: 'სამუშაოს ტიპები',
 
   // Form labels
   WEIGHT: 'წონა',
@@ -176,6 +204,7 @@ export const STRINGS = {
 
   // Placeholders
   VARIETY_NAME_PLACEHOLDER: 'ჯიშის სახელი',
+  WORK_TYPE_NAME_PLACEHOLDER: 'სამუშაოს ტიპის სახელი',
   BUYER_NAME_PLACEHOLDER: 'მყიდველის სახელი',
   SEASON_NAME_PLACEHOLDER: 'სეზონის სახელი (მაგ: 2024-25)',
   BIN_NAME_PLACEHOLDER: 'მაგ: სილოსი 2',
@@ -260,6 +289,7 @@ export const STRINGS = {
   ADD_SEASON_ERROR: 'სეზონის დამატება ვერ მოხერხდა',
   ADD_VARIETY_ERROR: 'ჯიშის დამატება ვერ მოხერხდა',
   ADD_BIN_ERROR: 'სექციის დამატება ვერ მოხერხდა',
+  ADD_WORK_TYPE_ERROR: 'სამუშაოს ტიპის დამატება ვერ მოხერხდა',
 
   // Internal transfer
   INTERNAL_TRANSFER: 'შიდა გადატანა',
@@ -276,4 +306,7 @@ export const STRINGS = {
   WAREHOUSE_NAME_PLACEHOLDER: 'მაგ: მთავარი საწყობი',
   ADDRESS_DESCRIPTION: 'მისამართი / აღწერა',
   DEFAULT_BIN_NAME: 'სექცია 1',
+
+  // Misc
+  VERSION: 'ვერსია',
 };

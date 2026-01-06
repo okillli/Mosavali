@@ -8,6 +8,7 @@ export default function SettingsPage() {
   const settingsLinks = [
       { name: 'სეზონები', href: '/app/settings/seasons' },
       { name: 'ჯიშები', href: '/app/settings/varieties' },
+      { name: 'სამუშაოს ტიპები', href: '/app/settings/work-types' },
       { name: 'მყიდველები', href: '/app/settings/buyers' },
       { name: 'საწყობები', href: '/app/warehouses' }, // Reusing main link
   ];

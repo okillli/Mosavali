@@ -40,6 +40,7 @@ const SettingsPage = lazy(() => import('./app/app/settings/page'));
 const SeasonsSettings = lazy(() => import('./app/app/settings/seasons/page'));
 const VarietiesSettings = lazy(() => import('./app/app/settings/varieties/page'));
 const BuyersSettings = lazy(() => import('./app/app/settings/buyers/page'));
+const WorkTypesSettings = lazy(() => import('./app/app/settings/work-types/page'));
 
 // Declare global to fix window property error
 declare global {
@@ -91,6 +92,7 @@ const Router = () => {
       else if (route === '/app/settings/seasons') page = <SeasonsSettings />;
       else if (route === '/app/settings/varieties') page = <VarietiesSettings />;
       else if (route === '/app/settings/buyers') page = <BuyersSettings />;
+      else if (route === '/app/settings/work-types') page = <WorkTypesSettings />;
 
       // Dynamic Matches - Edit pages (must be before detail pages)
       else if (route.match(/^\/app\/fields\/[^/]+\/edit$/)) page = <FieldEditPage />;

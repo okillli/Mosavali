@@ -137,6 +137,7 @@ export interface StockView {
 
 export interface WorkType {
   id: UUID;
+  farm_id: UUID;
   name: string;
 }
 
