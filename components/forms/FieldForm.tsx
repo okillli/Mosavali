@@ -40,7 +40,7 @@ export const FieldForm: React.FC<FieldFormProps> = ({ mode, initialData }) => {
         .single();
 
       if (profileError || !profile) {
-        alert('პროფილის მონაცემები ვერ მოიძებნა.');
+        alert(STRINGS.PROFILE_NOT_FOUND);
         setLoading(false);
         return;
       }
@@ -95,7 +95,7 @@ export const FieldForm: React.FC<FieldFormProps> = ({ mode, initialData }) => {
         label={STRINGS.FIELD_NAME}
         value={formData.name}
         onChange={e => setFormData({ ...formData, name: e.target.value })}
-        placeholder="მაგ: ზედა ყანა"
+        placeholder={STRINGS.FIELD_NAME_PLACEHOLDER}
       />
 
       <Input
@@ -114,7 +114,7 @@ export const FieldForm: React.FC<FieldFormProps> = ({ mode, initialData }) => {
       />
 
       <Input
-        label="ლოკაცია"
+        label={STRINGS.LOCATION}
         value={formData.location_text}
         onChange={e => setFormData({ ...formData, location_text: e.target.value })}
       />

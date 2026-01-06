@@ -196,7 +196,7 @@ export default function SeasonsSettings() {
                    <div className="flex justify-between items-center">
                      <div className="font-bold text-lg">
                        {s.year}
-                       {s.is_current && <span className="ml-2 text-xs bg-green-100 text-green-800 px-2 py-1 rounded">მიმდინარე</span>}
+                       {s.is_current && <span className="ml-2 text-xs bg-green-100 text-green-800 px-2 py-1 rounded">{STRINGS.CURRENT_SEASON}</span>}
                      </div>
                      <div className="flex items-center gap-2">
                        {!s.is_current && (
@@ -232,7 +232,7 @@ export default function SeasonsSettings() {
        <ConfirmDialog
          isOpen={!!seasonToDelete}
          title={STRINGS.DELETE_CONFIRM_TITLE}
-         message={seasonToDelete ? `წაშალოთ სეზონი "${seasonToDelete.year}"? ${getDeleteWarning(seasonToDelete)}` : ''}
+         message={seasonToDelete ? `${STRINGS.DELETE_SEASON_CONFIRM} "${seasonToDelete.year}"? ${getDeleteWarning(seasonToDelete)}` : ''}
          confirmLabel={STRINGS.DELETE}
          cancelLabel={STRINGS.CANCEL}
          variant="danger"

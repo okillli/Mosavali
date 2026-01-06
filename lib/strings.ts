@@ -265,4 +265,8 @@ export const STRINGS = {
   // Form placeholders
   PHONE_PLACEHOLDER: 'ტელეფონი',
   NAME_PLACEHOLDER: 'სახელი',
+  FIELD_NAME_PLACEHOLDER: 'მაგ: ზედა ყანა',
+  WAREHOUSE_NAME_PLACEHOLDER: 'მაგ: მთავარი საწყობი',
+  ADDRESS_DESCRIPTION: 'მისამართი / აღწერა',
+  DEFAULT_BIN_NAME: 'სექცია 1',
 };

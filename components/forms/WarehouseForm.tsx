@@ -36,7 +36,7 @@ export const WarehouseForm: React.FC<WarehouseFormProps> = ({ mode, initialData 
         .single();
 
       if (profileError || !profile) {
-        setError('პროფილის მონაცემები ვერ მოიძებნა.');
+        setError(STRINGS.PROFILE_NOT_FOUND);
         setLoading(false);
         return;
       }
@@ -57,7 +57,7 @@ export const WarehouseForm: React.FC<WarehouseFormProps> = ({ mode, initialData 
       // Create Default Bin
       await supabase.from('bins').insert({
         warehouse_id: wh.id,
-        name: 'სექცია 1',
+        name: STRINGS.DEFAULT_BIN_NAME,
         is_default: true
       });
 
@@ -91,11 +91,11 @@ export const WarehouseForm: React.FC<WarehouseFormProps> = ({ mode, initialData 
         label={STRINGS.WAREHOUSE_NAME}
         value={formData.name}
         onChange={e => setFormData({ ...formData, name: e.target.value })}
-        placeholder="მაგ: მთავარი საწყობი"
+        placeholder={STRINGS.WAREHOUSE_NAME_PLACEHOLDER}
       />
 
       <TextArea
-        label="მისამართი / აღწერა"
+        label={STRINGS.ADDRESS_DESCRIPTION}
         value={formData.location_text}
         onChange={e => setFormData({ ...formData, location_text: e.target.value })}
       />
