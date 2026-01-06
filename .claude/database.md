@@ -1,5 +1,19 @@
 # Database
 
+## Direct Query Access
+
+Use the PostgreSQL MCP tool for direct database queries:
+
+```
+mcp__postgres__query({ sql: "SELECT * FROM fields LIMIT 5" })
+```
+
+This bypasses RLS (service role), useful for:
+- Debugging data issues
+- Checking schema/constraints
+- Verifying trigger behavior
+- Quick data inspection
+
 ## Setup Order
 
 Run in Supabase SQL Editor:
