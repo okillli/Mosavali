@@ -2,15 +2,18 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { supabase } from '../../../lib/supabaseClient';
 import { STRINGS } from '../../../lib/strings';
+import { PAGE_SIZE } from '../../../lib/hooks';
 import Link from 'next/link';
-import { Plus } from 'lucide-react';
+import { Plus, Loader2 } from 'lucide-react';
 import { Field } from '../../../types';
-import { SearchFilterBar, FilterConfig } from '../../../components/ui';
+import { SearchFilterBar, FilterConfig, Button } from '../../../components/ui';
 
 export default function FieldsList() {
   const [fields, setFields] = useState<Field[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(true);
 
   // Filter state
   const [searchValue, setSearchValue] = useState('');
@@ -19,25 +22,45 @@ export default function FieldsList() {
   });
 
   useEffect(() => {
-    fetchFields();
+    fetchFields(0, false);
   }, []);
 
-  const fetchFields = async () => {
+  const fetchFields = async (offset: number, append: boolean) => {
     try {
-      const { data, error: fetchError } = await supabase.from('fields').select('*').limit(50).order('created_at', { ascending: false });
+      const { data, error: fetchError } = await supabase
+        .from('fields')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .range(offset, offset + PAGE_SIZE - 1);
+
       if (fetchError) {
         console.error('Failed to fetch fields:', fetchError);
         setError(STRINGS.LOAD_ERROR);
         return;
       }
-      if (data) setFields(data);
+
+      if (data) {
+        if (append) {
+          setFields(prev => [...prev, ...data]);
+        } else {
+          setFields(data);
+        }
+        setHasMore(data.length === PAGE_SIZE);
+      }
     } catch (err) {
       console.error('Fetch error:', err);
       setError(STRINGS.LOAD_ERROR);
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
   };
+
+  const handleLoadMore = useCallback(async () => {
+    if (loadingMore || !hasMore) return;
+    setLoadingMore(true);
+    await fetchFields(fields.length, true);
+  }, [loadingMore, hasMore, fields.length]);
 
   // Filter configuration
   const filters: FilterConfig[] = useMemo(() => [
@@ -80,6 +103,9 @@ export default function FieldsList() {
   const handleClearFilters = useCallback(() => {
     setFilterValues({ ownership: '' });
   }, []);
+
+  // Only show Load More when not filtering (filters work on loaded data)
+  const showLoadMore = hasMore && !searchValue && !filterValues.ownership;
 
   return (
     <div>
@@ -128,6 +154,27 @@ export default function FieldsList() {
           </div>
         )}
       </div>
+
+      {/* Load More Button */}
+      {!loading && showLoadMore && (
+        <div className="mt-6 text-center">
+          <Button
+            variant="outline"
+            onClick={handleLoadMore}
+            disabled={loadingMore}
+            className="min-w-[200px]"
+          >
+            {loadingMore ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                {STRINGS.LOADING}
+              </>
+            ) : (
+              STRINGS.LOAD_MORE
+            )}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

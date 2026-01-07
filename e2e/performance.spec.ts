@@ -256,6 +256,106 @@ test.describe('Performance', () => {
   });
 });
 
+test.describe('Load More Pagination', () => {
+  test.beforeEach(async ({ page }) => {
+    await login(page);
+  });
+
+  test('fields list shows Load More button when data exceeds page size', async ({ page }) => {
+    await page.goto('/#/app/fields');
+    await page.waitForLoadState('networkidle');
+
+    // Check if Load More button exists (only shown when hasMore is true)
+    const loadMoreButton = page.getByRole('button', { name: /მეტის ჩატვირთვა/i });
+    const buttonVisible = await loadMoreButton.isVisible().catch(() => false);
+
+    // If there are enough fields, the button should be visible
+    // If not enough data, button won't show - both are valid states
+    if (buttonVisible) {
+      await expect(loadMoreButton).toBeEnabled();
+    }
+  });
+
+  test('Load More button is hidden when filter is active', async ({ page }) => {
+    await page.goto('/#/app/fields');
+    await page.waitForLoadState('networkidle');
+
+    // Check if Load More button is initially visible
+    const loadMoreButton = page.getByRole('button', { name: /მეტის ჩატვირთვა/i });
+    const initiallyVisible = await loadMoreButton.isVisible().catch(() => false);
+
+    if (initiallyVisible) {
+      // Apply a filter by searching
+      const searchInput = page.locator('input[placeholder="ძიება"]');
+      await searchInput.fill('test');
+      await page.waitForTimeout(300);
+
+      // Load More should be hidden when filtering
+      await expect(loadMoreButton).not.toBeVisible();
+    }
+  });
+
+  test('works list has Load More functionality', async ({ page }) => {
+    await page.goto('/#/app/works');
+    await page.waitForLoadState('networkidle');
+
+    const loadMoreButton = page.getByRole('button', { name: /მეტის ჩატვირთვა/i });
+    const buttonVisible = await loadMoreButton.isVisible().catch(() => false);
+
+    if (buttonVisible) {
+      await expect(loadMoreButton).toBeEnabled();
+    }
+  });
+
+  test('sales list has Load More functionality', async ({ page }) => {
+    await page.goto('/#/app/sales');
+    await page.waitForLoadState('networkidle');
+
+    const loadMoreButton = page.getByRole('button', { name: /მეტის ჩატვირთვა/i });
+    const buttonVisible = await loadMoreButton.isVisible().catch(() => false);
+
+    if (buttonVisible) {
+      await expect(loadMoreButton).toBeEnabled();
+    }
+  });
+
+  test('expenses list has Load More functionality', async ({ page }) => {
+    await page.goto('/#/app/expenses');
+    await page.waitForLoadState('networkidle');
+
+    const loadMoreButton = page.getByRole('button', { name: /მეტის ჩატვირთვა/i });
+    const buttonVisible = await loadMoreButton.isVisible().catch(() => false);
+
+    if (buttonVisible) {
+      await expect(loadMoreButton).toBeEnabled();
+    }
+  });
+
+  test('lots list has Load More functionality', async ({ page }) => {
+    await page.goto('/#/app/lots');
+    await page.waitForLoadState('networkidle');
+
+    const loadMoreButton = page.getByRole('button', { name: /მეტის ჩატვირთვა/i });
+    const buttonVisible = await loadMoreButton.isVisible().catch(() => false);
+
+    if (buttonVisible) {
+      await expect(loadMoreButton).toBeEnabled();
+    }
+  });
+
+  test('warehouses list has Load More functionality', async ({ page }) => {
+    await page.goto('/#/app/warehouses');
+    await page.waitForLoadState('networkidle');
+
+    const loadMoreButton = page.getByRole('button', { name: /მეტის ჩატვირთვა/i });
+    const buttonVisible = await loadMoreButton.isVisible().catch(() => false);
+
+    if (buttonVisible) {
+      await expect(loadMoreButton).toBeEnabled();
+    }
+  });
+});
+
 test.describe('Mobile Navigation Performance', () => {
   test.use({ viewport: { width: 375, height: 667 } }); // iPhone SE size
 

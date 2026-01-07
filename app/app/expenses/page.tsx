@@ -2,18 +2,21 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { supabase } from '../../../lib/supabaseClient';
 import { STRINGS } from '../../../lib/strings';
+import { PAGE_SIZE } from '../../../lib/hooks';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Plus, Tag } from 'lucide-react';
+import { Plus, Tag, Loader2 } from 'lucide-react';
 import { ExpenseWithRelations, Season } from '../../../types';
-import { SearchFilterBar, FilterConfig } from '../../../components/ui';
+import { SearchFilterBar, FilterConfig, Button } from '../../../components/ui';
 
 export default function ExpensesList() {
   const router = useRouter();
   const [expenses, setExpenses] = useState<ExpenseWithRelations[]>([]);
   const [seasons, setSeasons] = useState<Season[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(true);
 
   // Filter state
   const [searchValue, setSearchValue] = useState('');
@@ -23,41 +26,69 @@ export default function ExpensesList() {
   });
 
   useEffect(() => {
-    fetchData();
+    fetchInitialData();
   }, []);
 
-  const fetchData = async () => {
+  const fetchInitialData = async () => {
     try {
-      const [expensesRes, seasonsRes] = await Promise.all([
-        supabase.from('expenses')
-          .select('*, seasons(name)')
-          .limit(50)
-          .order('expense_date', { ascending: false }),
-        supabase.from('seasons')
-          .select('id, name')
-          .order('created_at', { ascending: false }),
-      ]);
+      const { data: seasonsData, error: seasonsError } = await supabase
+        .from('seasons')
+        .select('id, name')
+        .order('created_at', { ascending: false });
 
-      if (expensesRes.error) {
-        console.error('Failed to fetch expenses:', expensesRes.error);
-        setError(STRINGS.LOAD_ERROR);
-        return;
-      }
-      if (seasonsRes.error) {
-        console.error('Failed to fetch seasons:', seasonsRes.error);
+      if (seasonsError) {
+        console.error('Failed to fetch seasons:', seasonsError);
         setError(STRINGS.LOAD_ERROR);
         return;
       }
 
-      if (expensesRes.data) setExpenses(expensesRes.data);
-      if (seasonsRes.data) setSeasons(seasonsRes.data);
+      if (seasonsData) setSeasons(seasonsData);
+
+      // Fetch initial expenses
+      await fetchExpenses(0, false);
+    } catch (err) {
+      console.error('Fetch error:', err);
+      setError(STRINGS.LOAD_ERROR);
+      setLoading(false);
+    }
+  };
+
+  const fetchExpenses = async (offset: number, append: boolean) => {
+    try {
+      const { data, error: fetchError } = await supabase
+        .from('expenses')
+        .select('*, seasons(name)')
+        .order('expense_date', { ascending: false })
+        .range(offset, offset + PAGE_SIZE - 1);
+
+      if (fetchError) {
+        console.error('Failed to fetch expenses:', fetchError);
+        setError(STRINGS.LOAD_ERROR);
+        return;
+      }
+
+      if (data) {
+        if (append) {
+          setExpenses(prev => [...prev, ...data]);
+        } else {
+          setExpenses(data);
+        }
+        setHasMore(data.length === PAGE_SIZE);
+      }
     } catch (err) {
       console.error('Fetch error:', err);
       setError(STRINGS.LOAD_ERROR);
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
   };
+
+  const handleLoadMore = useCallback(async () => {
+    if (loadingMore || !hasMore) return;
+    setLoadingMore(true);
+    await fetchExpenses(expenses.length, true);
+  }, [loadingMore, hasMore, expenses.length]);
 
   const getAllocationLabel = (type: string) => {
     return type === 'FIELD' ? STRINGS.NAV_FIELDS :
@@ -120,6 +151,9 @@ export default function ExpensesList() {
     setFilterValues({ allocation_type: '', season_id: '' });
   }, []);
 
+  // Only show Load More when not filtering (filters work on loaded data)
+  const showLoadMore = hasMore && !searchValue && !filterValues.allocation_type && !filterValues.season_id;
+
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
@@ -178,6 +212,27 @@ export default function ExpensesList() {
           </div>
         )}
       </div>
+
+      {/* Load More Button */}
+      {!loading && showLoadMore && (
+        <div className="mt-6 text-center">
+          <Button
+            variant="outline"
+            onClick={handleLoadMore}
+            disabled={loadingMore}
+            className="min-w-[200px]"
+          >
+            {loadingMore ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                {STRINGS.LOADING}
+              </>
+            ) : (
+              STRINGS.LOAD_MORE
+            )}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

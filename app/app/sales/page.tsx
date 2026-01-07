@@ -2,16 +2,19 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { supabase } from '../../../lib/supabaseClient';
 import { STRINGS } from '../../../lib/strings';
+import { PAGE_SIZE } from '../../../lib/hooks';
 import Link from 'next/link';
-import { Plus } from 'lucide-react';
+import { Plus, Loader2 } from 'lucide-react';
 import { Sale, Buyer } from '../../../types';
-import { SearchFilterBar, FilterConfig } from '../../../components/ui';
+import { SearchFilterBar, FilterConfig, Button } from '../../../components/ui';
 
 export default function SalesList() {
   const [sales, setSales] = useState<Sale[]>([]);
   const [buyers, setBuyers] = useState<Buyer[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(true);
 
   // Filter state
   const [searchValue, setSearchValue] = useState('');
@@ -21,41 +24,69 @@ export default function SalesList() {
   });
 
   useEffect(() => {
-    fetchData();
+    fetchInitialData();
   }, []);
 
-  const fetchData = async () => {
+  const fetchInitialData = async () => {
     try {
-      const [salesRes, buyersRes] = await Promise.all([
-        supabase.from('sales')
-          .select('*, buyers(name), lots(lot_code)')
-          .limit(50)
-          .order('sale_date', { ascending: false }),
-        supabase.from('buyers')
-          .select('id, name')
-          .order('name'),
-      ]);
+      const { data: buyersData, error: buyersError } = await supabase
+        .from('buyers')
+        .select('id, name')
+        .order('name');
 
-      if (salesRes.error) {
-        console.error('Failed to fetch sales:', salesRes.error);
-        setError(STRINGS.LOAD_ERROR);
-        return;
-      }
-      if (buyersRes.error) {
-        console.error('Failed to fetch buyers:', buyersRes.error);
+      if (buyersError) {
+        console.error('Failed to fetch buyers:', buyersError);
         setError(STRINGS.LOAD_ERROR);
         return;
       }
 
-      if (salesRes.data) setSales(salesRes.data);
-      if (buyersRes.data) setBuyers(buyersRes.data);
+      if (buyersData) setBuyers(buyersData);
+
+      // Fetch initial sales
+      await fetchSales(0, false);
+    } catch (err) {
+      console.error('Fetch error:', err);
+      setError(STRINGS.LOAD_ERROR);
+      setLoading(false);
+    }
+  };
+
+  const fetchSales = async (offset: number, append: boolean) => {
+    try {
+      const { data, error: fetchError } = await supabase
+        .from('sales')
+        .select('*, buyers(name), lots(lot_code)')
+        .order('sale_date', { ascending: false })
+        .range(offset, offset + PAGE_SIZE - 1);
+
+      if (fetchError) {
+        console.error('Failed to fetch sales:', fetchError);
+        setError(STRINGS.LOAD_ERROR);
+        return;
+      }
+
+      if (data) {
+        if (append) {
+          setSales(prev => [...prev, ...data]);
+        } else {
+          setSales(data);
+        }
+        setHasMore(data.length === PAGE_SIZE);
+      }
     } catch (err) {
       console.error('Fetch error:', err);
       setError(STRINGS.LOAD_ERROR);
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
   };
+
+  const handleLoadMore = useCallback(async () => {
+    if (loadingMore || !hasMore) return;
+    setLoadingMore(true);
+    await fetchSales(sales.length, true);
+  }, [loadingMore, hasMore, sales.length]);
 
   // Filter configuration
   const filters: FilterConfig[] = useMemo(() => [
@@ -109,6 +140,9 @@ export default function SalesList() {
   const handleClearFilters = useCallback(() => {
     setFilterValues({ payment_status: '', buyer_id: '' });
   }, []);
+
+  // Only show Load More when not filtering (filters work on loaded data)
+  const showLoadMore = hasMore && !searchValue && !filterValues.payment_status && !filterValues.buyer_id;
 
   const getStatusColor = (status: string) => {
     if (status === 'PAID') return 'bg-green-100 text-green-800';
@@ -180,6 +214,27 @@ export default function SalesList() {
           </div>
         )}
       </div>
+
+      {/* Load More Button */}
+      {!loading && showLoadMore && (
+        <div className="mt-6 text-center">
+          <Button
+            variant="outline"
+            onClick={handleLoadMore}
+            disabled={loadingMore}
+            className="min-w-[200px]"
+          >
+            {loadingMore ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                {STRINGS.LOADING}
+              </>
+            ) : (
+              STRINGS.LOAD_MORE
+            )}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

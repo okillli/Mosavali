@@ -1,40 +1,63 @@
 'use client';
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { supabase } from '../../../lib/supabaseClient';
 import { STRINGS } from '../../../lib/strings';
+import { PAGE_SIZE } from '../../../lib/hooks';
 import Link from 'next/link';
-import { Plus } from 'lucide-react';
+import { Plus, Loader2 } from 'lucide-react';
 import { Warehouse } from '../../../types';
-import { SearchFilterBar } from '../../../components/ui';
+import { SearchFilterBar, Button } from '../../../components/ui';
 
 export default function WarehousesList() {
   const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(true);
 
   // Search state (no dropdown filters needed for simple warehouse list)
   const [searchValue, setSearchValue] = useState('');
 
   useEffect(() => {
-    fetchWarehouses();
+    fetchWarehouses(0, false);
   }, []);
 
-  const fetchWarehouses = async () => {
+  const fetchWarehouses = async (offset: number, append: boolean) => {
     try {
-      const { data, error: fetchError } = await supabase.from('warehouses').select('*').limit(50).order('created_at', { ascending: false });
+      const { data, error: fetchError } = await supabase
+        .from('warehouses')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .range(offset, offset + PAGE_SIZE - 1);
+
       if (fetchError) {
         console.error('Failed to fetch warehouses:', fetchError);
         setError(STRINGS.LOAD_ERROR);
         return;
       }
-      if (data) setWarehouses(data);
+
+      if (data) {
+        if (append) {
+          setWarehouses(prev => [...prev, ...data]);
+        } else {
+          setWarehouses(data);
+        }
+        setHasMore(data.length === PAGE_SIZE);
+      }
     } catch (err) {
       console.error('Fetch error:', err);
       setError(STRINGS.LOAD_ERROR);
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
   };
+
+  const handleLoadMore = useCallback(async () => {
+    if (loadingMore || !hasMore) return;
+    setLoadingMore(true);
+    await fetchWarehouses(warehouses.length, true);
+  }, [loadingMore, hasMore, warehouses.length]);
 
   // Filter logic - search only
   const filteredWarehouses = useMemo(() => {
@@ -47,6 +70,9 @@ export default function WarehousesList() {
       return name.includes(search) || location.includes(search);
     });
   }, [warehouses, searchValue]);
+
+  // Only show Load More when not filtering (filters work on loaded data)
+  const showLoadMore = hasMore && !searchValue;
 
   return (
     <div>
@@ -92,6 +118,27 @@ export default function WarehousesList() {
           </div>
         )}
       </div>
+
+      {/* Load More Button */}
+      {!loading && showLoadMore && (
+        <div className="mt-6 text-center">
+          <Button
+            variant="outline"
+            onClick={handleLoadMore}
+            disabled={loadingMore}
+            className="min-w-[200px]"
+          >
+            {loadingMore ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                {STRINGS.LOADING}
+              </>
+            ) : (
+              STRINGS.LOAD_MORE
+            )}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

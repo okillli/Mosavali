@@ -2,17 +2,20 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { supabase } from '../../../lib/supabaseClient';
 import { STRINGS } from '../../../lib/strings';
+import { PAGE_SIZE } from '../../../lib/hooks';
 import Link from 'next/link';
-import { Plus, Calendar, CheckCircle2, Clock } from 'lucide-react';
+import { Plus, Calendar, CheckCircle2, Clock, Loader2 } from 'lucide-react';
 import { WorkWithRelations, Field, WorkType } from '../../../types';
-import { SearchFilterBar, FilterConfig } from '../../../components/ui';
+import { SearchFilterBar, FilterConfig, Button } from '../../../components/ui';
 
 export default function WorksList() {
   const [works, setWorks] = useState<WorkWithRelations[]>([]);
   const [fields, setFields] = useState<Field[]>([]);
   const [workTypes, setWorkTypes] = useState<WorkType[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(true);
 
   // Filter state
   const [searchValue, setSearchValue] = useState('');
@@ -23,16 +26,12 @@ export default function WorksList() {
   });
 
   useEffect(() => {
-    fetchData();
+    fetchInitialData();
   }, []);
 
-  const fetchData = async () => {
+  const fetchInitialData = async () => {
     try {
-      const [worksRes, fieldsRes, workTypesRes] = await Promise.all([
-        supabase.from('works')
-          .select('*, fields(name), work_types(name)')
-          .limit(50)
-          .order('planned_date', { ascending: false }),
+      const [fieldsRes, workTypesRes] = await Promise.all([
         supabase.from('fields')
           .select('id, name')
           .order('name'),
@@ -41,11 +40,6 @@ export default function WorksList() {
           .order('name'),
       ]);
 
-      if (worksRes.error) {
-        console.error('Failed to fetch works:', worksRes.error);
-        setError(STRINGS.LOAD_ERROR);
-        return;
-      }
       if (fieldsRes.error) {
         console.error('Failed to fetch fields:', fieldsRes.error);
         setError(STRINGS.LOAD_ERROR);
@@ -57,16 +51,54 @@ export default function WorksList() {
         return;
       }
 
-      if (worksRes.data) setWorks(worksRes.data);
       if (fieldsRes.data) setFields(fieldsRes.data);
       if (workTypesRes.data) setWorkTypes(workTypesRes.data);
+
+      // Fetch initial works
+      await fetchWorks(0, false);
+    } catch (err) {
+      console.error('Fetch error:', err);
+      setError(STRINGS.LOAD_ERROR);
+      setLoading(false);
+    }
+  };
+
+  const fetchWorks = async (offset: number, append: boolean) => {
+    try {
+      const { data, error: fetchError } = await supabase
+        .from('works')
+        .select('*, fields(name), work_types(name)')
+        .order('planned_date', { ascending: false })
+        .range(offset, offset + PAGE_SIZE - 1);
+
+      if (fetchError) {
+        console.error('Failed to fetch works:', fetchError);
+        setError(STRINGS.LOAD_ERROR);
+        return;
+      }
+
+      if (data) {
+        if (append) {
+          setWorks(prev => [...prev, ...data]);
+        } else {
+          setWorks(data);
+        }
+        setHasMore(data.length === PAGE_SIZE);
+      }
     } catch (err) {
       console.error('Fetch error:', err);
       setError(STRINGS.LOAD_ERROR);
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
   };
+
+  const handleLoadMore = useCallback(async () => {
+    if (loadingMore || !hasMore) return;
+    setLoadingMore(true);
+    await fetchWorks(works.length, true);
+  }, [loadingMore, hasMore, works.length]);
 
   // Filter configuration
   const filters: FilterConfig[] = useMemo(() => [
@@ -130,6 +162,9 @@ export default function WorksList() {
     setFilterValues({ status: '', field_id: '', work_type_id: '' });
   }, []);
 
+  // Only show Load More when not filtering (filters work on loaded data)
+  const showLoadMore = hasMore && !searchValue && !filterValues.status && !filterValues.field_id && !filterValues.work_type_id;
+
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
@@ -190,6 +225,27 @@ export default function WorksList() {
           </div>
         )}
       </div>
+
+      {/* Load More Button */}
+      {!loading && showLoadMore && (
+        <div className="mt-6 text-center">
+          <Button
+            variant="outline"
+            onClick={handleLoadMore}
+            disabled={loadingMore}
+            className="min-w-[200px]"
+          >
+            {loadingMore ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                {STRINGS.LOADING}
+              </>
+            ) : (
+              STRINGS.LOAD_MORE
+            )}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
