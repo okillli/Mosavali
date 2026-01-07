@@ -1,10 +1,17 @@
 import { test, expect } from '@playwright/test';
 import { login } from './utils/auth';
+import { cleanupE2EWarehouses, logCleanupResults } from './utils/cleanup';
 
 test.describe('Warehouses Tests (Section 8)', () => {
 
   test.beforeEach(async ({ page }) => {
     await login(page);
+  });
+
+  // Clean up E2E test warehouses after all tests
+  test.afterAll(async () => {
+    const results = await cleanupE2EWarehouses();
+    logCleanupResults(results);
   });
 
   test('warehouses-list: Warehouses list page loads', async ({ page }) => {

@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { login } from './utils/auth';
+import { cleanupAllE2EData, logCleanupResults } from './utils/cleanup';
 
 /**
  * TEST DATA SETUP
@@ -9,9 +10,17 @@ import { login } from './utils/auth';
  * 3. Create a lot (harvest) and receive into warehouse
  * 4. Create a buyer
  * 5. Create a sale from the lot
+ *
+ * Note: Test data is cleaned up after all tests run (afterAll hook)
  */
 
 test.describe.serial('Test Data Setup', () => {
+  // Clean up all E2E test data after all tests complete
+  test.afterAll(async () => {
+    console.log('\n🧹 Cleaning up E2E test data...');
+    const results = await cleanupAllE2EData();
+    logCleanupResults(results);
+  });
   test('1. Create warehouse for testing', async ({ page }) => {
     await login(page);
     await page.goto('/#/app/warehouses/new');

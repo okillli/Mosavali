@@ -1,10 +1,17 @@
 import { test, expect } from '@playwright/test';
 import { login } from './utils/auth';
+import { cleanupAllE2EData, logCleanupResults } from './utils/cleanup';
 
 test.describe('Fields Tests (Section 6)', () => {
 
   test.beforeEach(async ({ page }) => {
     await login(page);
+  });
+
+  // Clean up E2E test data after all tests
+  test.afterAll(async () => {
+    const results = await cleanupAllE2EData();
+    logCleanupResults(results);
   });
 
   test('fields-list: Fields list page loads', async ({ page }) => {

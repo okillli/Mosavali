@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { login } from './utils/auth';
+import { cleanupAllE2EData, logCleanupResults } from './utils/cleanup';
 
 /**
  * HIGH PRIORITY TESTS
@@ -8,7 +9,15 @@ import { login } from './utils/auth';
  * 2. Sales & Payments Flow - Creating sales, stock validation, payment status
  * 3. E2E Flows - Complete harvest-to-sale journey
  * 4. Reports Accuracy - Stock calculations match movements
+ *
+ * Note: E2E test data is cleaned up after tests run
  */
+
+// Global cleanup after all test suites in this file
+test.afterAll(async () => {
+  const results = await cleanupAllE2EData();
+  logCleanupResults(results);
+});
 
 test.describe('No Mixing Rules', () => {
   test.beforeEach(async ({ page }) => {
